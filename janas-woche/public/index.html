@@ -451,7 +451,7 @@
   const C = {
     o: '#5b3d26', b: '#ecc173', l: '#f8e2b0', e: '#c99044', n: '#2a1a12', t: '#f292ad', c: '#f2a9c8', s: 'rgba(60,30,40,.15)',
     w: '#efd2a8', wd: '#d9b07e', r: '#ee9bb7', d: '#3a2a33', hp: '#fde8f1',
-    p: '#f2a9c8', p2: '#f8c9dc', k: '#9a6235', ba: '#a9c8ec', hl: '#ffffff',
+    p: '#f2a9c8', p2: '#f8c9dc', k: '#9a6235', ba: '#a9c8ec', hl: '#ffffff', rain: '#6fa6e6', snow: '#a9c4ea',
   };
   const fill = (x, y, w, h, c) => { ctx.fillStyle = C[c]; ctx.fillRect(x, y, w, h); };
   function outlined(parts) {
@@ -538,7 +538,7 @@
     fill(30 + hx, H(9), 1, 2, 'n');                    // Nase
     const bark = happy && Math.floor(t / 140) % 2 === 0;
     if (bark) { fill(27, Y(12), 4, 1, 'n'); fill(27, Y(13), 2, 2, 't'); }
-    else if (happy || pose === 'run') fill(27 + hx, H(13), 2, 1, 't');
+    else if (happy || pose === 'run' || (hot() && !eat)) fill(27 + hx, H(13), 2, 1, 't');
     ctx.restore();
   }
 
@@ -557,14 +557,56 @@
 
   // ---------- Verhalten ----------
   const rand = (a, b) => a + Math.random() * (b - a);
+  // Wetter und Tageszeit (vom Wetter-Skript in window.janaWeather abgelegt)
+  const wxNow = () => window.janaWeather || {};
+  const wet = () => ['rain', 'drizzle', 'thunder'].includes(wxNow().kind);
+  const snowy = () => wxNow().kind === 'snow';
+  const hot = () => Number.isFinite(wxNow().temp) && wxNow().temp >= 25;
+  const cold = () => Number.isFinite(wxNow().temp) && wxNow().temp <= 3;
+  const hourNow = () => new Date().getHours();
+  const lateNight = () => { const h = hourNow(); return h >= 22 || h < 6; };
+  const night = () => wxNow().isDay === false || lateNight();
+  const morning = () => { const h = hourNow(); return h >= 6 && h < 10 && !night(); };
+  const spd = () => (hot() || night() ? 10 : morning() ? 18 : 15);
+  let shelterSaid = false, greetedMorning = false;
+  function mood() {
+    if (hot()) return pick(['Puh, ist das warm! 🥵', 'Hechel hechel…']);
+    if (cold()) return pick(['Brr, kalt! 🥶', 'Kalte Pfoten…']);
+    if (snowy()) return pick(['Schnee! ❄️', 'Kalt, aber schön!']);
+    if (morning() && !greetedMorning) { greetedMorning = true; return 'Guten Morgen, Jana! 🐾'; }
+    if (night()) return pick(['*gähn*', 'Bald ist Schlafenszeit…']);
+    return null;
+  }
+  function sleepTalk() {
+    const k = wxNow().kind;
+    const pool = k === 'thunder' ? ['Huch, Gewitter! 😰', 'Ich bleib lieber drin…', 'Zzz…']
+      : (k === 'rain' || k === 'drizzle') ? ['Plitsch platsch… 🌧️', 'Ich bleib im Trockenen.', 'Zzz…']
+      : k === 'snow' ? ['Brr, Schnee! ❄️', 'Zzz…']
+      : night() ? ['Zzz…', 'Zzz… 🌙', '*schnarch*'] : ['Zzz…'];
+    return pick(pool);
+  }
   function decide(t) {
     if (reduce) { mode = 'idle'; until = t + 1e9; return; }
+    if (wet() || lateNight()) { mode = 'goSleep'; target = houseX + 3; return; }
+    let pSleep = 0.1, pIdle = 0.17, pEat = 0.17, pPlay = 0.18;
+    if (night()) { pSleep = 0.45; pIdle = 0.2; pPlay = 0.06; }
+    if (snowy() || cold()) pSleep = Math.max(pSleep, 0.4);
+    if (hot()) { pIdle = 0.3; pEat = 0.22; pPlay = 0.06; }
+    if (morning()) pPlay = 0.3;
     const r = Math.random();
-    if (r < 0.38) { mode = 'walk'; target = rand(minDog(), maxDog()); }
-    else if (r < 0.55) { mode = 'idle'; until = t + rand(1500, 3200); }
-    else if (r < 0.72 && food > 0) { mode = 'goEat'; target = bowlX + 2; }
-    else if (r < 0.9) { mode = 'goPlay'; kicks = 2 + Math.floor(Math.random() * 2); }
-    else { mode = 'goSleep'; target = houseX + 3; }
+    let acc = pSleep;
+    if (r < acc) { mode = 'goSleep'; target = houseX + 3; return; }
+    acc += pIdle;
+    if (r < acc) {
+      mode = 'idle'; until = t + rand(1500, hot() ? 5000 : 3200);
+      const m = mood(); if (m && Math.random() < 0.6) say(m, dogX + 16, 1700);
+      return;
+    }
+    acc += pEat;
+    if (r < acc && food > 0) { mode = 'goEat'; target = bowlX + 2; return; }
+    acc += pPlay;
+    if (r < acc) { mode = 'goPlay'; kicks = 2 + Math.floor(Math.random() * 2); return; }
+    mode = 'walk'; target = rand(minDog(), maxDog());
   }
   const ballApproach = () => ball.x > dogX + 16 ? ball.x - 30 : ball.x + 3;
   function moveTo(goal, speed, dt) {
@@ -587,22 +629,41 @@
       if (ball.x > W - 7) { ball.x = W - 7; ball.vx = -Math.abs(ball.vx); }
     } else { ball.vx = 0; ball.hop = 0; }
 
+    // Bei Regen oder spät nachts sofort in die Hütte
+    if ((wet() || lateNight()) && !['goSleep', 'sleep', 'happy'].includes(mode)) {
+      mode = 'goSleep';
+      if (wet() && !shelterSaid) { say(wxNow().kind === 'thunder' ? 'Gewitter! Schnell in die Hütte! 😰' : 'Brr, Regen! Ab in die Hütte! 🌧️', dogX + 16, 1900); shelterSaid = true; }
+    }
     switch (mode) {
-      case 'walk': if (moveTo(Math.min(Math.max(target, houseX + 2), maxDog()), 15, dt)) decide(t); break;
+      case 'walk': if (moveTo(Math.min(Math.max(target, houseX + 2), maxDog()), spd(), dt)) decide(t); break;
       case 'idle': if (t > until) decide(t); break;
-      case 'goEat': if (moveTo(bowlX + 2, 15, dt)) { dir = -1; mode = 'eat'; until = t + 3600; say('Mampf mampf!', bowlX + 4, 1400); } break;
+      case 'goEat': if (moveTo(bowlX + 2, spd(), dt)) { dir = -1; mode = 'eat'; until = t + 3600; say(hot() ? 'Schlabber schlabber! 💧' : 'Mampf mampf!', bowlX + 4, 1400); } break;
       case 'eat': if (t > until) { food = Math.max(0, food - 1); mode = 'walk'; target = rand(minDog(), maxDog()); } break;
-      case 'goSleep': if (moveTo(houseX + 3, 15, dt)) { mode = 'sleep'; until = t + 7000; nextZzz = t; } break;
+      case 'goSleep': if (moveTo(houseX + 3, wet() ? 26 : spd(), dt)) { mode = 'sleep'; until = t + (night() ? 15000 : 7000); nextZzz = t + 900; } break;
       case 'sleep':
-        if (t > nextZzz) { say('Zzz…', houseX + 10, 1500); nextZzz = t + 2600; }
-        if (t > until) { food = 3; dogX = houseX + 3; dir = 1; mode = 'walk'; target = rand(minDog(), maxDog()); }
+        if (t > nextZzz) { say(sleepTalk(), houseX + 10, 1600); nextZzz = t + 3400; }
+        if (t > until) {
+          if (wet() || lateNight()) { until = t + 8000; break; }   // bleibt drin, solange es regnet oder Nacht ist
+          food = 3; dogX = houseX + 3; dir = 1; mode = 'walk'; target = rand(minDog(), maxDog()); shelterSaid = false;
+        }
         break;
       case 'goPlay': if (moveTo(Math.min(Math.max(ballApproach(), houseX + 2), maxDog()), 26, dt) || Math.abs(ballApproach() - dogX) < 1.5) kick(t); break;
       case 'play':
         if (Math.abs(ball.vx) < 4) { if (kicks > 0) mode = 'goPlay'; else { mode = 'idle'; until = t + 1800; say('Wuff!', dogX + 16, 1200); } }
         else moveTo(Math.min(Math.max(ballApproach(), houseX + 2), maxDog()), 26, dt);
         break;
-      case 'happy': if (t > until) { mode = 'walk'; target = rand(minDog(), maxDog()); } break;
+      case 'happy': if (t > until) decide(t); break;
+    }
+  }
+  // Regen oder Schnee im Garten
+  function drawPrecip(t) {
+    const k = wxNow().kind;
+    if (reduce || !['rain', 'drizzle', 'thunder', 'snow'].includes(k)) return;
+    const n = Math.round(W / (k === 'drizzle' ? 10 : 6));
+    for (let i = 0; i < n; i++) {
+      const x = (i * 37 + Math.floor(i / 3)) % W;
+      if (k === 'snow') fill(x + Math.round(Math.sin(t / 500 + i)), Math.floor((t / 160 + i * 5.3) % 26) - 2, 1, 1, 'snow');
+      else fill(x, Math.floor((t / 45 + i * 7.1) % 28) - 4, 1, 2, 'rain');
     }
   }
   function kick() {
@@ -624,6 +685,7 @@
     drawBowl();
     if (mode !== 'sleep') drawDog(t);
     drawBall();
+    drawPrecip(t);
     requestAnimationFrame(loop);
   }
 
@@ -864,6 +926,7 @@
     const cur = data.current || {};
     const { text, kind } = describe(cur.code, cur.isDay);
     state.kind = kind; state.isDay = !!cur.isDay;
+    window.janaWeather = { kind, isDay: !!cur.isDay, temp: cur.temp, code: cur.code };
     // nächster Sonnenauf- bzw. -untergang nach der Ortszeit der Wetterdaten
     const now = data.time || '';
     const nextRise = (data.sunrise || []).find((s) => s > now), nextSet = (data.sunset || []).find((s) => s > now);
@@ -876,6 +939,7 @@
   function fallbackScene() {
     const h = new Date().getHours();
     state.kind = 'clear'; state.isDay = h >= 7 && h < 18;
+    if (!window.janaWeather) window.janaWeather = { kind: 'clear', isDay: state.isDay };
   }
 
   // ---------- Standort & Abruf ----------
