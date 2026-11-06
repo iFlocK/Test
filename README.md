@@ -45,3 +45,9 @@ Bei Änderungen das Speicherformat beibehalten, damit vorhandene Einträge erhal
 ## Gast-Zugang
 Benutzername `gast`, Passwort `gast`: zeigt eine automatische Vorschau aller Funktionen mit Beispieldaten.
 Im Gastmodus wird nichts gespeichert; Janas eigene Daten sind davon nicht betroffen.
+
+## Änderungen testen, ohne Netlify-Guthaben zu verbrauchen
+1. Änderungen in `janas-woche/public/index.html` machen.
+2. Vorschau erzeugen: `python3 janas-woche/tools/make-preview.py vorschau.html` und als Claude-Artifact ansehen.
+   Die Vorschau läuft im Gastmodus mit Beispieldaten (ohne Login und Wetter-Schnittstelle).
+3. Erst wenn ein Paket fertig ist, **einmal** zu Netlify hochladen. Jedes Veröffentlichen kostet Guthaben.
