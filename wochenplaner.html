@@ -3,344 +3,289 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Janas Wochenplaner</title>
+<title>Janas Woche</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* Pastell: Rosé als Akzent, Lavendel als zweite Farbe, weiche Kategorie-Töne */
+  /* Layout: Kopf + Wochenziele-Leiste, darunter 7 Tageskarten; jeder Tag hat eine Tag-Auswahl als Shortcut */
   :root {
-    --bg: #fdf6fa; --card: #ffffff; --text: #4a3f55; --muted: #8f839c;
-    --border: #f0e3ef; --accent: #f2a9c8; --accent-2: #cdb7ef; --on-accent: #4a2340;
-    --accent-soft: #fde8f1; --today: #fff4f9; --tint: 32%;
-    --c-termin: #f4a7b9; --c-arbeit: #a9c8ec; --c-sport: #a6dcc2; --c-freunde: #f8cfa0;
-    --c-selfcare: #cdb4e8; --c-haushalt: #b9d3db;
-    --shadow: 0 4px 16px rgba(190, 140, 180, .12);
+    --bg: #fdf6fa; --card: #ffffff; --text: #4a3f55; --muted: #85798f;
+    --border: #f0e3ef; --soft: #fbeaf2; --accent: #f2a9c8; --accent-2: #cdb7ef;
+    --accent-ink: #b8557f; --on-accent: #4a2340; --today: #fff3f8; --chip-ink: #3b3040; --tint: 40%;
+    --c-ern: #a6dcc2; --c-bew: #f8cfa0; --c-schlaf: #cdb4e8; --c-gehirn: #a9c8ec;
+    --c-sozial: #f4a7b9; --c-psyche: #c6e3a9; --c-allg: #f6df96; --c-eigen: #e3d3c8;
+    --font-display: Fraunces, Georgia, serif;
+    --font-body: Nunito, system-ui, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #221d27; --card: #2c2633; --text: #f3ecf7; --muted: #ab9fb8;
-      --border: #3d3446; --accent: #f0b3cf; --accent-2: #c9b3ec; --on-accent: #3a2233;
-      --accent-soft: #46303f; --today: #33293a; --tint: 24%;
-      --shadow: none; color-scheme: dark;
+      --bg: #1f1a24; --card: #2a2431; --text: #f3ecf7; --muted: #ab9fb8;
+      --border: #3b3245; --soft: #362c3d; --accent: #f0b3cf; --accent-2: #c9b3ec;
+      --accent-ink: #f0b3cf; --on-accent: #3a2233; --today: #33293a; --tint: 30%;
+      --c-ern: #8fcfb0; --c-bew: #f2c08a; --c-schlaf: #c2a6e6; --c-gehirn: #97bbe8;
+      --c-sozial: #f09bb0; --c-psyche: #b5d996; --c-allg: #eed585; --c-eigen: #d4c2b6;
+      color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-      --bg: #221d27; --card: #2c2633; --text: #f3ecf7; --muted: #ab9fb8;
-      --border: #3d3446; --accent: #f0b3cf; --accent-2: #c9b3ec; --on-accent: #3a2233;
-      --accent-soft: #46303f; --today: #33293a; --tint: 24%;
-      --shadow: none; color-scheme: dark;
+      --bg: #1f1a24; --card: #2a2431; --text: #f3ecf7; --muted: #ab9fb8;
+      --border: #3b3245; --soft: #362c3d; --accent: #f0b3cf; --accent-2: #c9b3ec;
+      --accent-ink: #f0b3cf; --on-accent: #3a2233; --today: #33293a; --tint: 30%;
+      --c-ern: #8fcfb0; --c-bew: #f2c08a; --c-schlaf: #c2a6e6; --c-gehirn: #97bbe8;
+      --c-sozial: #f09bb0; --c-psyche: #b5d996; --c-allg: #eed585; --c-eigen: #d4c2b6;
+      color-scheme: dark;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 Nunito, system-ui, sans-serif; }
-  main { max-width: 1280px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-  h1, h2, h3 { font-family: Fraunces, Georgia, serif; font-weight: 600; margin: 0; }
-  h1 { font-size: 2rem; outline: none; border-radius: 6px; }
-  h1:focus { background: var(--accent-soft); }
-  input, select, button, textarea {
-    font: inherit; color: var(--text); background: var(--card);
-    border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px;
-  }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font-body); }
+  main { max-width: 1280px; margin: 0 auto; padding-block: 28px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid; gap: 18px; }
+  @media (min-width: 1560px) { main { max-width: 1560px; } }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 600; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(1.8rem, 5vw, 2.4rem); line-height: 1.1; }
+  button, input, select, textarea { font: inherit; color: var(--text); }
   button { cursor: pointer; }
-  button:hover { border-color: var(--accent); }
-  .btn-accent { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 700; }
+  :focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; min-width: 0; }
+  .muted { color: var(--muted); }
 
-  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; }
-  header .week { color: var(--muted); }
-  header .spacer { flex: 1; }
+  .top { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between; }
+  .week { color: var(--muted); margin-top: 4px; }
   .nav { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill { background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: .9rem; }
+  .pill:hover { border-color: var(--accent); }
+  .pill.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
-  .sample { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
-    background: var(--accent-soft); border-radius: 14px; padding: 12px 14px; margin-bottom: 16px; }
-  .progress { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 4px 0 20px; }
-  .progress > div { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .3s; }
-  .progress-label { color: var(--muted); font-size: .9rem; }
+  /* Wochenziele */
+  .goals { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .goals h2 { font-size: 1rem; margin-right: 4px; }
+  .goal { display: inline-flex; gap: 6px; align-items: center; border-radius: 999px; padding: 4px 12px; font-size: .85rem; font-weight: 700;
+    background: color-mix(in srgb, var(--c) var(--tint), var(--card)); color: var(--text); font-variant-numeric: tabular-nums; }
+  .goal b { font-weight: 800; }
+  .goal.done b::after { content: " ★"; color: var(--accent-ink); }
 
-  .top { display: grid; gap: 16px; grid-template-columns: 1fr; margin-bottom: 16px; }
-  @media (min-width: 900px) { .top { grid-template-columns: 1fr 1.4fr; } }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); }
-  .card h2 { font-size: 1.15rem; margin-bottom: 10px; }
-  textarea { width: 100%; resize: vertical; min-height: 70px; }
-
-  .days { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
-  @media (min-width: 1560px) { main { max-width: 1560px; } .days { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
-  .day { display: flex; flex-direction: column; min-height: 240px; }
+  /* Tage */
+  .days { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr)); align-items: start; }
+  .day > * { min-width: 0; }
+  @media (min-width: 1560px) { .days { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+  .day { display: flex; flex-direction: column; gap: 10px; min-height: 170px; }
   .day.today { background: var(--today); border-color: var(--accent); }
-  .day-head { display: flex; flex-wrap: wrap; gap: 0 8px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
-  .day-head h3 { font-size: 1.05rem; }
+  .day-head { display: flex; flex-wrap: wrap; gap: 0 8px; align-items: baseline; justify-content: space-between; }
+  .day-head h3 { font-size: 1.1rem; }
   .day-head .date { color: var(--muted); font-size: .85rem; }
-  .day.today .day-head h3::after { content: "heute"; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: .7rem; font-family: Nunito, sans-serif; font-weight: 700; vertical-align: middle; }
-  ul.items { list-style: none; margin: 0 0 8px; padding: 0; flex: 1; display: flex; flex-direction: column; gap: 6px; }
-  li.item { display: grid; grid-template-columns: auto 1fr auto; gap: 6px; align-items: start;
-    padding: 6px 8px; border-radius: 10px; background: color-mix(in srgb, var(--c) var(--tint), transparent); border-left: 4px solid var(--c); }
-  li.item input[type=checkbox] { margin-top: 4px; accent-color: var(--c); width: 16px; height: 16px; }
-  li.item .txt { overflow-wrap: break-word; hyphens: auto; font-size: .92rem; min-width: 0; }
-  li.item .time { font-weight: 700; font-size: .8rem; color: color-mix(in srgb, var(--c) 40%, var(--text)); display: block; }
-  li.item.done .txt { text-decoration: line-through; opacity: .55; }
-  li.item .del { border: none; background: none; padding: 0 2px; color: var(--muted); opacity: 0; font-size: 1rem; line-height: 1; }
-  li.item:hover .del, li.item:focus-within .del { opacity: 1; }
-  @media (hover: none) { li.item .del { opacity: .6; } }
+  .badge { margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--accent); color: var(--on-accent);
+    font: 800 .7rem var(--font-body); vertical-align: middle; }
+  ul.items { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; flex: 1; align-content: flex-start; }
   .empty { color: var(--muted); font-size: .85rem; font-style: italic; }
+  .item { display: inline-flex; align-items: center; border-radius: 999px; background: color-mix(in srgb, var(--c) var(--tint), var(--card));
+    border: 1px solid color-mix(in srgb, var(--c) 70%, transparent); overflow: hidden; max-width: 100%; }
+  .item .toggle { border: none; background: none; padding: 5px 4px 5px 10px; display: inline-flex; gap: 6px; align-items: center; font-weight: 700; font-size: .88rem; min-width: 0; text-align: left; }
+  .item .toggle::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--c) 60%, var(--text)); flex: none; }
+  .item.done { background: var(--c); }
+  .item.done .toggle { color: var(--chip-ink); }
+  .item.done .toggle::before { content: "✓"; border-color: transparent; background: var(--card); color: var(--accent-ink); font-size: .65rem; display: grid; place-items: center; font-weight: 900; }
+  .item .x { border: none; background: none; padding: 5px 10px 5px 4px; color: var(--muted); font-size: 1rem; line-height: 1; }
+  .item.done .x { color: var(--chip-ink); opacity: .6; }
 
-  form.add { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
-  form.add input[name=text] { grid-column: 1 / -1; }
-  form.add .row { display: flex; flex-wrap: wrap; gap: 6px; grid-column: 1 / -1; }
-  form.add .row > * { min-width: 0; padding: 5px 6px; font-size: .85rem; }
-  form.add .row input[type=time] { flex: 0 0 auto; }
-  form.add .row select { flex: 1 1 90px; }
-  form.add .row button { flex: 0 0 auto; }
+  .add-btn { align-self: flex-start; border: 1px dashed var(--accent); background: none; color: var(--accent-ink); border-radius: 999px; padding: 4px 14px; font-weight: 800; font-size: .88rem; }
+  .add-btn[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); border-style: solid; }
+  .picker { border-top: 1px dashed var(--border); padding-top: 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .picker .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { border: 1px solid color-mix(in srgb, var(--c) 80%, transparent); background: var(--card); border-radius: 999px; padding: 4px 11px; font-size: .84rem; font-weight: 700; }
+  .picker .tag:hover { background: color-mix(in srgb, var(--c) var(--tint), var(--card)); }
+  .tag[aria-pressed="true"] { background: var(--c); color: var(--chip-ink); }
+  .tag[aria-pressed="true"]::before { content: "✓ "; }
+  .picker form { display: flex; gap: 6px; }
+  .picker input { flex: 1; min-width: 0; border: 1px solid var(--border); background: var(--card); border-radius: 10px; padding: 6px 10px; }
+  .picker form button { border: 1px solid var(--border); background: var(--card); border-radius: 10px; padding: 6px 12px; font-weight: 800; }
 
-  .habits table { width: 100%; border-collapse: collapse; }
-  .habits th, .habits td { padding: 4px 2px; text-align: center; font-size: .85rem; }
-  .habits th:first-child, .habits td:first-child { text-align: left; }
-  .habits td:first-child { display: flex; gap: 4px; align-items: center; }
-  .habits td:first-child button { border: none; background: none; padding: 0 4px; color: var(--muted); }
-  .habits input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
-  .habits .add-habit { display: flex; gap: 6px; margin-top: 8px; }
-  .habits .add-habit input { flex: 1; min-width: 0; }
-  .habits th.today { color: var(--on-accent); background: var(--accent-soft); border-radius: 8px; }
-  .habits th.today { color: var(--text); }
-
-  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; color: var(--muted); font-size: .85rem; }
-  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--c); margin-right: 5px; }
-
-  @media print {
-    body { background: #fff; color: #000; }
-    header .nav, header .spacer, form.add, .del, .add-habit, .habits td:first-child button, .progress { display: none !important; }
-    .card { box-shadow: none; break-inside: avoid; }
-    .days { grid-template-columns: repeat(4, 1fr) !important; }
-  }
+  /* Tags verwalten + Notiz */
+  .two { display: grid; gap: 18px; grid-template-columns: 1fr; }
+  @media (min-width: 860px) { .two { grid-template-columns: 1.3fr 1fr; } }
+  .two h2 { font-size: 1.15rem; margin-bottom: 8px; }
+  .manage .row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .manage .tag { display: inline-flex; gap: 6px; align-items: center; background: color-mix(in srgb, var(--c) var(--tint), var(--card)); }
+  .manage .tag button { border: none; background: none; padding: 0; color: var(--muted); font-weight: 800; }
+  .manage .tag button.armed { color: var(--accent-ink); }
+  .manage .goal-n { font-size: .75rem; color: var(--muted); }
+  .manage form { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .manage form input, .manage form select { border: 1px solid var(--border); background: var(--card); border-radius: 10px; padding: 6px 10px; min-width: 0; }
+  .manage form input[name=name] { flex: 1 1 160px; }
+  .manage form input[name=target] { width: 8em; }
+  .manage .hint { font-size: .85rem; color: var(--muted); margin: 0 0 10px; }
+  textarea { width: 100%; min-height: 110px; resize: vertical; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; background: var(--card); }
+  .motto { text-align: center; color: var(--muted); font-size: .9rem; max-width: 60ch; margin: 4px auto 0; }
 </style>
 </head>
 <body>
+
 <main>
-  <header>
+  <header class="top">
     <div>
-      <h1 id="title" contenteditable="true" spellcheck="false" title="Zum Ändern anklicken">Janas Wochenplaner</h1>
+      <h1>Janas Woche</h1>
       <div class="week" id="weekLabel"></div>
     </div>
-    <span class="spacer"></span>
     <div class="nav">
-      <button id="prev" aria-label="Vorherige Woche">← Woche</button>
-      <button id="today" class="btn-accent">Heute</button>
-      <button id="next" aria-label="Nächste Woche">Woche →</button>
-      <button id="print">Drucken</button>
+      <button class="pill" id="prev" aria-label="Vorherige Woche">← Woche</button>
+      <button class="pill primary" id="today">Heute</button>
+      <button class="pill" id="next" aria-label="Nächste Woche">Woche →</button>
     </div>
   </header>
 
-  <div class="sample" id="sample" hidden>
-    <span>Das sind Beispiel-Einträge, damit du siehst, wie es aussieht.</span>
-    <button id="clearSample" class="btn-accent">Beispiele entfernen &amp; loslegen</button>
-  </div>
-
-  <div class="progress-label" id="progLabel"></div>
-  <div class="progress"><div id="progBar" style="width:0"></div></div>
-
-  <section class="top">
-    <div class="card">
-      <h2>✨ Fokus der Woche</h2>
-      <textarea id="focus" placeholder="Was ist diese Woche wichtig? Worauf freust du dich?"></textarea>
-      <h2 style="margin-top:14px">📝 Notizen</h2>
-      <textarea id="notes" placeholder="Einkaufsliste, Ideen, Geburtstage…"></textarea>
-    </div>
-    <div class="card habits">
-      <h2>🌱 Gewohnheiten</h2>
-      <table>
-        <thead id="habitHead"></thead>
-        <tbody id="habitBody"></tbody>
-      </table>
-      <form class="add-habit" id="habitForm">
-        <input name="habit" placeholder="Neue Gewohnheit, z. B. 2 Liter trinken" aria-label="Neue Gewohnheit">
-        <button type="submit">+</button>
-      </form>
-    </div>
-  </section>
+  <section class="goals" id="goals" aria-label="Wochenziele"></section>
 
   <section class="days" id="days"></section>
 
-  <div class="legend" id="legend"></div>
+  <div class="two">
+    <section class="card manage">
+      <h2>Meine Tags</h2>
+      <p class="hint">Diese Tags erscheinen bei jedem Tag unter „+ Tag“. Mit einem Wochenziel tauchen sie oben in den Wochenzielen auf.</p>
+      <div class="row" id="tagList"></div>
+      <form id="tagForm">
+        <input name="name" id="newTagName" placeholder="Neuer Tag, z. B. Yoga" aria-label="Name des neuen Tags" required>
+        <select name="area" id="areaSelect" aria-label="Bereich"></select>
+        <input name="target" id="newTagTarget" type="number" min="0" max="7" placeholder="Ziel ×/Wo." aria-label="Wochenziel (optional)">
+        <button class="pill primary" type="submit">Anlegen</button>
+      </form>
+    </section>
+    <section class="card">
+      <h2>Wochen-Notiz</h2>
+      <textarea id="note" placeholder="Was lief gut? Worauf achte ich nächste Woche?"></textarea>
+    </section>
+  </div>
+
+  <p class="motto">Entscheidend ist die langfristige Gewohnheit, nicht Perfektion.</p>
 </main>
 
 <script>
 (() => {
-  const KEY = 'wochenplaner.v1';
+  const KEY = 'janas-woche.v2';
   const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
-  const CATS = {
-    termin: 'Termin', arbeit: 'Arbeit', sport: 'Sport',
-    freunde: 'Freunde & Familie', selfcare: 'Selfcare', haushalt: 'Haushalt',
-  };
+  const AREAS = { bew: 'Bewegung', ern: 'Ernährung', schlaf: 'Schlaf', gehirn: 'Gehirn', sozial: 'Soziales', psyche: 'Erholung', allg: 'Gesundheit', eigen: 'Eigenes' };
+  const DEFAULT_TAGS = [
+    ['kraft', 'Krafttraining', 'bew', 2], ['ausdauer', 'Ausdauer', 'bew', 3], ['spazieren', 'Spazieren', 'bew'], ['rad', 'Fahrrad', 'bew'],
+    ['gemuese', 'Obst & Gemüse', 'ern'], ['huelsen', 'Hülsenfrüchte', 'ern', 3], ['fisch', 'Fisch / Omega-3', 'ern', 1], ['vollkorn', 'Vollkorn', 'ern'], ['wasser', 'Viel Wasser', 'ern'],
+    ['schlafen', 'Früh ins Bett', 'schlaf'], ['handy', 'Handyfrei vorm Schlafen', 'schlaf'],
+    ['lesen', 'Lesen', 'gehirn', 3], ['lernen', 'Neues lernen', 'gehirn'],
+    ['freunde', 'Freunde treffen', 'sozial', 2], ['familie', 'Familie', 'sozial'],
+    ['entspannen', 'Entspannen', 'psyche'], ['hobby', 'Hobby-Zeit', 'psyche'],
+    ['zahnseide', 'Zahnzwischenräume', 'allg'], ['sonne', 'Sonnenschutz', 'allg'], ['alkoholfrei', 'Alkoholfrei', 'allg'], ['vorsorge', 'Vorsorge / Arzt', 'allg'],
+  ].map(([id, name, area, target]) => ({ id, name, area, target: target || 0 }));
+
   const $ = (id) => document.getElementById(id);
-  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
-  let state = load();
-  let monday = startOfWeek(new Date());
+  let state = { tags: DEFAULT_TAGS, weeks: {} };
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.tags) state = s; } catch {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
 
-  function load() {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY));
-      if (s && s.weeks) { if (s.title === 'Mein Wochenplaner') s.title = 'Janas Wochenplaner'; return s; }
-    } catch {}
-    return sampleState();
-  }
-  function sampleState() {
-    const m = key(startOfWeek(new Date()));
-    const ex = (text, time, cat, done = false) => ({ id: uid(), text, time, cat, done, sample: true });
-    return {
-      title: 'Janas Wochenplaner', habits: ['Sport', 'Lesen', 'Früh schlafen'], sample: true,
-      weeks: { [m]: {
-        items: [
-          [ex('Teammeeting', '09:30', 'arbeit', true), ex('Yoga', '18:00', 'sport')],
-          [ex('Zahnarzt', '14:00', 'termin')],
-          [ex('Wäsche waschen', '', 'haushalt')],
-          [ex('Kino mit Freundinnen', '20:00', 'freunde')],
-          [ex('Gesichtsmaske & Buch', '', 'selfcare')],
-          [ex('Brunch bei Mama', '11:00', 'freunde')],
-          [ex('Laufen gehen', '10:00', 'sport')],
-        ],
-        focus: 'Mehr Pausen machen und genug schlafen', notes: '', habits: { Sport: [true], Lesen: [, true] },
-      } },
-    };
-  }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
-
-  function startOfWeek(d) {
-    const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
-    return x;
-  }
-  function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
-  function key(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+  const startOfWeek = (d) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const key = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   function isoWeek(d) {
     const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
     t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
-    const y = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
-    return Math.ceil(((t - y) / 864e5 + 1) / 7);
+    return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
   }
-  function week() {
-    const k = key(monday);
-    if (!state.weeks[k]) state.weeks[k] = { items: [[], [], [], [], [], [], []], focus: '', notes: '', habits: {} };
-    return state.weeks[k];
-  }
-  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-  const fmt = (d, o) => d.toLocaleDateString('de-DE', o);
+
+  let monday = startOfWeek(new Date());
+  let openDay = -1;
+  const week = () => (state.weeks[key(monday)] ||= { days: [[], [], [], [], [], [], []], note: '' });
+  const tagOf = (id) => state.tags.find(t => t.id === id);
+  const areaOf = (it) => it.tag ? (tagOf(it.tag)?.area || 'eigen') : 'eigen';
+  const labelOf = (it) => it.tag ? (tagOf(it.tag)?.name || it.text || '?') : it.text;
+
+  $('areaSelect').innerHTML = Object.entries(AREAS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
 
   function render() {
     const w = week();
     const todayKey = key(new Date());
-    const sunday = addDays(monday, 6);
-    $('title').textContent = state.title;
-    $('sample').hidden = !state.sample;
-    $('weekLabel').textContent = `KW ${isoWeek(monday)} · ${fmt(monday, { day: 'numeric', month: 'long' })} – ${fmt(sunday, { day: 'numeric', month: 'long', year: 'numeric' })}`;
-    $('focus').value = w.focus;
-    $('notes').value = w.notes;
+    const fmt = (d, o) => d.toLocaleDateString('de-DE', o);
+    $('weekLabel').textContent = `KW ${isoWeek(monday)} · ${fmt(monday, { day: 'numeric', month: 'long' })} – ${fmt(addDays(monday, 6), { day: 'numeric', month: 'long', year: 'numeric' })}`;
 
-    // Fortschritt
-    const all = w.items.flat();
-    const done = all.filter(i => i.done).length;
-    $('progLabel').textContent = all.length ? `${done} von ${all.length} erledigt${done === all.length ? ' 🎉' : ''}` : 'Noch nichts geplant für diese Woche';
-    $('progBar').style.width = all.length ? (done / all.length * 100) + '%' : '0';
+    // Wochenziele: nur Tags mit Ziel; gezählt werden Tage, an denen der Tag abgehakt ist
+    const withGoal = state.tags.filter(t => t.target > 0);
+    $('goals').innerHTML = withGoal.length ? `<h2>Wochenziele</h2>` + withGoal.map(t => {
+      const n = w.days.filter(d => d.some(i => i.tag === t.id && i.done)).length;
+      return `<span class="goal ${n >= t.target ? 'done' : ''}" style="--c: var(--c-${t.area})">${esc(t.name)} <b>${n}/${t.target}</b></span>`;
+    }).join('') : '';
 
-    // Tage
     $('days').innerHTML = DAYS.map((name, i) => {
-      const d = addDays(monday, i);
-      const items = [...w.items[i]].sort((a, b) => (a.time || '99').localeCompare(b.time || '99'));
-      return `
-        <article class="card day ${key(d) === todayKey ? 'today' : ''}">
-          <div class="day-head"><h3>${name}</h3><span class="date">${fmt(d, { day: 'numeric', month: 'short' })}</span></div>
-          <ul class="items">
-            ${items.length ? items.map(it => `
-              <li class="item ${it.done ? 'done' : ''}" style="--c: var(--c-${it.cat})">
-                <input type="checkbox" data-day="${i}" data-id="${it.id}" ${it.done ? 'checked' : ''} aria-label="Erledigt">
-                <span class="txt">${it.time ? `<span class="time">${it.time}</span>` : ''}${esc(it.text)}</span>
-                <button class="del" data-day="${i}" data-del="${it.id}" aria-label="Löschen">×</button>
-              </li>`).join('') : '<li class="empty">Frei 🌸</li>'}
-          </ul>
-          <form class="add" data-day="${i}">
-            <input name="text" placeholder="Neuer Eintrag…" aria-label="Neuer Eintrag für ${name}" autocomplete="off">
-            <div class="row">
-              <input type="time" name="time" aria-label="Uhrzeit">
-              <select name="cat" aria-label="Kategorie">
-                ${Object.entries(CATS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}
-              </select>
-              <button type="submit" aria-label="Hinzufügen">+</button>
-            </div>
-          </form>
-        </article>`;
+      const d = addDays(monday, i), items = w.days[i], isToday = key(d) === todayKey, open = openDay === i;
+      const used = new Set(items.map(it => it.tag).filter(Boolean));
+      return `<article class="card day ${isToday ? 'today' : ''}" data-day="${i}">
+        <div class="day-head"><h3>${name}${isToday ? '<span class="badge">heute</span>' : ''}</h3><span class="date">${fmt(d, { day: 'numeric', month: 'short' })}</span></div>
+        <ul class="items">${items.length ? items.map(it => `
+          <li class="item ${it.done ? 'done' : ''}" style="--c: var(--c-${areaOf(it)})">
+            <button class="toggle" data-toggle="${it.id}" aria-pressed="${!!it.done}" title="Erledigt umschalten">${esc(labelOf(it))}</button>
+            <button class="x" data-del="${it.id}" aria-label="${esc(labelOf(it))} entfernen">×</button>
+          </li>`).join('') : '<li class="empty">Noch nichts ausgewählt</li>'}</ul>
+        <button class="add-btn" data-open="${i}" aria-expanded="${open}">${open ? 'Fertig' : '+ Tag'}</button>
+        ${open ? `<div class="picker">
+          <div class="tags">${state.tags.map(t => `<button class="tag" style="--c: var(--c-${t.area})" data-pick="${t.id}" aria-pressed="${used.has(t.id)}">${esc(t.name)}</button>`).join('')}</div>
+          <form data-custom="${i}"><input name="text" id="custom-${i}" placeholder="Oder eigener Eintrag…" aria-label="Eigener Eintrag für ${name}" autocomplete="off"><button type="submit">+</button></form>
+        </div>` : ''}
+      </article>`;
     }).join('');
 
-    // Gewohnheiten
-    $('habitHead').innerHTML = `<tr><th></th>${DAYS.map((n, i) =>
-      `<th class="${key(addDays(monday, i)) === todayKey ? 'today' : ''}">${n.slice(0, 2)}</th>`).join('')}</tr>`;
-    $('habitBody').innerHTML = state.habits.length ? state.habits.map((h, hi) => {
-      const checks = w.habits[h] || [];
-      return `<tr><td><button data-rmhabit="${hi}" aria-label="${esc(h)} entfernen">×</button>${esc(h)}</td>${DAYS.map((_, i) =>
-        `<td><input type="checkbox" data-habit="${hi}" data-day="${i}" ${checks[i] ? 'checked' : ''} aria-label="${esc(h)} am ${DAYS[i]}"></td>`).join('')}</tr>`;
-    }).join('') : '<tr><td colspan="8" class="empty">Füge unten eine Gewohnheit hinzu.</td></tr>';
+    $('tagList').innerHTML = Object.keys(AREAS).flatMap(a => state.tags.filter(t => t.area === a)).map(t =>
+      `<span class="tag" style="--c: var(--c-${t.area})">${esc(t.name)}${t.target ? `<span class="goal-n">${t.target}×/Wo.</span>` : ''}<button data-rmtag="${t.id}" aria-label="Tag ${esc(t.name)} löschen">×</button></span>`).join('');
+
+    $('note').value = w.note || '';
   }
 
-  // Events
-  $('days').addEventListener('submit', (ev) => {
-    ev.preventDefault();
-    const f = ev.target, day = +f.dataset.day;
-    const text = f.text.value.trim();
-    if (!text) { f.text.focus(); return; }
-    week().items[day].push({ id: uid(), text, time: f.time.value, cat: f.cat.value, done: false });
-    save(); render();
-    document.querySelector(`form.add[data-day="${day}"] input[name=text]`).focus();
-  });
-  $('days').addEventListener('change', (ev) => {
-    const cb = ev.target;
-    if (cb.type !== 'checkbox') return;
-    const it = week().items[+cb.dataset.day].find(x => x.id === cb.dataset.id);
-    if (it) { it.done = cb.checked; save(); render(); }
-  });
-  $('days').addEventListener('click', (ev) => {
-    const b = ev.target.closest('[data-del]');
+  $('days').addEventListener('click', (e) => {
+    const b = e.target.closest('button');
     if (!b) return;
-    const w = week(), day = +b.dataset.day;
-    w.items[day] = w.items[day].filter(x => x.id !== b.dataset.del);
-    save(); render();
-  });
-
-  $('habitBody').addEventListener('change', (ev) => {
-    const cb = ev.target, name = state.habits[+cb.dataset.habit], w = week();
-    (w.habits[name] ||= [])[+cb.dataset.day] = cb.checked;
-    save();
-  });
-  $('habitBody').addEventListener('click', (ev) => {
-    const b = ev.target.closest('[data-rmhabit]');
-    if (!b) return;
-    if (b.dataset.armed) { state.habits.splice(+b.dataset.rmhabit, 1); save(); render(); return; }
-    b.dataset.armed = '1'; b.textContent = 'Entfernen?'; b.style.color = 'var(--accent)';
-    setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = '×'; b.style.color = ''; } }, 3000);
-  });
-  $('habitForm').addEventListener('submit', (ev) => {
-    ev.preventDefault();
-    const v = ev.target.habit.value.trim();
-    if (v && !state.habits.includes(v)) { state.habits.push(v); save(); render(); }
-    ev.target.habit.value = '';
-  });
-
-  $('focus').addEventListener('input', (e) => { week().focus = e.target.value; save(); });
-  $('notes').addEventListener('input', (e) => { week().notes = e.target.value; save(); });
-  $('title').addEventListener('blur', (e) => { state.title = e.target.textContent.trim() || 'Janas Wochenplaner'; save(); render(); });
-  $('title').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
-
-  $('prev').addEventListener('click', () => { monday = addDays(monday, -7); render(); });
-  $('next').addEventListener('click', () => { monday = addDays(monday, 7); render(); });
-  $('today').addEventListener('click', () => { monday = startOfWeek(new Date()); render(); });
-  $('print')?.addEventListener('click', () => window.print());
-  $('clearSample').addEventListener('click', () => {
-    for (const w of Object.values(state.weeks)) {
-      w.items = w.items.map(day => day.filter(i => !i.sample));
-      if (w.focus === 'Mehr Pausen machen und genug schlafen') w.focus = '';
-      w.habits = {};
+    const w = week(), day = +b.closest('[data-day]').dataset.day;
+    if (b.dataset.open !== undefined) { openDay = openDay === day ? -1 : day; render(); return; }
+    if (b.dataset.pick) {
+      const list = w.days[day], idx = list.findIndex(i => i.tag === b.dataset.pick);
+      if (idx >= 0) list.splice(idx, 1); else list.push({ id: uid(), tag: b.dataset.pick, done: false });
+      save(); render(); return;
     }
-    state.sample = false; save(); render();
+    if (b.dataset.toggle) { const it = w.days[day].find(i => i.id === b.dataset.toggle); it.done = !it.done; save(); render(); return; }
+    if (b.dataset.del) { w.days[day] = w.days[day].filter(i => i.id !== b.dataset.del); save(); render(); }
+  });
+  $('days').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target, day = +f.dataset.custom, text = f.text.value.trim();
+    if (!text) return;
+    week().days[day].push({ id: uid(), text, done: false });
+    save(); render();
+    $(`custom-${day}`)?.focus();
   });
 
-  $('legend').innerHTML = Object.entries(CATS).map(([k, v]) => `<span style="--c: var(--c-${k})">${v}</span>`).join('');
+  $('tagList').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rmtag]');
+    if (!b) return;
+    if (!b.classList.contains('armed')) {
+      b.classList.add('armed'); b.textContent = 'löschen?';
+      setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = '×'; } }, 3000);
+      return;
+    }
+    const t = tagOf(b.dataset.rmtag);
+    // Schon eingetragene Tage behalten den Namen als eigenen Eintrag
+    for (const w of Object.values(state.weeks)) for (const d of w.days) for (const it of d) if (it.tag === t.id) { it.text = t.name; delete it.tag; }
+    state.tags = state.tags.filter(x => x.id !== t.id);
+    save(); render();
+  });
+  $('tagForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target, name = f.name.value.trim();
+    if (!name) return;
+    state.tags.push({ id: 't' + uid(), name, area: f.area.value, target: Math.min(7, Math.max(0, +f.target.value || 0)) });
+    f.name.value = ''; f.target.value = '';
+    save(); render();
+  });
+  $('note').addEventListener('input', (e) => { week().note = e.target.value; save(); });
+  $('prev').addEventListener('click', () => { monday = addDays(monday, -7); openDay = -1; render(); });
+  $('next').addEventListener('click', () => { monday = addDays(monday, 7); openDay = -1; render(); });
+  $('today').addEventListener('click', () => { monday = startOfWeek(new Date()); openDay = -1; render(); });
+
   render();
 })();
 </script>
