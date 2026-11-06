@@ -35,6 +35,9 @@ Datum;Typ;Beschreibung;Kategorie;Betrag
 Wochenplaner mit Gewohnheits-Tags, langfristigen To-dos und Pixel-Labrador.
 Live unter https://janas-woche.netlify.app
 
-Die veröffentlichte Version liegt im Ordner `janas-woche/` (Seite, App-Icons, Manifest, `netlify.toml`).
+Die veröffentlichte Version liegt im Ordner `janas-woche/`: die Seite mit App-Icons und Manifest in `public/`,
+der Login als Edge-Funktion in `netlify/edge-functions/login.ts`.
+Benutzername, Passwort und Geheimschlüssel stehen nicht im Code, sondern als Netlify-Umgebungsvariablen
+`JANA_USER`, `JANA_PASS` und `AUTH_SECRET`. Nach einer Änderung dort neu deployen.
 Einträge werden nur im Browser des jeweiligen Geräts gespeichert (localStorage, Schlüssel `janas-woche.v2`).
 Bei Änderungen das Speicherformat beibehalten, damit vorhandene Einträge erhalten bleiben.
