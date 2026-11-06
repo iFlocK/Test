@@ -58,14 +58,6 @@
   .pill:hover { border-color: var(--accent); }
   .pill.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
-  /* Wochenziele */
-  .goals { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .goals h2 { font-size: 1rem; margin-right: 4px; }
-  .goal { display: inline-flex; gap: 6px; align-items: center; border-radius: 999px; padding: 4px 12px; font-size: .85rem; font-weight: 700;
-    background: color-mix(in srgb, var(--c) var(--tint), var(--card)); color: var(--text); font-variant-numeric: tabular-nums; }
-  .goal b { font-weight: 800; }
-  .goal.done b::after { content: " ★"; color: var(--accent-ink); }
-
   /* Tage */
   .days { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr)); align-items: start; }
   .day > * { min-width: 0; }
@@ -109,11 +101,9 @@
   .manage .tag { display: inline-flex; gap: 6px; align-items: center; background: color-mix(in srgb, var(--c) var(--tint), var(--card)); }
   .manage .tag button { border: none; background: none; padding: 0; color: var(--muted); font-weight: 800; }
   .manage .tag button.armed { color: var(--accent-ink); }
-  .manage .goal-n { font-size: .75rem; color: var(--muted); }
   .manage form { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
   .manage form input, .manage form select { border: 1px solid var(--border); background: var(--card); border-radius: 10px; padding: 6px 10px; min-width: 0; }
   .manage form input[name=name] { flex: 1 1 160px; }
-  .manage form input[name=target] { width: 8em; }
   .manage .hint { font-size: .85rem; color: var(--muted); margin: 0 0 10px; }
   textarea { width: 100%; min-height: 110px; resize: vertical; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; background: var(--card); }
   .motto { text-align: center; color: var(--muted); font-size: .9rem; max-width: 60ch; margin: 4px auto 0; }
@@ -152,19 +142,16 @@
     </div>
   </header>
 
-  <section class="goals" id="goals" aria-label="Wochenziele"></section>
-
   <section class="days" id="days"></section>
 
   <div class="two">
     <section class="card manage">
       <h2>Meine Gewohnheiten</h2>
-      <p class="hint">Deine Gewohnheiten erscheinen bei jedem Tag unter „+ Tag“. Mit einem Wochenziel tauchen sie oben in den Wochenzielen auf. Eigene kannst du hier oder direkt bei einem Tag anlegen.</p>
+      <p class="hint">Deine Gewohnheiten erscheinen bei jedem Tag unter „+ Tag“. Eigene kannst du hier oder direkt bei einem Tag anlegen.</p>
       <div class="row" id="tagList"></div>
       <form id="tagForm">
         <input name="name" id="newTagName" placeholder="Neue Gewohnheit, z. B. Yoga" aria-label="Name der neuen Gewohnheit" required>
         <select name="area" id="areaSelect" aria-label="Bereich"></select>
-        <input name="target" id="newTagTarget" type="number" min="0" max="7" placeholder="Ziel ×/Wo." aria-label="Wochenziel (optional)">
         <button class="pill primary" type="submit">Anlegen</button>
       </form>
     </section>
@@ -192,7 +179,7 @@
     ['freunde', 'Freunde treffen', 'sozial', 2], ['familie', 'Familie', 'sozial'],
     ['entspannen', 'Entspannen', 'psyche'], ['hobby', 'Hobby-Zeit', 'psyche'],
     ['zahnseide', 'Zahnzwischenräume', 'allg'], ['sonne', 'Sonnenschutz', 'allg'], ['alkoholfrei', 'Alkoholfrei', 'allg'], ['vorsorge', 'Vorsorge / Arzt', 'allg'],
-  ].map(([id, name, area, target]) => ({ id, name, area, target: target || 0 }));
+  ].map(([id, name, area]) => ({ id, name, area }));
 
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -226,13 +213,6 @@
     const fmt = (d, o) => d.toLocaleDateString('de-DE', o);
     $('weekLabel').textContent = `KW ${isoWeek(monday)} · ${fmt(monday, { day: 'numeric', month: 'long' })} – ${fmt(addDays(monday, 6), { day: 'numeric', month: 'long', year: 'numeric' })}`;
 
-    // Wochenziele: nur Tags mit Ziel; gezählt werden Tage, an denen der Tag abgehakt ist
-    const withGoal = state.tags.filter(t => t.target > 0);
-    $('goals').innerHTML = withGoal.length ? `<h2>Wochenziele</h2>` + withGoal.map(t => {
-      const n = w.days.filter(d => d.some(i => i.tag === t.id && i.done)).length;
-      return `<span class="goal ${n >= t.target ? 'done' : ''}" style="--c: var(--c-${t.area})">${esc(t.name)} <b>${n}/${t.target}</b></span>`;
-    }).join('') : '';
-
     $('days').innerHTML = DAYS.map((name, i) => {
       const d = addDays(monday, i), items = w.days[i], isToday = key(d) === todayKey, open = openDay === i;
       const used = new Set(items.map(it => it.tag).filter(Boolean));
@@ -252,7 +232,7 @@
     }).join('');
 
     $('tagList').innerHTML = Object.keys(AREAS).flatMap(a => state.tags.filter(t => t.area === a)).map(t =>
-      `<span class="tag" style="--c: var(--c-${t.area})">${esc(t.name)}${t.target ? `<span class="goal-n">${t.target}×/Wo.</span>` : ''}<button data-rmtag="${t.id}" aria-label="Tag ${esc(t.name)} löschen">×</button></span>`).join('');
+      `<span class="tag" style="--c: var(--c-${t.area})">${esc(t.name)}<button data-rmtag="${t.id}" aria-label="Tag ${esc(t.name)} löschen">×</button></span>`).join('');
 
     $('note').value = w.note || '';
   }
@@ -279,7 +259,7 @@
     const f = e.target, day = +f.dataset.custom, text = f.text.value.trim();
     if (!text) return;
     let t = state.tags.find(x => x.name.toLowerCase() === text.toLowerCase());
-    if (!t) { t = { id: 't' + uid(), name: text, area: 'eigen', target: 0 }; state.tags.push(t); }
+    if (!t) { t = { id: 't' + uid(), name: text, area: 'eigen' }; state.tags.push(t); }
     const list = week().days[day];
     if (!list.some(i => i.tag === t.id)) list.push({ id: uid(), tag: t.id, done: false });
     save(); render();
@@ -304,8 +284,8 @@
     e.preventDefault();
     const f = e.target, name = f.name.value.trim();
     if (!name) return;
-    state.tags.push({ id: 't' + uid(), name, area: f.area.value, target: Math.min(7, Math.max(0, +f.target.value || 0)) });
-    f.name.value = ''; f.target.value = '';
+    state.tags.push({ id: 't' + uid(), name, area: f.area.value });
+    f.name.value = '';
     save(); render();
   });
   $('note').addEventListener('input', (e) => { week().note = e.target.value; save(); });
