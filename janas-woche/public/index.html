@@ -1393,7 +1393,7 @@
   const $ = (id) => document.getElementById(id);
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const WX_KEY = 'janas-woche.weather', GEO_KEY = 'janas-woche.geo';
-  const FRESH = 30 * 60 * 1000;   // Wetter höchstens alle 30 Minuten neu laden (spart Server-Aufrufe)
+  const FRESH = 60 * 60 * 1000;   // Wetter höchstens einmal pro Stunde neu laden (spart Server-Aufrufe)
 
   // Mondphase (synodischer Monat ab Neumond am 6.1.2000, 18:14 UTC)
   const SYN = 29.530588853;
