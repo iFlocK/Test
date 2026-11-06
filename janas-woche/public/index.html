@@ -174,6 +174,30 @@
   @keyframes beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.25); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } }
   @media (prefers-reduced-motion: reduce) { .heart { animation: none; } }
 
+  /* KW-Übersicht */
+  .overlay { position: fixed; inset: 0; z-index: 40; background: rgba(40, 25, 45, .35); display: grid; place-items: center;
+    padding: max(16px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+  .sheet { width: 100%; max-width: 640px; max-height: 100%; overflow: auto; overscroll-behavior: contain; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 20px; padding: 16px; box-shadow: 0 12px 40px rgba(60, 30, 60, .25); }
+  .sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; position: sticky; top: -16px; background: var(--bg); padding: 4px 0 8px; z-index: 1; }
+  .sheet-head h2 { font-size: 1.25rem; }
+  .kw-sum { margin: 0 0 12px; color: var(--muted); font-size: .85rem; }
+  .kw-list { display: grid; gap: 8px; }
+  .kw-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; text-align: left; width: 100%;
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 10px 12px; }
+  .kw-row:hover { border-color: var(--accent); }
+  .kw-row.cur { border-color: var(--accent); background: var(--today); }
+  .kw-badge { display: grid; justify-items: center; min-width: 3.6rem; padding: 4px 6px; border-radius: 10px; background: var(--soft);
+    font-family: var(--font-display); font-weight: 600; font-size: .95rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .kw-badge small { font-family: var(--font-body); font-size: .68rem; color: var(--muted); font-weight: 700; }
+  .kw-info { display: grid; gap: 1px; min-width: 0; font-size: .82rem; }
+  .kw-info b { font-size: .88rem; }
+  .kw-info em { white-space: nowrap; font-style: normal; font-size: .7rem; font-weight: 800; color: var(--on-accent); background: var(--accent); border-radius: 999px; padding: 1px 7px; margin-left: 4px; vertical-align: middle; }
+  .kw-info small { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kw-days { display: flex; gap: 2px; align-items: flex-end; height: 24px; }
+  .kw-days i { display: block; width: 5px; border-radius: 2px; background: var(--border); }
+  .kw-days i.on { background: var(--accent); }
+
   /* Langfristige To-dos */
   .todos-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
   .todos h2 { font-size: 1.15rem; }
@@ -236,6 +260,7 @@
       <button class="pill" id="prev" aria-label="Vorherige Woche">← Woche</button>
       <button class="pill primary" id="today">Heute</button>
       <button class="pill" id="next" aria-label="Nächste Woche">Woche →</button>
+      <button class="pill" id="overviewBtn" type="button">📅 KW-Übersicht</button>
       <button class="pill" id="sound" type="button"></button>
     </div>
   </header>
@@ -308,6 +333,13 @@
   <p class="motto">Entscheidend ist die langfristige Gewohnheit, nicht Perfektion.</p>
 </main>
 
+<div class="overlay" id="kwOverlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="kwTitle">
+    <div class="sheet-head"><h2 id="kwTitle">Alle Kalenderwochen</h2><button class="pill" id="kwClose" type="button" aria-label="Übersicht schließen">✕</button></div>
+    <p class="kw-sum" id="kwSum"></p>
+    <div class="kw-list" id="kwList"></div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <div class="sky" id="sky" aria-hidden="true"><canvas id="skyCanvas" width="130" height="24"></canvas></div>
 <div class="yard" id="yard" aria-hidden="true"><div class="yard-clip"><canvas id="yardCanvas" width="130" height="24"></canvas></div><div class="bubble" id="bubble"></div></div>
@@ -740,6 +772,81 @@
   }
   renderLove();
   setInterval(renderLove, 1000);
+
+  // ---------- KW-Übersicht ----------
+  const shortDate = (d) => d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+  function weekStats(mk) {
+    const w = state.weeks[mk];
+    const [yy, mm, dd] = mk.split('-').map(Number), mon = new Date(yy, mm - 1, dd);
+    let planned = 0, done = 0;
+    const perDay = [], tagCount = {};
+    for (let i = 0; i < 7; i++) {
+      const items = w?.days?.[i] || [], dn = items.filter((it) => it.done);
+      planned += items.length; done += dn.length; perDay.push(dn.length);
+      for (const it of dn) {
+        const name = it.tag ? (state.tags.find((t) => t.id === it.tag)?.name || it.text) : it.text;
+        if (name) tagCount[name] = (tagCount[name] || 0) + 1;
+      }
+    }
+    const water = Array.from({ length: 7 }, (_, i) => waterOf(key(addDays(mon, i))));
+    return {
+      mon, planned, done, perDay, waterGoals: water.filter((v) => v >= GOAL).length, waterSum: water.reduce((a, b) => a + b, 0),
+      note: (w?.note || '').trim(), top: Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 3),
+    };
+  }
+  function renderOverview() {
+    const cur = key(startOfWeek(new Date()));
+    const keys = [...Object.keys(state.weeks).filter((k) => {
+      const w = state.weeks[k]; return w.days.some((d) => d.length) || (w.note || '').trim();
+    }), ...Object.keys(state.water).filter((k) => waterOf(k) > 0).map((k) => key(startOfWeek(new Date(k + 'T12:00:00')))), cur].sort();
+    const [fy, fm, fd] = keys[0].split('-').map(Number), [ly, lm, ld] = keys[keys.length - 1].split('-').map(Number);
+    const first = new Date(fy, fm - 1, fd), weeks = [];
+    for (let d = new Date(ly, lm - 1, ld); d >= first && weeks.length < 520; d = addDays(d, -7)) weeks.push(new Date(d));
+    let totalDone = 0, best = null;
+    const rows = weeks.map((mon) => {
+      const k = key(mon), s = weekStats(k), sun = addDays(mon, 6), kw = isoWeek(mon);
+      totalDone += s.done;
+      if (s.done && (!best || s.done > best.done)) best = { kw, year: mon.getFullYear(), done: s.done };
+      const tag = k === cur ? '<em>diese Woche</em>' : k > cur ? '<em>geplant</em>' : '';
+      const parts = [s.planned ? `✅\u00a0${s.done} von ${s.planned} erledigt` : 'Keine Gewohnheiten'];
+      if (s.waterGoals) parts.push(`💧\u00a0${s.waterGoals}×\u00a02,5\u00a0l`); else if (s.waterSum) parts.push(`💧\u00a0${fmtL(s.waterSum).replace(' ', '\u00a0')}`);
+      if (s.note) parts.push('📝 Notiz');
+      const maxD = Math.max(3, ...s.perDay);
+      const bars = s.perDay.map((n, i) => `<i style="height:${n ? Math.max(4, Math.round(n / maxD * 22)) : 2}px" title="${['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i]}: ${n} erledigt" class="${n ? 'on' : ''}"></i>`).join('');
+      return `<button class="kw-row ${k === cur ? 'cur' : ''}" type="button" data-week="${k}">
+        <span class="kw-badge">KW ${kw}<small>${mon.getFullYear()}</small></span>
+        <span class="kw-info"><b>${shortDate(mon)} – ${shortDate(sun)} ${tag}</b><span>${parts.join(' · ')}</span>${s.top.length ? `<small>Meist: ${s.top.map(([n, c]) => `${esc(n)} ${c}×`).join(', ')}</small>` : ''}</span>
+        <span class="kw-days" aria-hidden="true">${bars}</span>
+      </button>`;
+    });
+    $('kwSum').textContent = `${weeks.length} ${weeks.length === 1 ? 'Woche' : 'Wochen'} · ${totalDone} Gewohnheiten erledigt` + (best ? ` · Beste Woche: KW ${best.kw}/${best.year} mit ${best.done} ✅` : '');
+    $('kwList').innerHTML = rows.join('');
+  }
+  let kwReturnFocus = null;
+  function openOverview() {
+    renderOverview();
+    kwReturnFocus = document.activeElement;
+    $('kwOverlay').hidden = false;
+    document.body.style.overflow = 'hidden';
+    $('kwClose').focus();
+  }
+  function closeOverview() {
+    $('kwOverlay').hidden = true;
+    document.body.style.overflow = '';
+    kwReturnFocus?.focus?.();
+  }
+  $('overviewBtn').addEventListener('click', openOverview);
+  $('kwClose').addEventListener('click', closeOverview);
+  $('kwOverlay').addEventListener('click', (e) => {
+    if (e.target === $('kwOverlay')) { closeOverview(); return; }
+    const row = e.target.closest('[data-week]');
+    if (!row) return;
+    const [y, m, d] = row.dataset.week.split('-').map(Number);
+    monday = new Date(y, m - 1, d); openDay = -1; render();
+    closeOverview();
+    $('days').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('kwOverlay').hidden) closeOverview(); });
 
   // Einmaliges Zurücksetzen der Erfolge. Einträge bleiben, gezählt wird nur, was danach passiert.
   const ACH_RESET_ID = 'reset-2026-11-06';
