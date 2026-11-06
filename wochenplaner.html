@@ -136,10 +136,12 @@
   .quote::before { content: "„"; } .quote::after { content: "“"; }
   .quote:hover { background: color-mix(in srgb, var(--accent) 25%, var(--soft)); }
 
-  /* Pixel-Labrador */
-  .dog { position: fixed; left: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); width: 96px; height: 72px; pointer-events: none; z-index: 20; will-change: transform; }
-  .dog canvas { width: 96px; height: 72px; image-rendering: pixelated; display: block; }
-  .dog.left canvas { transform: scaleX(-1); }
+  /* Hundegarten mit Labrador */
+  .yard { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 4px); height: 72px; pointer-events: none; z-index: 20; }
+  .yard-clip { position: absolute; inset: -12px 0 calc(-4px - env(safe-area-inset-bottom, 0px)); overflow: hidden;
+    background: linear-gradient(to top, var(--bg) 55%, transparent); }
+  .yard canvas { bottom: calc(4px + env(safe-area-inset-bottom, 0px)); }
+  .yard canvas { position: absolute; left: 0; height: 72px; image-rendering: pixelated; display: block; }
   .bubble { position: absolute; bottom: 70px; left: 0; background: var(--card); color: var(--text); border: 2px solid var(--accent);
     border-radius: 12px; padding: 3px 10px; font: 800 .85rem var(--font-body); white-space: nowrap; opacity: 0; transition: opacity .15s, transform .15s; }
   .bubble.show { opacity: 1; transform: translateY(-4px); }
@@ -195,7 +197,7 @@
   <p class="motto">Entscheidend ist die langfristige Gewohnheit, nicht Perfektion.</p>
 </main>
 
-<div class="dog" id="dog" aria-hidden="true"><div class="bubble" id="bubble"></div><canvas id="dogCanvas" width="32" height="24"></canvas></div>
+<div class="yard" id="yard" aria-hidden="true"><div class="yard-clip"><canvas id="yardCanvas" width="130" height="24"></canvas></div><div class="bubble" id="bubble"></div></div>
 
 <script>
 (() => {
@@ -403,78 +405,203 @@
   q.addEventListener('click', nextQuote);
   nextQuote();
 
-  // Pixel-Labrador: 32×24 Pixel, dreifach vergrößert
-  const el = document.getElementById('dog'), cv = document.getElementById('dogCanvas'), bubble = document.getElementById('bubble');
+  // Hundegarten: Hütte, Napf, Ball und Labrador auf einer Pixel-Leinwand (1 Pixel = 3 Bildschirmpunkte)
+  const S = 3;
+  const yard = document.getElementById('yard'), cv = document.getElementById('yardCanvas'), bubble = document.getElementById('bubble');
   const ctx = cv.getContext('2d');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const C = { o: '#5b3d26', b: '#ecc173', l: '#f8e2b0', e: '#c99044', n: '#2a1a12', t: '#f292ad', c: '#f2a9c8', s: 'rgba(60,30,40,.15)' };
-  let x = 24, dir = 1, frame = 0, lastT = 0, acc = 0, happyUntil = 0, hideTimer;
+  const C = {
+    o: '#5b3d26', b: '#ecc173', l: '#f8e2b0', e: '#c99044', n: '#2a1a12', t: '#f292ad', c: '#f2a9c8', s: 'rgba(60,30,40,.15)',
+    w: '#efd2a8', wd: '#d9b07e', r: '#ee9bb7', d: '#3a2a33', hp: '#fde8f1',
+    p: '#f2a9c8', p2: '#f8c9dc', k: '#9a6235', ba: '#a9c8ec', hl: '#ffffff',
+  };
+  const fill = (x, y, w, h, c) => { ctx.fillStyle = C[c]; ctx.fillRect(x, y, w, h); };
+  function outlined(parts) {
+    for (const [x, y, w, h] of parts) { ctx.fillStyle = C.o; ctx.fillRect(x - 1, y - 1, w + 2, h + 2); }
+    for (const [x, y, w, h, c] of parts) fill(x, y, w, h, c);
+  }
 
-  function draw(t) {
-    ctx.clearRect(0, 0, 32, 24);
-    const happy = t < happyUntil, walk = !happy && !reduce, f = frame % 4;
+  let W = 130, houseX = 1, bowlX = 23;
+  let dogX = 40, dir = 1, frame = 0, stepAcc = 0;
+  let mode = 'walk', target = 60, until = 0, kicks = 0, food = 3, nextZzz = 0, lastT = 0;
+  const ball = { x: 90, vx: 0, hop: 0 };
+  const minDog = () => bowlX + 10, maxDog = () => W - 33;
+
+  function resize() {
+    const vw = document.documentElement.clientWidth;
+    W = Math.ceil(vw / S);
+    cv.width = W; cv.height = 24;
+    cv.style.width = (W * S) + 'px';
+    ctx.imageSmoothingEnabled = false;
+    dogX = Math.min(Math.max(dogX, houseX + 2), Math.max(houseX + 2, maxDog()));
+    ball.x = Math.min(Math.max(ball.x, bowlX + 12), W - 7);
+  }
+  addEventListener('resize', resize);
+  resize();
+  ball.x = Math.round(W * 0.7);
+  if (reduce) { mode = 'idle'; dogX = minDog(); dir = -1; }
+
+  // ---------- Zeichnen ----------
+  function drawHouse() {
+    const x0 = houseX, parts = [[x0 + 2, 12, 16, 11, 'w']];
+    for (let r = 0; r < 8; r++) parts.push([x0 + 9 - r, 4 + r, 2 + 2 * r, 1, 'r']);
+    parts.push([x0 + 1, 12, 18, 1, 'r']);
+    ctx.fillStyle = C.s; ctx.fillRect(x0 + 1, 23, 19, 1);
+    outlined(parts);
+    fill(x0 + 2, 15, 5, 1, 'wd'); fill(x0 + 13, 18, 5, 1, 'wd'); fill(x0 + 3, 20, 3, 1, 'wd');
+    fill(x0 + 7, 16, 6, 7, 'd'); fill(x0 + 8, 15, 4, 1, 'd');                    // Türöffnung
+    fill(x0 + 8, 7, 1, 1, 'hp'); fill(x0 + 10, 7, 1, 1, 'hp'); fill(x0 + 8, 8, 3, 1, 'hp'); fill(x0 + 9, 9, 1, 1, 'hp'); // Herz
+    if (mode === 'sleep') {                                                       // schlafender Kopf in der Tür
+      fill(x0 + 8, 18, 4, 4, 'b'); fill(x0 + 8, 18, 1, 3, 'e');
+      fill(x0 + 9, 19, 1, 1, 'n'); fill(x0 + 11, 19, 1, 1, 'n'); fill(x0 + 9, 21, 3, 1, 'l');
+    }
+  }
+  function drawBowl() {
+    const x = bowlX;
+    ctx.fillStyle = C.s; ctx.fillRect(x, 23, 9, 1);
+    outlined([[x + 1, 20, 7, 3, 'p'], [x, 19, 9, 1, 'p2']]);
+    if (food >= 1) fill(x + 2, 18, 2, 1, 'k');
+    if (food >= 2) fill(x + 5, 18, 2, 1, 'k');
+    if (food >= 3) fill(x + 3, 17, 3, 1, 'k');
+  }
+  function drawBall() {
+    const x = Math.round(ball.x), y = 18 - Math.round(ball.hop);
+    ctx.fillStyle = C.s; ctx.fillRect(x, 23, 5, 1);
+    outlined([[x + 1, y, 3, 5, 'ba'], [x, y + 1, 5, 3, 'ba']]);
+    fill(x, y + 2, 5, 1, 'c'); fill(x + 1, y + 1, 1, 1, 'hl');
+  }
+  function drawDog(t) {
+    const pose = mode === 'happy' ? 'happy' : mode === 'eat' ? 'eat' : mode === 'idle' ? 'stand'
+      : (mode === 'play' || mode === 'goPlay') ? 'run' : 'walk';
+    const happy = pose === 'happy', moving = pose === 'walk' || pose === 'run', eat = pose === 'eat';
+    const f = frame % 4;
     const jump = happy && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : 0;
-    const bob = walk && (f === 1 || f === 3) ? -1 : 0;
+    const bob = moving && (f === 1 || f === 3) ? -1 : 0;
     const Y = (v) => v - jump + bob;
-    const fill = (px, py, w, h, c) => { ctx.fillStyle = C[c]; ctx.fillRect(px, py, w, h); };
-
-    ctx.fillStyle = C.s; ctx.fillRect(8, 22, 16 - jump, 1); // Schatten
-
-    const lift = (i) => walk && ((f < 2) === (i % 2 === 0)) ? 1 : 0;
-    const wag = Math.floor(t / (happy ? 70 : 260)) % 2;
+    const hd = eat ? (Math.floor(t / 220) % 2 ? 7 : 8) : 0, hx = eat ? 1 : 0;
+    const H = (v) => Y(v) + hd;
+    ctx.save();
+    if (dir < 0) { ctx.translate(Math.round(dogX) + 32, 0); ctx.scale(-1, 1); } else ctx.translate(Math.round(dogX), 0);
+    ctx.fillStyle = C.s; ctx.fillRect(8, 23, 16 - jump, 1);
+    const lift = (i) => moving && ((f < 2) === (i % 2 === 0)) ? 1 : 0;
+    const wag = Math.floor(t / (happy || pose === 'run' ? 70 : eat ? 180 : 260)) % 2;
     const parts = [];
-    [9, 12, 18, 21].forEach((lx, i) => parts.push([lx, Y(16), 2, 5 - lift(i) + (happy ? 0 : 0), 'b']));
-    if (wag) parts.push([6, Y(8), 2, 3, 'b'], [5, Y(6), 2, 2, 'b']);
-    else parts.push([5, Y(10), 3, 2, 'b'], [3, Y(9), 2, 2, 'b']);
-    parts.push([8, Y(10), 15, 7, 'b'], [20, Y(4), 8, 8, 'b'], [26, Y(8), 5, 4, 'l']);
-    for (const [px, py, w, h] of parts) { ctx.fillStyle = C.o; ctx.fillRect(px - 1, py - 1, w + 2, h + 2); }
-    for (const [px, py, w, h, c] of parts) fill(px, py, w, h, c);
-
-    fill(10, Y(14), 11, 2, 'l');             // Bauch
-    fill(21, Y(5), 3, 6, 'e');               // Schlappohr
-    fill(20, Y(9), 2, 4, 'c');               // rosa Halsband
-    if (happy) { fill(24, Y(7), 1, 1, 'n'); fill(25, Y(6), 1, 1, 'n'); fill(26, Y(7), 1, 1, 'n'); } // ^-Auge
-    else fill(25, Y(6), 1, 2, 'n');
-    fill(30, Y(8), 1, 2, 'n');               // Nase
+    [9, 12, 18, 21].forEach((lx, i) => parts.push([lx, Y(17), 2, 5 - lift(i), 'b']));
+    if (wag) parts.push([6, Y(9), 2, 3, 'b'], [5, Y(7), 2, 2, 'b']);
+    else parts.push([5, Y(11), 3, 2, 'b'], [3, Y(10), 2, 2, 'b']);
+    parts.push([8, Y(11), 15, 7, 'b'], [20 + hx, H(5), 8, 8, 'b'], [26 + hx, H(9), 5, 4, 'l']);
+    outlined(parts);
+    fill(10, Y(15), 11, 2, 'l');                       // Bauch
+    fill(21 + hx, H(6), 3, 6, 'e');                    // Schlappohr
+    fill(20, Y(10), 2, 4, 'c');                        // rosa Halsband
+    if (happy) { fill(24, Y(8), 1, 1, 'n'); fill(25, Y(7), 1, 1, 'n'); fill(26, Y(8), 1, 1, 'n'); }
+    else if (eat) fill(24 + hx, H(8), 2, 1, 'n');
+    else fill(25, Y(7), 1, 2, 'n');
+    fill(30 + hx, H(9), 1, 2, 'n');                    // Nase
     const bark = happy && Math.floor(t / 140) % 2 === 0;
-    if (bark) { fill(27, Y(11), 4, 1, 'n'); fill(27, Y(12), 2, 2, 't'); } // Maul auf + Zunge
-    else if (happy) fill(27, Y(12), 2, 1, 't');
+    if (bark) { fill(27, Y(12), 4, 1, 'n'); fill(27, Y(13), 2, 2, 't'); }
+    else if (happy || pose === 'run') fill(27 + hx, H(13), 2, 1, 't');
+    ctx.restore();
+  }
+
+  // ---------- Sprechblase ----------
+  let hideTimer;
+  function say(text, centerArt, ms = 1700) {
+    bubble.textContent = text;
+    const bw = bubble.offsetWidth, vw = document.documentElement.clientWidth, center = centerArt * S;
+    const left = Math.min(Math.max(8, center - bw / 2), vw - bw - 8);
+    bubble.style.left = left + 'px';
+    bubble.style.setProperty('--arrow', (center - left) + 'px');
+    bubble.classList.add('show');
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => bubble.classList.remove('show'), ms);
+  }
+
+  // ---------- Verhalten ----------
+  const rand = (a, b) => a + Math.random() * (b - a);
+  function decide(t) {
+    if (reduce) { mode = 'idle'; until = t + 1e9; return; }
+    const r = Math.random();
+    if (r < 0.38) { mode = 'walk'; target = rand(minDog(), maxDog()); }
+    else if (r < 0.55) { mode = 'idle'; until = t + rand(1500, 3200); }
+    else if (r < 0.72 && food > 0) { mode = 'goEat'; target = bowlX + 2; }
+    else if (r < 0.9) { mode = 'goPlay'; kicks = 2 + Math.floor(Math.random() * 2); }
+    else { mode = 'goSleep'; target = houseX + 3; }
+  }
+  const ballApproach = () => ball.x > dogX + 16 ? ball.x - 30 : ball.x + 3;
+  function moveTo(goal, speed, dt) {
+    const dx = goal - dogX;
+    if (Math.abs(dx) < 0.6) { dogX = goal; return true; }
+    dir = Math.sign(dx);
+    const step = Math.min(Math.abs(dx), speed * dt);
+    dogX += dir * step;
+    stepAcc += step; if (stepAcc > 1.6) { stepAcc = 0; frame++; }
+    return false;
+  }
+
+  function update(t, dt) {
+    // Ball rollt aus
+    if (Math.abs(ball.vx) > 0.5) {
+      ball.x += ball.vx * dt;
+      ball.vx *= Math.max(0, 1 - 1.4 * dt);
+      ball.hop = Math.min(3, Math.abs(ball.vx) / 14) * Math.abs(Math.sin(t / 90));
+      if (ball.x < bowlX + 12) { ball.x = bowlX + 12; ball.vx = Math.abs(ball.vx); }
+      if (ball.x > W - 7) { ball.x = W - 7; ball.vx = -Math.abs(ball.vx); }
+    } else { ball.vx = 0; ball.hop = 0; }
+
+    switch (mode) {
+      case 'walk': if (moveTo(Math.min(Math.max(target, houseX + 2), maxDog()), 15, dt)) decide(t); break;
+      case 'idle': if (t > until) decide(t); break;
+      case 'goEat': if (moveTo(bowlX + 2, 15, dt)) { dir = -1; mode = 'eat'; until = t + 3600; say('Mampf mampf!', bowlX + 4, 1400); } break;
+      case 'eat': if (t > until) { food = Math.max(0, food - 1); mode = 'walk'; target = rand(minDog(), maxDog()); } break;
+      case 'goSleep': if (moveTo(houseX + 3, 15, dt)) { mode = 'sleep'; until = t + 7000; nextZzz = t; } break;
+      case 'sleep':
+        if (t > nextZzz) { say('Zzz…', houseX + 10, 1500); nextZzz = t + 2600; }
+        if (t > until) { food = 3; dogX = houseX + 3; dir = 1; mode = 'walk'; target = rand(minDog(), maxDog()); }
+        break;
+      case 'goPlay': if (moveTo(Math.min(Math.max(ballApproach(), houseX + 2), maxDog()), 26, dt) || Math.abs(ballApproach() - dogX) < 1.5) kick(t); break;
+      case 'play':
+        if (Math.abs(ball.vx) < 4) { if (kicks > 0) mode = 'goPlay'; else { mode = 'idle'; until = t + 1800; say('Wuff!', dogX + 16, 1200); } }
+        else moveTo(Math.min(Math.max(ballApproach(), houseX + 2), maxDog()), 26, dt);
+        break;
+      case 'happy': if (t > until) { mode = 'walk'; target = rand(minDog(), maxDog()); } break;
+    }
+  }
+  function kick() {
+    kicks--;
+    // Richtung: vom Hund weg; an der Wand umdrehen
+    let d = ball.x > dogX + 16 ? 1 : -1;
+    if (d > 0 && ball.x > W - 25) d = -1;
+    if (d < 0 && ball.x < bowlX + 30) d = 1;
+    ball.vx = d * rand(45, 70);
+    mode = 'play';
   }
 
   function loop(t) {
-    const dt = Math.min(50, t - (lastT || t)); lastT = t;
-    const max = Math.max(8, document.documentElement.clientWidth - 96 - 8);
-    if (reduce) { x = max; dir = -1; }
-    else if (t >= happyUntil) {
-      x += dir * dt * 0.045;
-      if (x > max) { x = max; dir = -1; }
-      if (x < 8) { x = 8; dir = 1; }
-      acc += dt; if (acc > 140) { acc = 0; frame++; }
-    }
-    el.style.transform = `translateX(${Math.round(x)}px)`;
-    el.classList.toggle('left', dir < 0);
-    draw(t);
+    const dt = Math.min(0.05, (t - (lastT || t)) / 1000); lastT = t;
+    if (!reduce) update(t, dt);
+    else if (mode === 'happy' && t > until) mode = 'idle';
+    ctx.clearRect(0, 0, W, 24);
+    drawHouse();
+    drawBowl();
+    if (mode !== 'sleep') drawDog(t);
+    drawBall();
     requestAnimationFrame(loop);
   }
 
+  // ---------- Freude, Bellen, Ton ----------
   const BARKS = ['Wuff!', 'Wuff wuff!', 'Wuff! 🐾', 'Wuff? Wuff!'];
   const PRAISE = ['Wuff! Super gemacht!', 'Wuff! Stolz auf dich!', 'Wuff wuff! 🎉', 'Wuff! Weiter so, Jana!', 'Wuff! Geschafft! 🐾'];
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   function happy(msg) {
-    happyUntil = performance.now() + 1500;
+    const now = performance.now();
+    if (mode === 'sleep') { dogX = houseX + 3; dir = 1; }
+    mode = 'happy'; until = now + 1500;
     const text = msg || pick(PRAISE);
-    bubble.textContent = text;
+    say(text, dogX + 16);
     bark(Math.min(2, Math.max(1, (text.match(/wuff/gi) || []).length)));
-    // Sprechblase im Bildschirm halten, Pfeil zeigt auf den Hund
-    const bw = bubble.offsetWidth, vw = document.documentElement.clientWidth, center = x + 48;
-    const left = Math.min(Math.max(8, center - bw / 2), vw - bw - 8);
-    bubble.style.left = (left - x) + 'px';
-    bubble.style.setProperty('--arrow', (center - left) + 'px');
-    bubble.classList.add('show');
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => bubble.classList.remove('show'), 1700);
   }
-  // Bellen: kurzer, synthetischer "Wuff"-Laut über Web Audio
+
   const SOUND_KEY = 'janas-woche.sound';
   let soundOn = true, actx = null;
   try { soundOn = localStorage.getItem(SOUND_KEY) !== 'off'; } catch {}
@@ -498,7 +625,6 @@
     g.gain.setValueAtTime(0.0001, t0);
     g.gain.exponentialRampToValueAtTime(0.6, t0 + 0.015);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.19);
-    // etwas Rauschen für den Atem im Bellen
     const len = Math.floor(actx.sampleRate * 0.12), buf = actx.createBuffer(1, len, actx.sampleRate), d = buf.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
     const n = actx.createBufferSource(); n.buffer = buf;
@@ -521,9 +647,10 @@
 
   document.addEventListener('click', (e) => {
     if (e.dogHandled) return;
-    const r = el.getBoundingClientRect();
-    const onDog = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-    if (onDog || e.target.closest('button')) happy(pick(BARKS));
+    const r = yard.getBoundingClientRect();
+    const onDog = mode !== 'sleep' && e.clientY >= r.top && e.clientY <= r.bottom && e.clientX >= dogX * S && e.clientX <= (dogX + 32) * S;
+    const onHouse = e.clientY >= r.top && e.clientY <= r.bottom && e.clientX >= houseX * S && e.clientX <= (houseX + 20) * S;
+    if (onDog || onHouse || e.target.closest('button')) happy(pick(BARKS));
   });
 
   requestAnimationFrame(loop);
