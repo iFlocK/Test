@@ -169,14 +169,6 @@
 
   <section class="days" id="days"></section>
 
-  <section class="card todos" id="todos">
-    <div class="todos-head"><h2>Langfristige To-dos</h2><span class="muted" id="todoCount"></span></div>
-    <p class="hint">Für alles, was irgendwann erledigt werden soll. Mit ☆ markierst du Wichtiges, das rutscht nach oben.</p>
-    <form id="todoForm" class="todo-add"><input name="text" id="todoInput" placeholder="Neues To-do, z. B. Zahnarzttermin ausmachen" aria-label="Neues To-do" autocomplete="off"><button class="pill primary" type="submit">Hinzufügen</button></form>
-    <ul class="todo-list" id="todoOpen"></ul>
-    <details id="todoDoneWrap" hidden><summary>Erledigt (<span id="todoDoneCount">0</span>)</summary><ul class="todo-list" id="todoDone"></ul></details>
-  </section>
-
   <div class="two">
     <section class="card manage">
       <h2>Meine Gewohnheiten</h2>
@@ -193,6 +185,14 @@
       <textarea id="note" placeholder="Was lief gut? Worauf achte ich nächste Woche?"></textarea>
     </section>
   </div>
+
+  <section class="card todos" id="todos">
+    <div class="todos-head"><h2>Langfristige To-dos</h2><span class="muted" id="todoCount"></span></div>
+    <p class="hint">Für alles, was irgendwann erledigt werden soll. Mit ☆ markierst du Wichtiges, das rutscht nach oben.</p>
+    <form id="todoForm" class="todo-add"><input name="text" id="todoInput" placeholder="Neues To-do, z. B. Zahnarzttermin ausmachen" aria-label="Neues To-do" autocomplete="off"><button class="pill primary" type="submit">Hinzufügen</button></form>
+    <ul class="todo-list" id="todoOpen"></ul>
+    <details id="todoDoneWrap" hidden><summary>Erledigt (<span id="todoDoneCount">0</span>)</summary><ul class="todo-list" id="todoDone"></ul></details>
+  </section>
 
   <p class="motto">Entscheidend ist die langfristige Gewohnheit, nicht Perfektion.</p>
 </main>
