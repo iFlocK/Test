@@ -127,7 +127,10 @@
   .today-wx { font-size: .85rem; }
   .today-wx strong { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; margin-right: 2px; }
   .today-moon { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: .8rem; }
-  .today-moon canvas { width: 24px; height: 24px; image-rendering: pixelated; flex: none; }
+  .today-moon canvas { width: 24px; height: 24px; image-rendering: pixelated; flex: none; cursor: pointer; }
+  .poke { animation: poke .3s ease-out; }
+  @keyframes poke { 50% { transform: scale(1.35) rotate(-12deg); } }
+  @media (prefers-reduced-motion: reduce) { .poke { animation: none; } }
   .loc-btn { justify-self: start; border: 1px dashed var(--accent); background: none; color: var(--accent-ink); border-radius: 999px;
     padding: 3px 12px; font-weight: 800; font-size: .82rem; margin-top: 4px; }
 
@@ -677,6 +680,7 @@
     ['nye', '🎆', 'Party-Pfote', 'An Silvester oder Neujahr vorbeigeschaut', () => !!(state.flags.nye || state.flags.newyear)],
     ['anniv', '💞', 'Jahrestag', 'Am Jahrestag vorbeigeschaut', () => !!state.flags.anniversary],
     ['wolf', '🐺', 'Werwolf gesichtet', 'Den Hund bei Vollmond als Wolf erlebt', () => !!state.flags.wolf],
+    ['moonclick', '🌝', 'Mondsüchtig', 'Ein Geheimnis entdeckt', () => !!state.flags.moonclick],
   ];
   function runLength(dates) {
     let best = 0, run = 0, prev = null;
@@ -748,6 +752,7 @@
     for (const [id, icon, name, , test] of ACH) if (!state.ach[id] && test(s)) { state.ach[id] = todayKey(); fresh.push([icon, name]); }
     if (fresh.length) { persist(); renderAch(); toast(fresh); }
   }
+  addEventListener('jana:forcewolf', () => { if (!state.flags.moonclick) { state.flags.moonclick = true; save(); } });
   addEventListener('jana:wolf', () => { if (!state.flags.wolf) { state.flags.wolf = true; save(); } });
   addEventListener('jana:dogpat', () => { state.flags.dogPats = (state.flags.dogPats || 0) + 1; save(); });
 
@@ -1101,7 +1106,9 @@
   const spd = () => (hot() || night() ? 10 : morning() ? 18 : 15);
   let shelterSaid = false, greetedMorning = false;
   let wolf = false, howlUntil = 0, nextHowl = 0;
-  const wolfTime = () => window.janaMoon?.().name === 'Vollmond' && night();
+  let forcedWolfUntil = 0, forcedMsg = false;
+  const wolfTime = () => performance.now() < forcedWolfUntil || (window.janaMoon?.().name === 'Vollmond' && night());
+  addEventListener('jana:forcewolf', () => { forcedWolfUntil = performance.now() + 45000; forcedMsg = true; });
   function mood() {
     const sp = window.janaSpecial;
     if (sp?.bark && Math.random() < 0.5) return sp.bark;
@@ -1174,7 +1181,8 @@
     if (wantWolf !== wolf && mode !== 'transform' && mode !== 'happy') {
       if (mode === 'sleep') { dogX = houseX + 3; dir = 1; }
       mode = 'transform'; until = t + 1800;
-      say(wantWolf ? 'Oh nein… Vollmond! 🌕' : 'Wuff? Was war denn los?', dogX + 16, 1800);
+      say(wantWolf ? (forcedMsg ? 'Huch… was passiert mit mir?! 🌕' : 'Oh nein… Vollmond! 🌕') : 'Wuff? Was war denn los?', dogX + 16, 1800);
+      forcedMsg = false;
     }
     // Bei Regen oder spät nachts sofort in die Hütte (der Wolf bleibt draußen)
     if ((wet() || lateNight()) && !wolf && !['goSleep', 'sleep', 'happy', 'transform'].includes(mode)) {
@@ -1249,6 +1257,7 @@
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   function happy(msg) {
     const now = performance.now();
+    if (mode === 'transform') { say(msg || pick(PRAISE), dogX + 16); return; }   // Verwandlung nicht unterbrechen
     if (mode === 'sleep') { dogX = houseX + 3; dir = 1; }
     mode = 'happy'; until = now + 1500;
     const text = msg || pick(PRAISE);
@@ -1605,6 +1614,23 @@
     drawSkySpecial(t, dark);
     for (let i = birds.length - 1; i >= 0; i--) if (birds[i].x < -20 || birds[i].x > SW + 20) birds.splice(i, 1);
   }
+
+  // Easter Egg: den Mond dreimal schnell antippen → Werwolf
+  let moonTaps = [];
+  function moonTap() {
+    const now = Date.now();
+    moonTaps = moonTaps.filter((x) => now - x < 1500);
+    moonTaps.push(now);
+    mCanvas.classList.remove('poke'); void mCanvas.offsetWidth; mCanvas.classList.add('poke');
+    if (moonTaps.length >= 3) { moonTaps = []; dispatchEvent(new Event('jana:forcewolf')); }
+  }
+  mCanvas.addEventListener('click', moonTap);
+  document.addEventListener('click', (e) => {
+    // Mond am Himmel: nur abends sichtbar (klar oder teilweise bewölkt)
+    if (state.isDay || !['clear', 'partly'].includes(state.kind)) return;
+    const r = sky.getBoundingClientRect(), x0 = r.left + (SW - 26) * 3;
+    if (e.clientX >= x0 && e.clientY >= r.top && e.clientY <= r.bottom) moonTap();
+  });
 
   // Himmel an besonderen Tagen: Konfetti, Herzen, Feuerwerk
   const bursts = [];
