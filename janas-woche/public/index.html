@@ -128,6 +128,36 @@
   .loc-btn { justify-self: start; border: 1px dashed var(--accent); background: none; color: var(--accent-ink); border-radius: 999px;
     padding: 3px 12px; font-weight: 800; font-size: .82rem; margin-top: 4px; }
 
+  /* Besondere Tage, Wasser, Erfolge */
+  .special { justify-self: start; background: var(--soft); border-radius: 12px; padding: 4px 12px; font-weight: 700; font-size: .92rem; margin: 2px 0; }
+  .water { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; }
+  #bottle { width: 64px; height: 120px; image-rendering: pixelated; display: block; }
+  .water-main { display: grid; gap: 8px; min-width: 0; }
+  .water-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .water h2 { font-size: 1.15rem; }
+  .water-amount { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .water-amount small { font-family: var(--font-body); font-size: .88rem; color: var(--muted); font-weight: 700; }
+  .water-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill.ghost { background: none; color: var(--muted); }
+  .pill:disabled { opacity: .45; cursor: default; }
+  .water-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-items: end; height: 54px; max-width: 280px; }
+  .ww { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; height: 100%; font-size: .72rem; color: var(--muted); }
+  .ww .b { width: 100%; max-width: 22px; border-radius: 5px 5px 3px 3px; background: #9cc6f2; min-height: 3px; }
+  .ww.goal .b { background: #5f9be0; }
+  .ww.today { color: var(--accent-ink); font-weight: 800; }
+  .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 8px; margin-top: 12px; }
+  .ach { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; padding: 8px; border-radius: 14px; background: var(--soft); border: 1px solid transparent; }
+  .ach .ic { font-size: 1.4rem; width: 1.8rem; text-align: center; }
+  .ach b { display: block; font-size: .85rem; line-height: 1.25; }
+  .ach span { display: block; font-size: .74rem; color: var(--muted); line-height: 1.3; }
+  .ach.locked { background: none; border-color: var(--border); border-style: dashed; }
+  .ach.locked .ic { filter: grayscale(1); opacity: .35; }
+  .ach.locked b { color: var(--muted); }
+  .toast { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 14px); transform: translateX(-50%); z-index: 30; background: var(--card);
+    border: 2px solid var(--accent); border-radius: 16px; padding: 10px 16px; box-shadow: 0 6px 24px rgba(120, 80, 110, .2); font-weight: 800;
+    width: max-content; max-width: calc(100% - 32px); text-align: center; }
+  .toast small { display: block; font-weight: 600; color: var(--muted); }
+
   /* Langfristige To-dos */
   .todos-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
   .todos h2 { font-size: 1.15rem; }
@@ -197,10 +227,25 @@
   <section class="card today" id="todayCard" aria-live="polite">
     <div class="today-text">
       <h2 id="greet">Hallo Jana!</h2>
+      <div class="special" id="specialLine" hidden></div>
       <div class="today-date" id="dateLine"></div>
       <div class="today-wx" id="wxLine">Wetter wird geladen…</div>
       <div class="today-moon"><canvas id="moonIcon" width="16" height="16" aria-hidden="true"></canvas><span id="moonLine"></span></div>
       <button class="loc-btn" id="locBtn" type="button" hidden>📍 Genauen Standort verwenden</button>
+    </div>
+  </section>
+
+  <section class="card water" id="waterCard">
+    <canvas id="bottle" width="16" height="30" role="img" aria-label="Wasserflasche"></canvas>
+    <div class="water-main">
+      <div class="water-head"><h2>Wasser heute</h2><span class="muted">Ziel 2,5 l</span></div>
+      <div class="water-amount" id="waterAmount">0 l</div>
+      <div class="water-btns">
+        <button class="pill primary" id="addGlass" type="button">🥛 + Glas · 250 ml</button>
+        <button class="pill primary" id="addHalf" type="button">💧 + ½ Liter</button>
+        <button class="pill ghost" id="undoWater" type="button">↶ Rückgängig</button>
+      </div>
+      <div class="water-week" id="waterWeek" aria-label="Wasser diese Woche"></div>
     </div>
   </section>
 
@@ -231,9 +276,15 @@
     <details id="todoDoneWrap" hidden><summary>Erledigt (<span id="todoDoneCount">0</span>)</summary><ul class="todo-list" id="todoDone"></ul></details>
   </section>
 
+  <section class="card achievements" id="achCard">
+    <div class="todos-head"><h2>Erfolge</h2><span class="muted" id="achCount"></span></div>
+    <div class="ach-grid" id="achGrid"></div>
+  </section>
+
   <p class="motto">Entscheidend ist die langfristige Gewohnheit, nicht Perfektion.</p>
 </main>
 
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <div class="sky" id="sky" aria-hidden="true"><canvas id="skyCanvas" width="130" height="24"></canvas></div>
 <div class="yard" id="yard" aria-hidden="true"><div class="yard-clip"><canvas id="yardCanvas" width="130" height="24"></canvas></div><div class="bubble" id="bubble"></div></div>
 
@@ -258,7 +309,8 @@
 
   let state = { tags: DEFAULT_TAGS, weeks: {} };
   try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.tags) state = s; } catch {}
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
+  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
+  const save = () => { persist(); checkAchievements(); };
 
   const startOfWeek = (d) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
   const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
@@ -319,7 +371,9 @@
       save(); render(); return;
     }
     if (b.dataset.toggle) {
-      const it = w.days[day].find(i => i.id === b.dataset.toggle); it.done = !it.done; save(); render();
+      const it = w.days[day].find(i => i.id === b.dataset.toggle); it.done = !it.done;
+      if (it.done) { const h = new Date().getHours(); if (h >= 4 && h < 8) state.flags.early = true; if (h >= 22 || h < 4) state.flags.owl = true; }
+      save(); render();
       if (it.done) { e.dogHandled = true; window.janaDog?.happy(); }
       return;
     }
@@ -412,6 +466,215 @@
     save(); renderTodos();
   });
   renderTodos();
+
+  // ---------- Besondere Tage ----------
+  function easterSunday(y) {
+    const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4;
+    const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31), day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(y, month - 1, day);
+  }
+  const BIRTH = { month: 8, day: 25, year: 2000 };
+  const daysWord = (n) => `${n} ${n === 1 ? 'Tag' : 'Tage'}`;
+  function getSpecial(now = new Date()) {
+    const y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
+    const today = new Date(y, m - 1, d);
+    if (m === BIRTH.month && d === BIRTH.day) return { id: 'birthday', greet: `Alles Gute zum ${y - BIRTH.year}. Geburtstag, Jana! 🎂`,
+      line: 'Heute ist dein Tag! Der Hund hat extra einen Kuchen gebacken.', hat: 'party', decor: 'cake', sky: 'confetti', bark: 'Happy Birthday, Jana! 🎉' };
+    if (m === 12 && d >= 24 && d <= 26) return { id: 'christmas', greet: 'Frohe Weihnachten, Jana! 🎄',
+      line: d === 24 ? 'Heute ist Heiligabend. ✨' : `${d - 24}. Weihnachtsfeiertag – lass es dir gut gehen.`, hat: 'santa', decor: 'tree', lights: true, bark: 'Wuff! Frohe Weihnachten! 🎄' };
+    if (m === 12 && d === 31) return { id: 'nye', greet: 'Guten Rutsch, Jana! 🎆', line: `Morgen beginnt ${y + 1}. Heute Abend gibt es Feuerwerk!`, hat: 'party', sky: 'fireworks', bark: 'Wuff! Guten Rutsch! 🎆' };
+    if (m === 1 && d === 1) return { id: 'newyear', greet: `Frohes neues Jahr ${y}, Jana! 🥂`, line: 'Neues Jahr, neue Häkchen.', hat: 'party', sky: 'fireworks', bark: 'Wuff! Frohes neues Jahr! 🎉' };
+    const diff = Math.round((today - easterSunday(y)) / 864e5);
+    if (diff >= -2 && diff <= 1) return { id: 'easter', greet: 'Frohe Ostern, Jana! 🐣',
+      line: ['Karfreitag', 'Karsamstag', 'Ostersonntag – der Hund hat Eier im Garten versteckt!', 'Ostermontag'][diff + 2], hat: 'bunny', decor: 'eggs', bark: 'Wuff! Frohe Ostern! 🐰' };
+    if (m === 2 && d === 14) return { id: 'valentine', greet: 'Alles Liebe zum Valentinstag, Jana! 💕', line: 'Du bist toll, so wie du bist.', sky: 'hearts', bark: 'Wuff! Hab dich lieb! 💕' };
+    if (m === 10 && d === 31) return { id: 'halloween', greet: 'Happy Halloween, Jana! 🎃', line: 'Süßes oder Saures! Heute Abend fliegen Fledermäuse.', decor: 'pumpkin', sky: 'bats', bark: 'Wuff! Buh! 🎃' };
+    if (m === 12 && d === 6) return { id: 'nikolaus', greet: 'Schönen Nikolaustag, Jana! 🎅', line: 'Hast du deine Stiefel geputzt?', hat: 'santa', lights: true, bark: 'Wuff! Der Nikolaus war da! 🍫' };
+    if (m === 12 && d < 24) return { id: 'advent', line: `Noch ${daysWord(24 - d)} bis Heiligabend 🎄`, lights: true };
+    if (m === 3 && d === 20) return { id: 'spring', line: 'Frühlingsanfang 🌷 Die Tage werden wieder länger!' };
+    if (m === 6 && d === 21) return { id: 'summer', line: 'Sommeranfang ☀️ Heute ist der längste Tag des Jahres.' };
+    const bday = new Date(y, BIRTH.month - 1, BIRTH.day), toB = Math.round((bday - today) / 864e5);
+    if (toB > 0 && toB <= 7) return { id: 'bdaysoon', line: `Noch ${daysWord(toB)} bis zu deinem Geburtstag 🎂` };
+    return null;
+  }
+  window.janaSpecial = getSpecial();
+
+  // ---------- Wasser ----------
+  state.water ||= {};
+  state.ach ||= {};
+  state.flags ||= {};
+  const GOAL = 2500;
+  const todayKey = () => key(new Date());
+  const waterOf = (k) => (state.water[k] || []).reduce((a, b) => a + b, 0);
+  const fmtL = (ml) => (ml / 1000).toLocaleString('de-DE', { maximumFractionDigits: 2 }) + ' l';
+  const pickOne = (a) => a[Math.floor(Math.random() * a.length)];
+  let bottleLevel = 0;   // angezeigte Füllhöhe (läuft sanft zum Ziel)
+
+  function renderWater() {
+    const ml = waterOf(todayKey());
+    $('waterAmount').innerHTML = `${fmtL(ml)} <small>von 2,5 l${ml >= GOAL ? ' · Ziel erreicht! 🎉' : ''}</small>`;
+    $('bottle').setAttribute('aria-label', `Wasserflasche: ${fmtL(ml)} von 2,5 l getrunken`);
+    $('undoWater').disabled = !(state.water[todayKey()] || []).length;
+    const mon = startOfWeek(new Date()), tk = todayKey();
+    $('waterWeek').innerHTML = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((n, i) => {
+      const k = key(addDays(mon, i)), v = waterOf(k);
+      return `<div class="ww ${v >= GOAL ? 'goal' : ''} ${k === tk ? 'today' : ''}" title="${n}: ${fmtL(v)}"><div class="b" style="height:${Math.round(Math.min(1, v / GOAL) * 36)}px"></div>${n}</div>`;
+    }).join('');
+  }
+  function addWater(ml, e) {
+    e.dogHandled = true;
+    const k = todayKey(), before = waterOf(k);
+    (state.water[k] ||= []).push(ml);
+    save(); renderWater();
+    if (before < GOAL && before + ml >= GOAL) window.janaDog?.happy('Wuff! 2,5 Liter geschafft! 💧🎉');
+    else window.janaDog?.happy(pickOne(['Prost! 💧', 'Gluck gluck! 💧', 'Wuff! Schön trinken! 💧']));
+  }
+  $('addGlass').addEventListener('click', (e) => addWater(250, e));
+  $('addHalf').addEventListener('click', (e) => addWater(500, e));
+  $('undoWater').addEventListener('click', (e) => {
+    e.dogHandled = true;
+    const list = state.water[todayKey()] || [];
+    if (!list.length) return;
+    list.pop(); persist(); renderWater();
+  });
+
+  // Pixel-Flasche: 16×30 Pixel, Wasser mit Wellen und Bläschen
+  const bottle = $('bottle'), bg = bottle.getContext('2d');
+  const BC = { o: '#4a3f55', cap: '#f2a9c8', capHi: '#f8c9dc', glass: '#eaf4fd', water: '#7fb8f0', waterDark: '#5f9be0', top: '#b7dcff', bubble: '#e3f2ff', tick: '#a79cbd', shine: '#ffffff' };
+  const bfill = (x, y, w, h, c) => { bg.fillStyle = BC[c]; bg.fillRect(x, y, w, h); };
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function drawBottle(t) {
+    bg.clearRect(0, 0, 16, 30);
+    // Umriss
+    bfill(5, 0, 6, 4, 'o'); bfill(5, 3, 6, 4, 'o'); bfill(3, 6, 10, 2, 'o'); bfill(2, 7, 12, 22, 'o'); bfill(3, 29, 10, 1, 'o');
+    // Deckel und Glas
+    bfill(6, 1, 4, 2, 'cap'); bfill(6, 1, 2, 1, 'capHi');
+    bfill(6, 3, 4, 3, 'glass'); bfill(4, 6, 8, 1, 'glass'); bfill(3, 7, 10, 22, 'glass');
+    // Wasser: Innenraum y 8..28 (21 Reihen)
+    const target = Math.min(1, waterOf(todayKey()) / GOAL);
+    bottleLevel += (target - bottleLevel) * (reduceMotion ? 1 : 0.15);
+    const rows = Math.round(bottleLevel * 21);
+    if (rows > 0) {
+      const top = 29 - rows;
+      bfill(3, top, 10, rows, 'water');
+      bfill(3, 27, 10, 2, 'waterDark');
+      for (let x = 3; x < 13; x++) {                       // Wellen an der Oberfläche
+        const up = reduceMotion ? 0 : Math.round(Math.sin(t / 260 + x * 0.9));
+        if (up < 0) { bfill(x, top, 1, 1, 'glass'); } else bfill(x, top, 1, 1, 'top');
+      }
+      if (!reduceMotion && rows > 3) for (let i = 0; i < 3; i++) {   // Bläschen
+        const y = 28 - Math.floor((t / 140 + i * 6) % (rows - 2));
+        bfill(4 + ((i * 3 + Math.floor(t / 2000)) % 7), y, 1, 1, 'bubble');
+      }
+    }
+    for (let k = 1; k < 5; k++) bfill(12, 29 - Math.round(k * 21 / 5), 1, 1, 'tick');   // Markierung alle 0,5 l
+    bfill(4, 9, 1, 8, 'shine');
+  }
+  let lastBottle = 0;
+  (function bottleLoop(t) {
+    if (t - lastBottle > 90) { lastBottle = t; drawBottle(t); }
+    requestAnimationFrame(bottleLoop);
+  })(0);
+
+  // ---------- Erfolge ----------
+  const ACH = [
+    ['first', '✅', 'Erster Haken', 'Die erste Gewohnheit abgehakt', (s) => s.done >= 1],
+    ['five', '🌱', 'Kleiner Anfang', '5 Gewohnheiten abgehakt', (s) => s.done >= 5],
+    ['quarter', '🌿', 'Am Wachsen', '25 Gewohnheiten abgehakt', (s) => s.done >= 25],
+    ['hundred', '🌳', 'Gewohnheits-Profi', '100 Gewohnheiten abgehakt', (s) => s.done >= 100],
+    ['streak3', '🔥', 'Drei am Stück', '3 Tage hintereinander etwas abgehakt', (s) => s.best >= 3],
+    ['streak7', '⭐', 'Eine ganze Woche', '7 Tage hintereinander etwas abgehakt', (s) => s.best >= 7],
+    ['streak30', '🏆', 'Monats-Heldin', '30 Tage hintereinander etwas abgehakt', (s) => s.best >= 30],
+    ['fullweek', '📅', 'Wochen-Runde', 'An allen 7 Tagen einer Woche etwas abgehakt', (s) => s.fullWeek],
+    ['perfect', '💯', 'Perfekter Tag', 'Mindestens 3 Gewohnheiten an einem Tag, alle erledigt', (s) => s.perfectDay],
+    ['sport', '💪', 'Sportskanone', '10× Bewegung abgehakt', (s) => s.bew >= 10],
+    ['books', '📚', 'Bücherwurm', '10× Lesen abgehakt', (s) => s.lesen >= 10],
+    ['sip', '💧', 'Erster Schluck', 'Das erste Glas Wasser eingetragen', (s) => s.anyWater],
+    ['water', '🐳', 'Wassernixe', '2,5 Liter an einem Tag getrunken', (s) => s.waterGoal >= 1],
+    ['water7', '🌊', 'Wasser-Woche', '7 Tage hintereinander 2,5 Liter', (s) => s.wBest >= 7],
+    ['todo1', '📝', 'Erledigt!', 'Das erste langfristige To-do abgehakt', (s) => s.todosDone >= 1],
+    ['todo10', '🎯', 'Macherin', '10 langfristige To-dos erledigt', (s) => s.todosDone >= 10],
+    ['custom', '✨', 'Ganz meins', 'Eine eigene Gewohnheit angelegt', (s) => s.custom],
+    ['early', '🐦', 'Früher Vogel', 'Vor 8 Uhr morgens etwas abgehakt', () => !!state.flags.early],
+    ['owl', '🦉', 'Nachteule', 'Nach 22 Uhr etwas abgehakt', () => !!state.flags.owl],
+    ['dog', '🐶', 'Hundeflüsterin', 'Den Labrador 20-mal angetippt', () => (state.flags.dogPats || 0) >= 20],
+    ['birthday', '🎂', 'Geburtstagskind', 'Am Geburtstag vorbeigeschaut', () => !!state.flags.birthday],
+    ['xmas', '🎄', 'Weihnachtself', 'An Weihnachten vorbeigeschaut', () => !!state.flags.christmas],
+    ['easter', '🐣', 'Osterhase', 'An Ostern vorbeigeschaut', () => !!state.flags.easter],
+    ['nye', '🎆', 'Party-Pfote', 'An Silvester oder Neujahr vorbeigeschaut', () => !!(state.flags.nye || state.flags.newyear)],
+  ];
+  function runLength(dates) {
+    let best = 0, run = 0, prev = null;
+    for (const ds of [...dates].sort()) {
+      const cur = new Date(ds + 'T12:00:00');
+      run = prev && (cur - prev) / 864e5 < 1.5 ? run + 1 : 1;
+      best = Math.max(best, run); prev = cur;
+    }
+    return best;
+  }
+  function stats() {
+    let done = 0, perfectDay = false, fullWeek = false;
+    const tagDone = {}, doneDates = new Set();
+    for (const [mk, w] of Object.entries(state.weeks)) {
+      const [yy, mm, dd] = mk.split('-').map(Number);
+      w.days.forEach((items, i) => {
+        const dn = items.filter((it) => it.done);
+        done += dn.length;
+        if (dn.length) doneDates.add(key(new Date(yy, mm - 1, dd + i)));
+        for (const it of dn) if (it.tag) tagDone[it.tag] = (tagDone[it.tag] || 0) + 1;
+        if (items.length >= 3 && dn.length === items.length) perfectDay = true;
+      });
+      if (w.days.every((items) => items.some((it) => it.done))) fullWeek = true;
+    }
+    const areaDone = (area) => Object.entries(tagDone).reduce((a, [id, n]) => a + (state.tags.find((t) => t.id === id)?.area === area ? n : 0), 0);
+    const waterDays = Object.keys(state.water).filter((k) => waterOf(k) >= GOAL);
+    return {
+      done, perfectDay, fullWeek, best: runLength(doneDates), bew: areaDone('bew'), lesen: tagDone.lesen || 0,
+      anyWater: Object.values(state.water).some((a) => a.length), waterGoal: waterDays.length, wBest: runLength(waterDays),
+      todosDone: (state.todos || []).filter((t) => t.done).length, custom: state.tags.some((t) => t.id.startsWith('t')),
+    };
+  }
+  function renderAch() {
+    const n = ACH.filter(([id]) => state.ach[id]).length;
+    $('achCount').textContent = `${n} von ${ACH.length} freigeschaltet`;
+    $('achGrid').innerHTML = ACH.map(([id, icon, name, desc]) => {
+      const got = state.ach[id];
+      const when = got ? new Date(got + 'T12:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      return `<div class="ach ${got ? '' : 'locked'}"><div class="ic" aria-hidden="true">${icon}</div><div><b>${name}</b><span>${desc}${got ? ` · ${when}` : ''}</span></div></div>`;
+    }).join('');
+  }
+  let toastTimer;
+  function toast(fresh) {
+    const el = $('toast');
+    const [icon, name] = fresh[0];
+    el.innerHTML = `${icon} Erfolg freigeschaltet: ${name}${fresh.length > 1 ? `<small>und ${fresh.length - 1} weitere</small>` : ''}`;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.hidden = true; }, 4000);
+    setTimeout(() => window.janaDog?.happy('Wuff! Neuer Erfolg! 🏆'), 1600);
+  }
+  function checkAchievements() {
+    const s = stats(), fresh = [];
+    for (const [id, icon, name, , test] of ACH) if (!state.ach[id] && test(s)) { state.ach[id] = todayKey(); fresh.push([icon, name]); }
+    if (fresh.length) { persist(); renderAch(); toast(fresh); }
+  }
+  addEventListener('jana:dogpat', () => { state.flags.dogPats = (state.flags.dogPats || 0) + 1; save(); });
+
+  function renderSpecial() {
+    const sp = window.janaSpecial = getSpecial();
+    const el = $('specialLine');
+    el.hidden = !sp?.line;
+    if (sp?.line) el.textContent = sp.line;
+    if (sp && ['birthday', 'christmas', 'easter', 'nye', 'newyear'].includes(sp.id) && !state.flags[sp.id]) { state.flags[sp.id] = true; save(); }
+  }
+  renderWater();
+  renderAch();
+  renderSpecial();
+  setInterval(() => { renderSpecial(); renderWater(); }, 10 * 60 * 1000);
+  setTimeout(checkAchievements, 1200);   // vorhandene Einträge nachträglich auswerten
+
 
   render();
 })();
@@ -539,6 +802,7 @@
     const bark = happy && Math.floor(t / 140) % 2 === 0;
     if (bark) { fill(27, Y(12), 4, 1, 'n'); fill(27, Y(13), 2, 2, 't'); }
     else if (happy || pose === 'run' || (hot() && !eat)) fill(27 + hx, H(13), 2, 1, 't');
+    drawHat(H, hx);
     ctx.restore();
   }
 
@@ -553,6 +817,59 @@
     bubble.classList.add('show');
     clearTimeout(hideTimer);
     hideTimer = setTimeout(() => bubble.classList.remove('show'), ms);
+  }
+
+  // ---------- Besondere Tage: Hut und Deko ----------
+  const SC = { hy: '#ffd36e', hp1: '#cdb7ef', hp2: '#f2a9c8', sr: '#e2574c', sw: '#ffffff', bw: '#ffffff', bp: '#f6b3c8',
+    tg: '#6fbf7c', tgd: '#4f9e5e', ck: '#f8c9dc', cf: '#ffffff', pk: '#f29a4a', pkd: '#d97a2e', e1: '#a9c8ec', e2: '#f4a7b9', e3: '#c6e3a9', e4: '#f6df96' };
+  const sfill = (x, y, w, h, c) => { ctx.fillStyle = SC[c] || C[c]; ctx.fillRect(x, y, w, h); };
+  function soutlined(parts) {
+    for (const [x, y, w, h] of parts) { ctx.fillStyle = C.o; ctx.fillRect(x - 1, y - 1, w + 2, h + 2); }
+    for (const [x, y, w, h, c] of parts) sfill(x, y, w, h, c);
+  }
+  function drawHat(H, hx) {
+    const sp = window.janaSpecial;
+    if (!sp?.hat) return;
+    if (sp.hat === 'party') soutlined([[22 + hx, H(4), 5, 1, 'hp2'], [22 + hx, H(3), 4, 1, 'hp1'], [23 + hx, H(2), 3, 1, 'hp2'], [23 + hx, H(1), 2, 1, 'hp1'], [24 + hx, H(0), 1, 1, 'hy']]);
+    else if (sp.hat === 'santa') soutlined([[21 + hx, H(3), 6, 1, 'sr'], [21 + hx, H(2), 5, 1, 'sr'], [21 + hx, H(1), 3, 1, 'sr'], [20 + hx, H(4), 8, 1, 'sw'], [19 + hx, H(1), 2, 2, 'sw']]);
+    else if (sp.hat === 'bunny') {
+      soutlined([[21 + hx, H(0), 2, 5, 'bw'], [25 + hx, H(0), 2, 5, 'bw']]);
+      sfill(22 + hx, H(1), 1, 3, 'bp'); sfill(26 + hx, H(1), 1, 3, 'bp');
+    }
+  }
+  function drawDecor(t) {
+    const sp = window.janaSpecial;
+    if (!sp) return;
+    const x = bowlX + 12;
+    if (sp.lights) {                                   // Lichterkette am Dach
+      const cols = ['#ff6b6b', '#ffd36e', '#7fd18b', '#7fb2ec'];
+      for (let r = 1; r < 8; r += 2) {
+        const ci = (r + Math.floor(t / 500)) % 4;
+        ctx.fillStyle = cols[ci]; ctx.fillRect(houseX + 9 - r - 1, 4 + r, 1, 1);
+        ctx.fillStyle = cols[(ci + 2) % 4]; ctx.fillRect(houseX + 10 + r + 1, 4 + r, 1, 1);
+      }
+    }
+    if (sp.decor === 'tree') {
+      soutlined([[x + 3, 21, 3, 2, 'wd'], [x, 17, 9, 4, 'tg'], [x + 1, 14, 7, 3, 'tg'], [x + 2, 11, 5, 3, 'tg'], [x + 3, 9, 3, 2, 'tg']]);
+      sfill(x + 4, 7, 1, 2, 'hy');
+      const blink = Math.floor(t / 600) % 2;
+      [[x + 2, 19, 'sr'], [x + 6, 18, 'hy'], [x + 3, 15, blink ? 'e1' : 'sr'], [x + 5, 12, 'e2'], [x + 4, 17, blink ? 'hy' : 'e1']].forEach(([bx, by, c]) => sfill(bx, by, 1, 1, c));
+    } else if (sp.decor === 'cake') {
+      soutlined([[x, 18, 9, 4, 'ck'], [x, 17, 9, 1, 'cf']]);
+      sfill(x + 1, 19, 7, 1, 'hp2');
+      [x + 2, x + 6].forEach((cx, i) => { sfill(cx, 14, 1, 3, 'cf'); sfill(cx, 13, 1, 1, Math.floor(t / 200 + i) % 2 ? 'hy' : 'pk'); });
+    } else if (sp.decor === 'pumpkin') {
+      soutlined([[x, 18, 7, 5, 'pk']]);
+      sfill(x + 3, 16, 1, 2, 'tg'); sfill(x + 2, 18, 1, 5, 'pkd'); sfill(x + 4, 18, 1, 5, 'pkd');
+      const eye = (window.janaWeather?.isDay === false) ? 'hy' : 'n';
+      sfill(x + 1, 19, 1, 1, eye); sfill(x + 5, 19, 1, 1, eye); sfill(x + 2, 21, 3, 1, eye);
+    } else if (sp.decor === 'eggs') {
+      [[x, 'e1'], [x + 22, 'e2'], [W - 14, 'e3'], [x + 40, 'e4']].forEach(([ex, c], i) => {
+        if (ex > W - 6) return;
+        soutlined([[ex, 20, 3, 3, c], [ex + 1, 19, 1, 1, c]]);
+        sfill(ex, 21, 3, 1, i % 2 ? 'cf' : 'hp1');
+      });
+    }
   }
 
   // ---------- Verhalten ----------
@@ -570,6 +887,8 @@
   const spd = () => (hot() || night() ? 10 : morning() ? 18 : 15);
   let shelterSaid = false, greetedMorning = false;
   function mood() {
+    const sp = window.janaSpecial;
+    if (sp?.bark && Math.random() < 0.5) return sp.bark;
     if (hot()) return pick(['Puh, ist das warm! 🥵', 'Hechel hechel…']);
     if (cold()) return pick(['Brr, kalt! 🥶', 'Kalte Pfoten…']);
     if (snowy()) return pick(['Schnee! ❄️', 'Kalt, aber schön!']);
@@ -683,6 +1002,7 @@
     ctx.clearRect(0, 0, W, 24);
     drawHouse();
     drawBowl();
+    drawDecor(t);
     if (mode !== 'sleep') drawDog(t);
     drawBall();
     drawPrecip(t);
@@ -750,7 +1070,9 @@
     const r = yard.getBoundingClientRect();
     const onDog = mode !== 'sleep' && e.clientY >= r.top && e.clientY <= r.bottom && e.clientX >= dogX * S && e.clientX <= (dogX + 32) * S;
     const onHouse = e.clientY >= r.top && e.clientY <= r.bottom && e.clientX >= houseX * S && e.clientX <= (houseX + 20) * S;
-    if (onDog || onHouse || e.target.closest('button')) happy(pick(BARKS));
+    if (onDog) dispatchEvent(new Event('jana:dogpat'));
+    const sp = window.janaSpecial;
+    if (onDog || onHouse || e.target.closest('button')) happy(sp?.bark && Math.random() < 0.5 ? sp.bark : pick(BARKS));
   });
 
   requestAnimationFrame(loop);
@@ -899,6 +1221,7 @@
   let state = { kind: null, isDay: null };
 
   function greeting(d = new Date()) {
+    if (window.janaSpecial?.greet) return window.janaSpecial.greet;
     const h = d.getHours();
     return h >= 5 && h < 11 ? 'Guten Morgen, Jana!' : h < 17 && h >= 11 ? 'Hallo Jana, schönen Tag!' : h >= 17 && h < 22 ? 'Guten Abend, Jana!' : 'Gute Nacht, Jana!';
   }
@@ -1002,9 +1325,15 @@
   function spawnFlock(t) {
     const dir = Math.random() < 0.5 ? 1 : -1, n = 1 + Math.floor(Math.random() * 3);
     const y0 = 3 + Math.random() * 9, speed = 16 + Math.random() * 10;
-    for (let i = 0; i < n; i++) birds.push({ x: dir > 0 ? -8 - i * 9 : SW + 2 + i * 9, y: y0 + (i % 2) * 3 + Math.random() * 2, v: speed * dir, ph: Math.random() * 6 });
+    const bat = !state.isDay && window.janaSpecial?.sky === 'bats';
+    for (let i = 0; i < n; i++) birds.push({ x: dir > 0 ? -8 - i * 9 : SW + 2 + i * 9, y: y0 + (i % 2) * 3 + Math.random() * 2, v: speed * dir * (bat ? 1.3 : 1), ph: Math.random() * 6, bat });
   }
-  function drawBird(x, y, up, c) {
+  function drawBird(x, y, up, c, bat) {
+    if (bat) {
+      const pts = up ? [[0, 0], [6, 0], [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [3, 2]] : [[2, 1], [3, 1], [4, 1], [1, 2], [3, 2], [5, 2], [0, 3], [6, 3]];
+      sg.fillStyle = c; for (const [dx, dy] of pts) sg.fillRect(Math.round(x) + dx, Math.round(y) + dy, 1, 1);
+      return;
+    }
     const pts = up ? [[0, 0], [6, 0], [1, 1], [5, 1], [2, 2], [4, 2], [3, 3]] : [[3, 1], [1, 2], [2, 2], [4, 2], [5, 2], [0, 3], [6, 3]];
     sg.fillStyle = c;
     for (const [dx, dy] of pts) sg.fillRect(Math.round(x) + dx, Math.round(y) + dy, 1, 1);
@@ -1018,10 +1347,49 @@
       for (const [x, y, ph] of stars) if (reduce || Math.floor(t / 700 + ph) % 4) sg.fillRect(x, y, 1, 1);
     }
     sg.save(); sg.translate(SW - 26, 0); scene(sg, state.kind, state.isDay, moon(), t); sg.restore();
-    if (!reduce && state.isDay && state.kind !== 'thunder' && t > nextFlock) { spawnFlock(t); nextFlock = t + 9000 + Math.random() * 16000; }
+    const batNight = window.janaSpecial?.sky === 'bats' && !state.isDay;
+    if (!reduce && (state.isDay || batNight) && state.kind !== 'thunder' && t > nextFlock) { spawnFlock(t); nextFlock = t + 9000 + Math.random() * 16000; }
     const bc = dark ? '#cfc6db' : '#6b5f7a';
-    for (const b of birds) { b.x += b.v * dt; drawBird(b.x, b.y + Math.sin(t / 300 + b.ph), Math.floor(t / 170 + b.ph) % 2 === 0, bc); }
+    for (const b of birds) { b.x += b.v * dt; drawBird(b.x, b.y + Math.sin(t / 300 + b.ph), Math.floor(t / (b.bat ? 120 : 170) + b.ph) % 2 === 0, b.bat ? (dark ? '#9d93ad' : '#3a2f45') : bc, b.bat); }
+    drawSkySpecial(t, dark);
     for (let i = birds.length - 1; i >= 0; i--) if (birds[i].x < -20 || birds[i].x > SW + 20) birds.splice(i, 1);
+  }
+
+  // Himmel an besonderen Tagen: Konfetti, Herzen, Feuerwerk
+  const bursts = [];
+  let nextBurst = 0;
+  function drawSkySpecial(t, dark) {
+    const sky = window.janaSpecial?.sky;
+    if (!sky || reduce) return;
+    const cols = ['#f2a9c8', '#cdb7ef', '#ffd36e', '#a6dcc2', '#a9c8ec', '#f29a4a'];
+    if (sky === 'confetti') {
+      for (let i = 0; i < Math.round(SW / 4); i++) {
+        const x = (i * 29) % SW + Math.round(Math.sin(t / 400 + i) * 2), y = Math.floor((t / 90 + i * 3.7) % 28) - 2;
+        sg.fillStyle = cols[i % cols.length]; sg.fillRect(x, y, (i + Math.floor(t / 300)) % 3 === 0 ? 2 : 1, 1);
+      }
+    } else if (sky === 'hearts') {
+      for (let i = 0; i < 6; i++) {
+        const x = (i * 41) % Math.max(10, SW - 32) + Math.round(Math.sin(t / 600 + i) * 2), y = 24 - Math.floor((t / 130 + i * 4.3) % 30);
+        sg.fillStyle = i % 2 ? '#f2a9c8' : '#ef8f95';
+        [[0, 0], [2, 0], [0, 1], [1, 1], [2, 1], [1, 2]].forEach(([dx, dy]) => sg.fillRect(x + dx, y + dy, 1, 1));
+      }
+    } else if (sky === 'fireworks' && (!state.isDay || new Date().getHours() >= 17)) {
+      if (t > nextBurst) {
+        bursts.push({ x: 6 + Math.random() * Math.max(10, SW - 40), y: 5 + Math.random() * 8, born: t, c: cols[Math.floor(Math.random() * cols.length)] });
+        nextBurst = t + 900 + Math.random() * 1600;
+      }
+      for (let i = bursts.length - 1; i >= 0; i--) {
+        const b = bursts[i], age = (t - b.born) / 1000;
+        if (age > 1.1) { bursts.splice(i, 1); continue; }
+        const r = Math.min(7, age * 11);
+        sg.fillStyle = age < 0.15 ? '#ffffff' : b.c;
+        for (let k = 0; k < 12; k++) {
+          const a = k * Math.PI / 6;
+          if (age > 0.75 && (k + Math.floor(t / 80)) % 2) continue;   // Funkeln beim Verglühen
+          sg.fillRect(Math.round(b.x + Math.cos(a) * r), Math.round(b.y + Math.sin(a) * r), 1, 1);
+        }
+      }
+    }
   }
 
   // Animation: wenige Bilder pro Sekunde reichen für Pixel-Wetter
