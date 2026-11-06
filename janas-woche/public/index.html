@@ -371,7 +371,7 @@
       save(); render(); return;
     }
     if (b.dataset.toggle) {
-      const it = w.days[day].find(i => i.id === b.dataset.toggle); it.done = !it.done;
+      const it = w.days[day].find(i => i.id === b.dataset.toggle); it.done = !it.done; it.doneAt = it.done ? Date.now() : null;
       if (it.done) { const h = new Date().getHours(); if (h >= 4 && h < 8) state.flags.early = true; if (h >= 22 || h < 4) state.flags.owl = true; }
       save(); render();
       if (it.done) { e.dogHandled = true; window.janaDog?.happy(); }
@@ -615,25 +615,39 @@
     return best;
   }
   function stats() {
+    // Nach einem Zurücksetzen zählt nur, was ab achSince passiert ist.
+    const since = state.achSince || 0, sinceKey = since ? key(new Date(since)) : '';
+    // Häkchen ohne Zeitstempel stammen von vor dem Zurücksetzen und zählen dann nicht mehr.
+    const counts = (it) => it.done && (it.doneAt ? it.doneAt >= since : !since);
     let done = 0, perfectDay = false, fullWeek = false;
     const tagDone = {}, doneDates = new Set();
     for (const [mk, w] of Object.entries(state.weeks)) {
       const [yy, mm, dd] = mk.split('-').map(Number);
+      let daysWith = 0;
       w.days.forEach((items, i) => {
-        const dn = items.filter((it) => it.done);
+        const dk = key(new Date(yy, mm - 1, dd + i));
+        const dn = items.filter((it) => counts(it));
         done += dn.length;
-        if (dn.length) doneDates.add(key(new Date(yy, mm - 1, dd + i)));
+        if (dn.length) { doneDates.add(dk); daysWith++; }
         for (const it of dn) if (it.tag) tagDone[it.tag] = (tagDone[it.tag] || 0) + 1;
         if (items.length >= 3 && dn.length === items.length) perfectDay = true;
       });
-      if (w.days.every((items) => items.some((it) => it.done))) fullWeek = true;
+      if (daysWith === 7) fullWeek = true;
     }
+    const sum = (a) => a.reduce((x, y) => x + y, 0);
+    const waterSince = (k) => {
+      const list = state.water[k] || [];
+      if (!since || k > sinceKey) return sum(list);
+      return k < sinceKey ? 0 : sum(list.slice(state.waterBase || 0));
+    };
+    const waterDays = Object.keys(state.water).filter((k) => waterSince(k) >= GOAL);
+    const created = (t) => { const ts = parseInt(t.id.slice(1, -4), 36); return Number.isFinite(ts) ? ts : 0; };
     const areaDone = (area) => Object.entries(tagDone).reduce((a, [id, n]) => a + (state.tags.find((t) => t.id === id)?.area === area ? n : 0), 0);
-    const waterDays = Object.keys(state.water).filter((k) => waterOf(k) >= GOAL);
     return {
       done, perfectDay, fullWeek, best: runLength(doneDates), bew: areaDone('bew'), lesen: tagDone.lesen || 0,
-      anyWater: Object.values(state.water).some((a) => a.length), waterGoal: waterDays.length, wBest: runLength(waterDays),
-      todosDone: (state.todos || []).filter((t) => t.done).length, custom: state.tags.some((t) => t.id.startsWith('t')),
+      anyWater: Object.keys(state.water).some((k) => waterSince(k) > 0), waterGoal: waterDays.length, wBest: runLength(waterDays),
+      todosDone: (state.todos || []).filter((t) => t.done && (t.doneAt || 0) >= since).length,
+      custom: state.tags.some((t) => t.id.startsWith('t') && created(t) >= since),
     };
   }
   function renderAch() {
@@ -669,6 +683,15 @@
     if (sp?.line) el.textContent = sp.line;
     if (sp && ['birthday', 'christmas', 'easter', 'nye', 'newyear'].includes(sp.id) && !state.flags[sp.id]) { state.flags[sp.id] = true; save(); }
   }
+  // Einmaliges Zurücksetzen der Erfolge. Einträge bleiben, gezählt wird nur, was danach passiert.
+  const ACH_RESET_ID = 'reset-2026-11-06';
+  if (state.achResetId !== ACH_RESET_ID) {
+    state.ach = {}; state.flags = {}; state.achSince = Date.now();
+    state.waterBase = (state.water[todayKey()] || []).length;
+    state.achResetId = ACH_RESET_ID;
+    persist();
+  }
+
   renderWater();
   renderAch();
   renderSpecial();
