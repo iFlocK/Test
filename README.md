@@ -29,3 +29,12 @@ Datum;Typ;Beschreibung;Kategorie;Betrag
 2026-11-01;Einnahme;Gehalt;Gehalt;2500,00
 2026-11-03;Ausgabe;Wocheneinkauf;Lebensmittel;87,45
 ```
+
+# Janas Woche
+
+Wochenplaner mit Gewohnheits-Tags, langfristigen To-dos und Pixel-Labrador.
+Live unter https://janas-woche.netlify.app
+
+Die veröffentlichte Version liegt im Ordner `janas-woche/` (Seite, App-Icons, Manifest, `netlify.toml`).
+Einträge werden nur im Browser des jeweiligen Geräts gespeichert (localStorage, Schlüssel `janas-woche.v2`).
+Bei Änderungen das Speicherformat beibehalten, damit vorhandene Einträge erhalten bleiben.
