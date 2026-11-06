@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wochenplaner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fbf6f2; --card: #ffffff; --text: #3a2e2c; --muted: #8c7c78;
+    --border: #f0e4dc; --accent: #d9737a; --accent-soft: #fbe3e2; --today: #fff4ec;
+    --c-termin: #d9737a; --c-arbeit: #6c8ebf; --c-sport: #5aa77f; --c-freunde: #e2a344;
+    --c-selfcare: #a67cc4; --c-haushalt: #8c9a9e;
+    --shadow: 0 2px 10px rgba(120, 80, 60, .07);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1719; --card: #262022; --text: #f1e7e3; --muted: #a8968f;
+      --border: #3a3033; --accent: #ef8f95; --accent-soft: #46292c; --today: #33282a;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 Nunito, system-ui, sans-serif; }
+  main { max-width: 1280px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1, h2, h3 { font-family: Fraunces, Georgia, serif; font-weight: 600; margin: 0; }
+  h1 { font-size: 2rem; outline: none; border-radius: 6px; }
+  h1:focus { background: var(--accent-soft); }
+  input, select, button, textarea {
+    font: inherit; color: var(--text); background: var(--card);
+    border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px;
+  }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  .btn-accent { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
+
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; }
+  header .week { color: var(--muted); }
+  header .spacer { flex: 1; }
+  .nav { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .progress { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 4px 0 20px; }
+  .progress > div { height: 100%; background: var(--accent); transition: width .3s; }
+  .progress-label { color: var(--muted); font-size: .9rem; }
+
+  .top { display: grid; gap: 16px; grid-template-columns: 1fr; margin-bottom: 16px; }
+  @media (min-width: 900px) { .top { grid-template-columns: 1fr 1.4fr; } }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); }
+  .card h2 { font-size: 1.15rem; margin-bottom: 10px; }
+  textarea { width: 100%; resize: vertical; min-height: 70px; }
+
+  .days { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  @media (min-width: 1560px) { main { max-width: 1560px; } .days { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+  .day { display: flex; flex-direction: column; min-height: 240px; }
+  .day.today { background: var(--today); border-color: var(--accent); }
+  .day-head { display: flex; flex-wrap: wrap; gap: 0 8px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  .day-head h3 { font-size: 1.05rem; }
+  .day-head .date { color: var(--muted); font-size: .85rem; }
+  .day.today .day-head h3::after { content: "heute"; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--accent); color: #fff; font-size: .7rem; font-family: Nunito, sans-serif; font-weight: 700; vertical-align: middle; }
+  ul.items { list-style: none; margin: 0 0 8px; padding: 0; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  li.item { display: grid; grid-template-columns: auto 1fr auto; gap: 6px; align-items: start;
+    padding: 6px 8px; border-radius: 10px; background: color-mix(in srgb, var(--c) 12%, transparent); border-left: 4px solid var(--c); }
+  li.item input[type=checkbox] { margin-top: 4px; accent-color: var(--c); width: 16px; height: 16px; }
+  li.item .txt { overflow-wrap: break-word; hyphens: auto; font-size: .92rem; min-width: 0; }
+  li.item .time { font-weight: 700; font-size: .8rem; color: var(--c); display: block; }
+  li.item.done .txt { text-decoration: line-through; opacity: .55; }
+  li.item .del { border: none; background: none; padding: 0 2px; color: var(--muted); opacity: 0; font-size: 1rem; line-height: 1; }
+  li.item:hover .del, li.item:focus-within .del { opacity: 1; }
+  @media (hover: none) { li.item .del { opacity: .6; } }
+  .empty { color: var(--muted); font-size: .85rem; font-style: italic; }
+
+  form.add { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+  form.add input[name=text] { grid-column: 1 / -1; }
+  form.add .row { display: flex; flex-wrap: wrap; gap: 6px; grid-column: 1 / -1; }
+  form.add .row > * { min-width: 0; padding: 5px 6px; font-size: .85rem; }
+  form.add .row input[type=time] { flex: 0 0 auto; }
+  form.add .row select { flex: 1 1 90px; }
+  form.add .row button { flex: 0 0 auto; }
+
+  .habits table { width: 100%; border-collapse: collapse; }
+  .habits th, .habits td { padding: 4px 2px; text-align: center; font-size: .85rem; }
+  .habits th:first-child, .habits td:first-child { text-align: left; }
+  .habits td:first-child { display: flex; gap: 4px; align-items: center; }
+  .habits td:first-child button { border: none; background: none; padding: 0 4px; color: var(--muted); }
+  .habits input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
+  .habits .add-habit { display: flex; gap: 6px; margin-top: 8px; }
+  .habits .add-habit input { flex: 1; min-width: 0; }
+  .habits th.today { color: var(--accent); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; color: var(--muted); font-size: .85rem; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--c); margin-right: 5px; }
+
+  @media print {
+    body { background: #fff; color: #000; }
+    header .nav, header .spacer, form.add, .del, .add-habit, .habits td:first-child button, .progress { display: none !important; }
+    .card { box-shadow: none; break-inside: avoid; }
+    .days { grid-template-columns: repeat(4, 1fr) !important; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1 id="title" contenteditable="true" spellcheck="false" title="Zum Ändern anklicken">Mein Wochenplaner</h1>
+      <div class="week" id="weekLabel"></div>
+    </div>
+    <span class="spacer"></span>
+    <div class="nav">
+      <button id="prev" aria-label="Vorherige Woche">← Woche</button>
+      <button id="today" class="btn-accent">Heute</button>
+      <button id="next" aria-label="Nächste Woche">Woche →</button>
+      <button id="print">Drucken</button>
+    </div>
+  </header>
+
+  <div class="progress-label" id="progLabel"></div>
+  <div class="progress"><div id="progBar" style="width:0"></div></div>
+
+  <section class="top">
+    <div class="card">
+      <h2>✨ Fokus der Woche</h2>
+      <textarea id="focus" placeholder="Was ist diese Woche wichtig? Worauf freust du dich?"></textarea>
+      <h2 style="margin-top:14px">📝 Notizen</h2>
+      <textarea id="notes" placeholder="Einkaufsliste, Ideen, Geburtstage…"></textarea>
+    </div>
+    <div class="card habits">
+      <h2>🌱 Gewohnheiten</h2>
+      <table>
+        <thead id="habitHead"></thead>
+        <tbody id="habitBody"></tbody>
+      </table>
+      <form class="add-habit" id="habitForm">
+        <input name="habit" placeholder="Neue Gewohnheit, z. B. 2 Liter trinken" aria-label="Neue Gewohnheit">
+        <button type="submit">+</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="days" id="days"></section>
+
+  <div class="legend" id="legend"></div>
+</main>
+
+<script>
+(() => {
+  const KEY = 'wochenplaner.v1';
+  const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+  const CATS = {
+    termin: 'Termin', arbeit: 'Arbeit', sport: 'Sport',
+    freunde: 'Freunde & Familie', selfcare: 'Selfcare', haushalt: 'Haushalt',
+  };
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  let state = load();
+  let monday = startOfWeek(new Date());
+
+  function load() {
+    try {
+      const s = JSON.parse(localStorage.getItem(KEY));
+      if (s && s.weeks) return s;
+    } catch {}
+    return { title: 'Mein Wochenplaner', habits: ['Sport', 'Lesen', 'Früh schlafen'], weeks: {} };
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
+
+  function startOfWeek(d) {
+    const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+    return x;
+  }
+  function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  function key(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+  function isoWeek(d) {
+    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+    const y = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+    return Math.ceil(((t - y) / 864e5 + 1) / 7);
+  }
+  function week() {
+    const k = key(monday);
+    if (!state.weeks[k]) state.weeks[k] = { items: [[], [], [], [], [], [], []], focus: '', notes: '', habits: {} };
+    return state.weeks[k];
+  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  const fmt = (d, o) => d.toLocaleDateString('de-DE', o);
+
+  function render() {
+    const w = week();
+    const todayKey = key(new Date());
+    const sunday = addDays(monday, 6);
+    $('title').textContent = state.title;
+    $('weekLabel').textContent = `KW ${isoWeek(monday)} · ${fmt(monday, { day: 'numeric', month: 'long' })} – ${fmt(sunday, { day: 'numeric', month: 'long', year: 'numeric' })}`;
+    $('focus').value = w.focus;
+    $('notes').value = w.notes;
+
+    // Fortschritt
+    const all = w.items.flat();
+    const done = all.filter(i => i.done).length;
+    $('progLabel').textContent = all.length ? `${done} von ${all.length} erledigt${done === all.length ? ' 🎉' : ''}` : 'Noch nichts geplant für diese Woche';
+    $('progBar').style.width = all.length ? (done / all.length * 100) + '%' : '0';
+
+    // Tage
+    $('days').innerHTML = DAYS.map((name, i) => {
+      const d = addDays(monday, i);
+      const items = [...w.items[i]].sort((a, b) => (a.time || '99').localeCompare(b.time || '99'));
+      return `
+        <article class="card day ${key(d) === todayKey ? 'today' : ''}">
+          <div class="day-head"><h3>${name}</h3><span class="date">${fmt(d, { day: 'numeric', month: 'short' })}</span></div>
+          <ul class="items">
+            ${items.length ? items.map(it => `
+              <li class="item ${it.done ? 'done' : ''}" style="--c: var(--c-${it.cat})">
+                <input type="checkbox" data-day="${i}" data-id="${it.id}" ${it.done ? 'checked' : ''} aria-label="Erledigt">
+                <span class="txt">${it.time ? `<span class="time">${it.time}</span>` : ''}${esc(it.text)}</span>
+                <button class="del" data-day="${i}" data-del="${it.id}" aria-label="Löschen">×</button>
+              </li>`).join('') : '<li class="empty">Frei 🌸</li>'}
+          </ul>
+          <form class="add" data-day="${i}">
+            <input name="text" placeholder="Neuer Eintrag…" aria-label="Neuer Eintrag für ${name}" autocomplete="off">
+            <div class="row">
+              <input type="time" name="time" aria-label="Uhrzeit">
+              <select name="cat" aria-label="Kategorie">
+                ${Object.entries(CATS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}
+              </select>
+              <button type="submit" aria-label="Hinzufügen">+</button>
+            </div>
+          </form>
+        </article>`;
+    }).join('');
+
+    // Gewohnheiten
+    $('habitHead').innerHTML = `<tr><th></th>${DAYS.map((n, i) =>
+      `<th class="${key(addDays(monday, i)) === todayKey ? 'today' : ''}">${n.slice(0, 2)}</th>`).join('')}</tr>`;
+    $('habitBody').innerHTML = state.habits.length ? state.habits.map((h, hi) => {
+      const checks = w.habits[h] || [];
+      return `<tr><td><button data-rmhabit="${hi}" aria-label="${esc(h)} entfernen">×</button>${esc(h)}</td>${DAYS.map((_, i) =>
+        `<td><input type="checkbox" data-habit="${hi}" data-day="${i}" ${checks[i] ? 'checked' : ''} aria-label="${esc(h)} am ${DAYS[i]}"></td>`).join('')}</tr>`;
+    }).join('') : '<tr><td colspan="8" class="empty">Füge unten eine Gewohnheit hinzu.</td></tr>';
+  }
+
+  // Events
+  $('days').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const f = ev.target, day = +f.dataset.day;
+    const text = f.text.value.trim();
+    if (!text) { f.text.focus(); return; }
+    week().items[day].push({ id: uid(), text, time: f.time.value, cat: f.cat.value, done: false });
+    save(); render();
+    document.querySelector(`form.add[data-day="${day}"] input[name=text]`).focus();
+  });
+  $('days').addEventListener('change', (ev) => {
+    const cb = ev.target;
+    if (cb.type !== 'checkbox') return;
+    const it = week().items[+cb.dataset.day].find(x => x.id === cb.dataset.id);
+    if (it) { it.done = cb.checked; save(); render(); }
+  });
+  $('days').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-del]');
+    if (!b) return;
+    const w = week(), day = +b.dataset.day;
+    w.items[day] = w.items[day].filter(x => x.id !== b.dataset.del);
+    save(); render();
+  });
+
+  $('habitBody').addEventListener('change', (ev) => {
+    const cb = ev.target, name = state.habits[+cb.dataset.habit], w = week();
+    (w.habits[name] ||= [])[+cb.dataset.day] = cb.checked;
+    save();
+  });
+  $('habitBody').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-rmhabit]');
+    if (!b) return;
+    const name = state.habits[+b.dataset.rmhabit];
+    if (confirm(`Gewohnheit „${name}“ entfernen?`)) { state.habits.splice(+b.dataset.rmhabit, 1); save(); render(); }
+  });
+  $('habitForm').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const v = ev.target.habit.value.trim();
+    if (v && !state.habits.includes(v)) { state.habits.push(v); save(); render(); }
+    ev.target.habit.value = '';
+  });
+
+  $('focus').addEventListener('input', (e) => { week().focus = e.target.value; save(); });
+  $('notes').addEventListener('input', (e) => { week().notes = e.target.value; save(); });
+  $('title').addEventListener('blur', (e) => { state.title = e.target.textContent.trim() || 'Mein Wochenplaner'; save(); render(); });
+  $('title').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
+
+  $('prev').addEventListener('click', () => { monday = addDays(monday, -7); render(); });
+  $('next').addEventListener('click', () => { monday = addDays(monday, 7); render(); });
+  $('today').addEventListener('click', () => { monday = startOfWeek(new Date()); render(); });
+  $('print').addEventListener('click', () => window.print());
+
+  $('legend').innerHTML = Object.entries(CATS).map(([k, v]) => `<span style="--c: var(--c-${k})">${v}</span>`).join('');
+  render();
+})();
+</script>
+</body>
+</html>
