@@ -164,6 +164,16 @@
     width: max-content; max-width: calc(100% - 32px); text-align: center; }
   .toast small { display: block; font-weight: 600; color: var(--muted); }
 
+  /* Zusammen-Zähler */
+  .love { display: grid; gap: 2px; }
+  .love-head { font-size: .82rem; color: var(--muted); font-weight: 700; }
+  .love-big { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; }
+  .love-live { font-size: .8rem; font-variant-numeric: tabular-nums; }
+  .love-next { font-size: .78rem; color: var(--accent-ink); font-weight: 700; }
+  .heart { display: inline-block; animation: beat 1.4s ease-in-out infinite; }
+  @keyframes beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.25); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } }
+  @media (prefers-reduced-motion: reduce) { .heart { animation: none; } }
+
   /* Langfristige To-dos */
   .todos-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
   .todos h2 { font-size: 1.15rem; }
@@ -254,6 +264,12 @@
       </div>
       <div class="water-week" id="waterWeek" aria-label="Wasser diese Woche"></div>
     </div>
+  </section>
+  <section class="card love" id="loveCard">
+    <div class="love-head"><span class="heart" aria-hidden="true">💕</span> Zusammen seit 18. September 2025</div>
+    <div class="love-big" id="loveYmd"></div>
+    <div class="love-live" id="loveLive"></div>
+    <div class="love-next" id="loveNext"></div>
   </section>
   </div>
 
@@ -490,6 +506,8 @@
     const today = new Date(y, m - 1, d);
     if (m === BIRTH.month && d === BIRTH.day) return { id: 'birthday', greet: `Alles Gute zum ${y - BIRTH.year}. Geburtstag, Jana! 🎂`,
       line: 'Heute ist dein Tag! Der Hund hat extra einen Kuchen gebacken.', hat: 'party', decor: 'cake', sky: 'confetti', bark: 'Happy Birthday, Jana! 🎉' };
+    if (m === 9 && d === 18 && y > 2025) return { id: 'anniversary', greet: 'Alles Liebe zum Jahrestag, Jana! 💕',
+      line: `Heute seid ihr ${y - 2025} ${y - 2025 === 1 ? 'Jahr' : 'Jahre'} zusammen! 💞`, sky: 'hearts', bark: 'Wuff! Alles Liebe zum Jahrestag! 💕' };
     if (m === 12 && d >= 24 && d <= 26) return { id: 'christmas', greet: 'Frohe Weihnachten, Jana! 🎄',
       line: d === 24 ? 'Heute ist Heiligabend. ✨' : `${d - 24}. Weihnachtsfeiertag – lass es dir gut gehen.`, hat: 'santa', decor: 'tree', lights: true, bark: 'Wuff! Frohe Weihnachten! 🎄' };
     if (m === 12 && d === 31) return { id: 'nye', greet: 'Guten Rutsch, Jana! 🎆', line: `Morgen beginnt ${y + 1}. Heute Abend gibt es Feuerwerk!`, hat: 'party', sky: 'fireworks', bark: 'Wuff! Guten Rutsch! 🎆' };
@@ -612,6 +630,8 @@
     ['xmas', '🎄', 'Weihnachtself', 'An Weihnachten vorbeigeschaut', () => !!state.flags.christmas],
     ['easter', '🐣', 'Osterhase', 'An Ostern vorbeigeschaut', () => !!state.flags.easter],
     ['nye', '🎆', 'Party-Pfote', 'An Silvester oder Neujahr vorbeigeschaut', () => !!(state.flags.nye || state.flags.newyear)],
+    ['anniv', '💞', 'Jahrestag', 'Am Jahrestag vorbeigeschaut', () => !!state.flags.anniversary],
+    ['wolf', '🐺', 'Werwolf gesichtet', 'Den Hund bei Vollmond als Wolf erlebt', () => !!state.flags.wolf],
   ];
   function runLength(dates) {
     let best = 0, run = 0, prev = null;
@@ -682,6 +702,7 @@
     for (const [id, icon, name, , test] of ACH) if (!state.ach[id] && test(s)) { state.ach[id] = todayKey(); fresh.push([icon, name]); }
     if (fresh.length) { persist(); renderAch(); toast(fresh); }
   }
+  addEventListener('jana:wolf', () => { if (!state.flags.wolf) { state.flags.wolf = true; save(); } });
   addEventListener('jana:dogpat', () => { state.flags.dogPats = (state.flags.dogPats || 0) + 1; save(); });
 
   function renderSpecial() {
@@ -689,8 +710,37 @@
     const el = $('specialLine');
     el.hidden = !sp?.line;
     if (sp?.line) el.textContent = sp.line;
-    if (sp && ['birthday', 'christmas', 'easter', 'nye', 'newyear'].includes(sp.id) && !state.flags[sp.id]) { state.flags[sp.id] = true; save(); }
+    if (sp && ['birthday', 'christmas', 'easter', 'nye', 'newyear', 'anniversary'].includes(sp.id) && !state.flags[sp.id]) { state.flags[sp.id] = true; save(); }
   }
+  // ---------- Zusammen seit 18.09.2025 ----------
+  const TOGETHER = { y: 2025, m: 9, d: 18 };
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  const inDays = (n) => (n === 1 ? 'morgen' : `in ${n} Tagen`);
+  function renderLove() {
+    const now = new Date();
+    let y = now.getFullYear() - TOGETHER.y, mo = now.getMonth() + 1 - TOGETHER.m, d = now.getDate() - TOGETHER.d;
+    if (d < 0) { mo--; d += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
+    if (mo < 0) { y--; mo += 12; }
+    const parts = [y && plural(y, 'Jahr', 'Jahre'), mo && plural(mo, 'Monat', 'Monate'), d && plural(d, 'Tag', 'Tage')].filter(Boolean);
+    $('loveYmd').textContent = !parts.length ? 'Heute ist euer erster Tag! 💕'
+      : parts.length === 1 ? parts[0] : parts.slice(0, -1).join(', ') + ' und ' + parts[parts.length - 1];
+    const dayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const days = Math.round((dayUTC - Date.UTC(TOGETHER.y, TOGETHER.m - 1, TOGETHER.d)) / 864e5);
+    const p2 = (n) => String(n).padStart(2, '0');
+    $('loveLive').textContent = `= ${days.toLocaleString('de-DE')} Tage · ${p2(now.getHours())} Std. · ${p2(now.getMinutes())} Min. · ${p2(now.getSeconds())} Sek.`;
+    const thisYear = Date.UTC(now.getFullYear(), TOGETHER.m - 1, TOGETHER.d);
+    const annivYear = dayUTC > thisYear ? now.getFullYear() + 1 : now.getFullYear();
+    const toAnniv = Math.round((Date.UTC(annivYear, TOGETHER.m - 1, TOGETHER.d) - dayUTC) / 864e5);
+    let next;
+    if (toAnniv === 0) next = `Heute ist euer ${annivYear - TOGETHER.y}. Jahrestag! 💞`;
+    else if (days > 0 && days % 100 === 0) next = `Heute: ${days.toLocaleString('de-DE')} Tage zusammen! 🎉`;
+    else if (toAnniv <= 30) next = `Noch ${daysWord(toAnniv)} bis zum ${annivYear - TOGETHER.y}. Jahrestag 💞`;
+    else { const m100 = Math.ceil((days + 1) / 100) * 100; next = `Nächster Meilenstein: ${m100.toLocaleString('de-DE')} Tage ${inDays(m100 - days)}`; }
+    $('loveNext').textContent = next;
+  }
+  renderLove();
+  setInterval(renderLove, 1000);
+
   // Einmaliges Zurücksetzen der Erfolge. Einträge bleiben, gezählt wird nur, was danach passiert.
   const ACH_RESET_ID = 'reset-2026-11-06';
   if (state.achResetId !== ACH_RESET_ID) {
@@ -748,6 +798,8 @@
     p: '#f2a9c8', p2: '#f8c9dc', k: '#9a6235', ba: '#a9c8ec', hl: '#ffffff', rain: '#6fa6e6', snow: '#a9c4ea',
   };
   const fill = (x, y, w, h, c) => { ctx.fillStyle = C[c]; ctx.fillRect(x, y, w, h); };
+  const DOG_COL = { b: C.b, l: C.l, e: C.e }, WOLF_COL = { b: '#a3a8b6', l: '#dfe2e8', e: '#727889' };
+  C.wy = '#ffd84d';
   function outlined(parts) {
     for (const [x, y, w, h] of parts) { ctx.fillStyle = C.o; ctx.fillRect(x - 1, y - 1, w + 2, h + 2); }
     for (const [x, y, w, h, c] of parts) fill(x, y, w, h, c);
@@ -803,14 +855,17 @@
     fill(x, y + 2, 5, 1, 'c'); fill(x + 1, y + 1, 1, 1, 'hl');
   }
   function drawDog(t) {
-    const pose = mode === 'happy' ? 'happy' : mode === 'eat' ? 'eat' : mode === 'idle' ? 'stand'
+    const showWolf = mode === 'transform' ? Math.floor(t / 150) % 2 === 0 : wolf;
+    Object.assign(C, showWolf ? WOLF_COL : DOG_COL);
+    const pose = mode === 'happy' ? 'happy' : mode === 'eat' ? 'eat' : mode === 'howl' ? 'howl' : (mode === 'idle' || mode === 'transform') ? 'stand'
       : (mode === 'play' || mode === 'goPlay') ? 'run' : 'walk';
     const happy = pose === 'happy', moving = pose === 'walk' || pose === 'run', eat = pose === 'eat';
     const f = frame % 4;
     const jump = happy && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : 0;
     const bob = moving && (f === 1 || f === 3) ? -1 : 0;
     const Y = (v) => v - jump + bob;
-    const hd = eat ? (Math.floor(t / 220) % 2 ? 7 : 8) : 0, hx = eat ? 1 : 0;
+    const howling = pose === 'howl' && t < howlUntil;
+    const hd = eat ? (Math.floor(t / 220) % 2 ? 7 : 8) : howling ? -2 : 0, hx = eat ? 1 : 0;
     const H = (v) => Y(v) + hd;
     ctx.save();
     if (dir < 0) { ctx.translate(Math.round(dogX) + 32, 0); ctx.scale(-1, 1); } else ctx.translate(Math.round(dogX), 0);
@@ -824,17 +879,20 @@
     parts.push([8, Y(11), 15, 7, 'b'], [20 + hx, H(5), 8, 8, 'b'], [26 + hx, H(9), 5, 4, 'l']);
     outlined(parts);
     fill(10, Y(15), 11, 2, 'l');                       // Bauch
-    fill(21 + hx, H(6), 3, 6, 'e');                    // Schlappohr
+    if (showWolf) outlined([[21 + hx, H(3), 2, 2, 'e'], [22 + hx, H(2), 1, 1, 'e']]);   // spitze Wolfsohren
+    else fill(21 + hx, H(6), 3, 6, 'e');               // Schlappohr
     fill(20, Y(10), 2, 4, 'c');                        // rosa Halsband
     if (happy) { fill(24, Y(8), 1, 1, 'n'); fill(25, Y(7), 1, 1, 'n'); fill(26, Y(8), 1, 1, 'n'); }
     else if (eat) fill(24 + hx, H(8), 2, 1, 'n');
-    else fill(25, Y(7), 1, 2, 'n');
+    else fill(25, H(7), 1, 2, showWolf ? 'wy' : 'n');
     fill(30 + hx, H(9), 1, 2, 'n');                    // Nase
+    if (howling) fill(27 + hx, H(12), 4, 1, 'n');      // Maul offen beim Heulen
     const bark = happy && Math.floor(t / 140) % 2 === 0;
     if (bark) { fill(27, Y(12), 4, 1, 'n'); fill(27, Y(13), 2, 2, 't'); }
     else if (happy || pose === 'run' || (hot() && !eat)) fill(27 + hx, H(13), 2, 1, 't');
     drawHat(H, hx);
     ctx.restore();
+    Object.assign(C, DOG_COL);
   }
 
   // ---------- Sprechblase ----------
@@ -917,6 +975,8 @@
   const morning = () => { const h = hourNow(); return h >= 6 && h < 10 && !night(); };
   const spd = () => (hot() || night() ? 10 : morning() ? 18 : 15);
   let shelterSaid = false, greetedMorning = false;
+  let wolf = false, howlUntil = 0, nextHowl = 0;
+  const wolfTime = () => window.janaMoon?.().name === 'Vollmond' && night();
   function mood() {
     const sp = window.janaSpecial;
     if (sp?.bark && Math.random() < 0.5) return sp.bark;
@@ -937,6 +997,11 @@
   }
   function decide(t) {
     if (reduce) { mode = 'idle'; until = t + 1e9; return; }
+    if (wolf) {
+      if (Math.random() < 0.65) { mode = 'howl'; until = t + rand(4000, 7000); nextHowl = t + 400; }
+      else { mode = 'walk'; target = rand(minDog(), maxDog()); }
+      return;
+    }
     if (wet() || lateNight()) { mode = 'goSleep'; target = houseX + 3; return; }
     let pSleep = 0.1, pIdle = 0.17, pEat = 0.17, pPlay = 0.18;
     if (night()) { pSleep = 0.45; pIdle = 0.2; pPlay = 0.06; }
@@ -979,8 +1044,15 @@
       if (ball.x > W - 7) { ball.x = W - 7; ball.vx = -Math.abs(ball.vx); }
     } else { ball.vx = 0; ball.hop = 0; }
 
-    // Bei Regen oder spät nachts sofort in die Hütte
-    if ((wet() || lateNight()) && !['goSleep', 'sleep', 'happy'].includes(mode)) {
+    // Vollmond-Nacht: Verwandlung in den Wolf und morgens zurück
+    const wantWolf = wolfTime();
+    if (wantWolf !== wolf && mode !== 'transform' && mode !== 'happy') {
+      if (mode === 'sleep') { dogX = houseX + 3; dir = 1; }
+      mode = 'transform'; until = t + 1800;
+      say(wantWolf ? 'Oh nein… Vollmond! 🌕' : 'Wuff? Was war denn los?', dogX + 16, 1800);
+    }
+    // Bei Regen oder spät nachts sofort in die Hütte (der Wolf bleibt draußen)
+    if ((wet() || lateNight()) && !wolf && !['goSleep', 'sleep', 'happy', 'transform'].includes(mode)) {
       mode = 'goSleep';
       if (wet() && !shelterSaid) { say(wxNow().kind === 'thunder' ? 'Gewitter! Schnell in die Hütte! 😰' : 'Brr, Regen! Ab in die Hütte! 🌧️', dogX + 16, 1900); shelterSaid = true; }
     }
@@ -1003,6 +1075,12 @@
         else moveTo(Math.min(Math.max(ballApproach(), houseX + 2), maxDog()), 26, dt);
         break;
       case 'happy': if (t > until) decide(t); break;
+      case 'transform': if (t > until) { wolf = wolfTime(); if (wolf) dispatchEvent(new Event('jana:wolf')); decide(t); } break;
+      case 'howl':
+        dir = 1;
+        if (t > nextHowl) { howlUntil = t + 1800; nextHowl = t + 3800; say(pick(['Auuuuuu! 🌕', 'Auuuu-uuuu! 🐺', 'Ahuuuuu! 🌕']), dogX + 16, 1800); howlSound(); }
+        if (t > until && t > howlUntil) decide(t);
+        break;
     }
   }
   // Regen oder Schnee im Garten
@@ -1084,6 +1162,21 @@
     o.connect(f); f.connect(g); n.connect(nf); nf.connect(ng); ng.connect(g); g.connect(actx.destination);
     o.start(t0); o.stop(t0 + 0.21); n.start(t0); n.stop(t0 + 0.13);
   }
+  // Heulen bei Vollmond (nur wenn der Ton an ist und schon einmal getippt wurde)
+  function howlSound() {
+    if (!soundOn || !actx) return;
+    try {
+      if (actx.state === 'suspended') actx.resume();
+      const t0 = actx.currentTime + 0.02, o = actx.createOscillator(), g = actx.createGain(), lfo = actx.createOscillator(), lg = actx.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(330, t0); o.frequency.linearRampToValueAtTime(620, t0 + 0.5);
+      o.frequency.linearRampToValueAtTime(560, t0 + 1.3); o.frequency.linearRampToValueAtTime(380, t0 + 1.8);
+      lfo.frequency.value = 5.5; lg.gain.value = 9; lfo.connect(lg); lg.connect(o.frequency);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.35, t0 + 0.25);
+      g.gain.setValueAtTime(0.35, t0 + 1.3); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.85);
+      o.connect(g); g.connect(actx.destination); o.start(t0); lfo.start(t0); o.stop(t0 + 1.9); lfo.stop(t0 + 1.9);
+    } catch {}
+  }
   function bark(times) {
     if (!soundOn) return;
     try {
@@ -1103,7 +1196,7 @@
     const onHouse = e.clientY >= r.top && e.clientY <= r.bottom && e.clientX >= houseX * S && e.clientX <= (houseX + 20) * S;
     if (onDog) dispatchEvent(new Event('jana:dogpat'));
     const sp = window.janaSpecial;
-    if (onDog || onHouse || e.target.closest('button')) happy(sp?.bark && Math.random() < 0.5 ? sp.bark : pick(BARKS));
+    if (onDog || onHouse || e.target.closest('button')) happy(wolf ? pick(['Auuu! 🐺', 'Grrr… Wuff! 🌕', 'Wuff… äh, Auuu!']) : sp?.bark && Math.random() < 0.5 ? sp.bark : pick(BARKS));
   });
 
   requestAnimationFrame(loop);
@@ -1129,6 +1222,8 @@
     const toFull = (SYN / 2 - age + SYN) % SYN, toNew = SYN - age;
     return { age, p, illum, name, toFull, toNew };
   }
+
+  window.janaMoon = moon;
 
   // Wettercodes (WMO) → Text und Bildart
   function describe(code, isDay) {
@@ -1268,7 +1363,7 @@
     const m = moon(now);
     mg.clearRect(0, 0, 16, 16); drawMoon(mg, 8, 8, 6, m);
     let extra = '';
-    if (m.name === 'Vollmond') extra = ' · Heute ist Vollmond 🌕';
+    if (m.name === 'Vollmond') extra = ' · Heute ist Vollmond 🌕 · Achtung, Werwolf-Gefahr! 🐺';
     else if (m.name === 'Neumond') extra = ' · Heute ist Neumond';
     else if (m.p < 0.5) extra = ` · Vollmond in ${Math.max(1, Math.round(m.toFull))} ${Math.round(m.toFull) === 1 ? 'Tag' : 'Tagen'}`;
     else extra = ` · Neumond in ${Math.max(1, Math.round(m.toNew))} ${Math.round(m.toNew) === 1 ? 'Tag' : 'Tagen'}`;
