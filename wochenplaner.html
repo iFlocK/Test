@@ -3,28 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Wochenplaner</title>
+<title>Janas Wochenplaner</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+  /* Pastell: Rosé als Akzent, Lavendel als zweite Farbe, weiche Kategorie-Töne */
   :root {
-    --bg: #fbf6f2; --card: #ffffff; --text: #3a2e2c; --muted: #8c7c78;
-    --border: #f0e4dc; --accent: #d9737a; --accent-soft: #fbe3e2; --today: #fff4ec;
-    --c-termin: #d9737a; --c-arbeit: #6c8ebf; --c-sport: #5aa77f; --c-freunde: #e2a344;
-    --c-selfcare: #a67cc4; --c-haushalt: #8c9a9e;
-    --shadow: 0 2px 10px rgba(120, 80, 60, .07);
+    --bg: #fdf6fa; --card: #ffffff; --text: #4a3f55; --muted: #8f839c;
+    --border: #f0e3ef; --accent: #f2a9c8; --accent-2: #cdb7ef; --on-accent: #4a2340;
+    --accent-soft: #fde8f1; --today: #fff4f9; --tint: 32%;
+    --c-termin: #f4a7b9; --c-arbeit: #a9c8ec; --c-sport: #a6dcc2; --c-freunde: #f8cfa0;
+    --c-selfcare: #cdb4e8; --c-haushalt: #b9d3db;
+    --shadow: 0 4px 16px rgba(190, 140, 180, .12);
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #1c1719; --card: #262022; --text: #f1e7e3; --muted: #a8968f;
-      --border: #3a3033; --accent: #ef8f95; --accent-soft: #46292c; --today: #33282a;
+      --bg: #221d27; --card: #2c2633; --text: #f3ecf7; --muted: #ab9fb8;
+      --border: #3d3446; --accent: #f0b3cf; --accent-2: #c9b3ec; --on-accent: #3a2233;
+      --accent-soft: #46303f; --today: #33293a; --tint: 24%;
       --shadow: none; color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-      --bg: #1c1719; --card: #262022; --text: #f1e7e3; --muted: #a8968f;
-      --border: #3a3033; --accent: #ef8f95; --accent-soft: #46292c; --today: #33282a;
+      --bg: #221d27; --card: #2c2633; --text: #f3ecf7; --muted: #ab9fb8;
+      --border: #3d3446; --accent: #f0b3cf; --accent-2: #c9b3ec; --on-accent: #3a2233;
+      --accent-soft: #46303f; --today: #33293a; --tint: 24%;
       --shadow: none; color-scheme: dark;
   }
   * { box-sizing: border-box; }
@@ -40,7 +44,7 @@
   }
   button { cursor: pointer; }
   button:hover { border-color: var(--accent); }
-  .btn-accent { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
+  .btn-accent { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 700; }
 
   header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; }
   header .week { color: var(--muted); }
@@ -50,7 +54,7 @@
   .sample { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
     background: var(--accent-soft); border-radius: 14px; padding: 12px 14px; margin-bottom: 16px; }
   .progress { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 4px 0 20px; }
-  .progress > div { height: 100%; background: var(--accent); transition: width .3s; }
+  .progress > div { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .3s; }
   .progress-label { color: var(--muted); font-size: .9rem; }
 
   .top { display: grid; gap: 16px; grid-template-columns: 1fr; margin-bottom: 16px; }
@@ -66,13 +70,13 @@
   .day-head { display: flex; flex-wrap: wrap; gap: 0 8px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
   .day-head h3 { font-size: 1.05rem; }
   .day-head .date { color: var(--muted); font-size: .85rem; }
-  .day.today .day-head h3::after { content: "heute"; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--accent); color: #fff; font-size: .7rem; font-family: Nunito, sans-serif; font-weight: 700; vertical-align: middle; }
+  .day.today .day-head h3::after { content: "heute"; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: .7rem; font-family: Nunito, sans-serif; font-weight: 700; vertical-align: middle; }
   ul.items { list-style: none; margin: 0 0 8px; padding: 0; flex: 1; display: flex; flex-direction: column; gap: 6px; }
   li.item { display: grid; grid-template-columns: auto 1fr auto; gap: 6px; align-items: start;
-    padding: 6px 8px; border-radius: 10px; background: color-mix(in srgb, var(--c) 12%, transparent); border-left: 4px solid var(--c); }
+    padding: 6px 8px; border-radius: 10px; background: color-mix(in srgb, var(--c) var(--tint), transparent); border-left: 4px solid var(--c); }
   li.item input[type=checkbox] { margin-top: 4px; accent-color: var(--c); width: 16px; height: 16px; }
   li.item .txt { overflow-wrap: break-word; hyphens: auto; font-size: .92rem; min-width: 0; }
-  li.item .time { font-weight: 700; font-size: .8rem; color: var(--c); display: block; }
+  li.item .time { font-weight: 700; font-size: .8rem; color: color-mix(in srgb, var(--c) 40%, var(--text)); display: block; }
   li.item.done .txt { text-decoration: line-through; opacity: .55; }
   li.item .del { border: none; background: none; padding: 0 2px; color: var(--muted); opacity: 0; font-size: 1rem; line-height: 1; }
   li.item:hover .del, li.item:focus-within .del { opacity: 1; }
@@ -95,7 +99,8 @@
   .habits input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
   .habits .add-habit { display: flex; gap: 6px; margin-top: 8px; }
   .habits .add-habit input { flex: 1; min-width: 0; }
-  .habits th.today { color: var(--accent); }
+  .habits th.today { color: var(--on-accent); background: var(--accent-soft); border-radius: 8px; }
+  .habits th.today { color: var(--text); }
 
   .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; color: var(--muted); font-size: .85rem; }
   .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--c); margin-right: 5px; }
@@ -112,7 +117,7 @@
 <main>
   <header>
     <div>
-      <h1 id="title" contenteditable="true" spellcheck="false" title="Zum Ändern anklicken">Mein Wochenplaner</h1>
+      <h1 id="title" contenteditable="true" spellcheck="false" title="Zum Ändern anklicken">Janas Wochenplaner</h1>
       <div class="week" id="weekLabel"></div>
     </div>
     <span class="spacer"></span>
@@ -174,7 +179,7 @@
   function load() {
     try {
       const s = JSON.parse(localStorage.getItem(KEY));
-      if (s && s.weeks) return s;
+      if (s && s.weeks) { if (s.title === 'Mein Wochenplaner') s.title = 'Janas Wochenplaner'; return s; }
     } catch {}
     return sampleState();
   }
@@ -182,7 +187,7 @@
     const m = key(startOfWeek(new Date()));
     const ex = (text, time, cat, done = false) => ({ id: uid(), text, time, cat, done, sample: true });
     return {
-      title: 'Mein Wochenplaner', habits: ['Sport', 'Lesen', 'Früh schlafen'], sample: true,
+      title: 'Janas Wochenplaner', habits: ['Sport', 'Lesen', 'Früh schlafen'], sample: true,
       weeks: { [m]: {
         items: [
           [ex('Teammeeting', '09:30', 'arbeit', true), ex('Yoga', '18:00', 'sport')],
@@ -319,7 +324,7 @@
 
   $('focus').addEventListener('input', (e) => { week().focus = e.target.value; save(); });
   $('notes').addEventListener('input', (e) => { week().notes = e.target.value; save(); });
-  $('title').addEventListener('blur', (e) => { state.title = e.target.textContent.trim() || 'Mein Wochenplaner'; save(); render(); });
+  $('title').addEventListener('blur', (e) => { state.title = e.target.textContent.trim() || 'Janas Wochenplaner'; save(); render(); });
   $('title').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
 
   $('prev').addEventListener('click', () => { monday = addDays(monday, -7); render(); });
