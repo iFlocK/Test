@@ -174,6 +174,17 @@
   @keyframes beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.25); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } }
   @media (prefers-reduced-motion: reduce) { .heart { animation: none; } }
 
+  /* Erfolge zum Aufklappen */
+  .ach-summary { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; cursor: pointer; list-style: none; border-radius: 10px; }
+  .ach-summary::-webkit-details-marker { display: none; }
+  .ach-summary h2 { font-size: 1.15rem; }
+  .ach-summary .muted { margin-left: auto; font-size: .85rem; }
+  .ach-icons { font-size: .95rem; letter-spacing: 1px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 50%; }
+  .chev { transition: transform .2s; color: var(--muted); }
+  details[open] .chev { transform: rotate(180deg); }
+  details[open] .ach-icons { display: none; }
+  @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
+
   /* KW-Übersicht */
   .overlay { position: fixed; inset: 0; z-index: 40; background: rgba(40, 25, 45, .35); display: grid; place-items: center;
     padding: max(16px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
@@ -326,8 +337,10 @@
   </section>
 
   <section class="card achievements" id="achCard">
-    <div class="todos-head"><h2>Erfolge</h2><span class="muted" id="achCount"></span></div>
-    <div class="ach-grid" id="achGrid"></div>
+    <details id="achDetails">
+      <summary class="ach-summary"><h2>Erfolge</h2><span class="ach-icons" id="achIcons" aria-hidden="true"></span><span class="muted" id="achCount"></span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="ach-grid" id="achGrid"></div>
+    </details>
   </section>
 
   <p class="motto">Entscheidend ist die langfristige Gewohnheit, nicht Perfektion.</p>
@@ -712,7 +725,8 @@
   }
   function renderAch() {
     const n = ACH.filter(([id]) => state.ach[id]).length;
-    $('achCount').textContent = `${n} von ${ACH.length} freigeschaltet`;
+    $('achCount').textContent = `${n} von ${ACH.length}`;
+    $('achIcons').textContent = ACH.filter(([id]) => state.ach[id]).map(([, icon]) => icon).join('');
     $('achGrid').innerHTML = ACH.map(([id, icon, name, desc]) => {
       const got = state.ach[id];
       const when = got ? new Date(got + 'T12:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
@@ -856,6 +870,10 @@
     state.achResetId = ACH_RESET_ID;
     persist();
   }
+
+  // Erfolge: auf- oder zugeklappt merken
+  try { $('achDetails').open = localStorage.getItem('janas-woche.achOpen') === '1'; } catch {}
+  $('achDetails').addEventListener('toggle', () => { try { localStorage.setItem('janas-woche.achOpen', $('achDetails').open ? '1' : '0'); } catch {} });
 
   renderWater();
   renderAch();
