@@ -42,10 +42,6 @@ Benutzername, Passwort und Geheimschlüssel stehen nicht im Code, sondern als Ne
 Einträge werden nur im Browser des jeweiligen Geräts gespeichert (localStorage, Schlüssel `janas-woche.v2`).
 Bei Änderungen das Speicherformat beibehalten, damit vorhandene Einträge erhalten bleiben.
 
-## Gast-Zugang
-Benutzername `gast`, Passwort `gast`: zeigt eine automatische Vorschau aller Funktionen mit Beispieldaten.
-Im Gastmodus wird nichts gespeichert; Janas eigene Daten sind davon nicht betroffen.
-
 ## Änderungen testen, ohne Netlify-Guthaben zu verbrauchen
 1. Änderungen in `janas-woche/public/index.html` machen.
 2. Vorschau erzeugen: `python3 janas-woche/tools/make-preview.py vorschau.html` und als Claude-Artifact ansehen.

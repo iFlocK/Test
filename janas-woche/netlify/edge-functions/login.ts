@@ -5,8 +5,6 @@ import type { Config, Context } from "@netlify/edge-functions";
 
 const COOKIE = "jw_session";
 const MAX_AGE = 60 * 60 * 24 * 365; // ein Jahr angemeldet bleiben
-// Gast-Zugang zum Herzeigen: zeigt nur eine Vorschau mit Beispieldaten.
-const GUEST_USER = "gast", GUEST_PASS = "gast", GUEST_MAX_AGE = 60 * 60 * 24 * 7;
 
 const enc = new TextEncoder();
 
@@ -45,11 +43,7 @@ export default async (req: Request, context: Context) => {
   const url = new URL(req.url);
   // Ändert sich das Passwort, werden alte Anmeldungen ungültig.
   const token = await sign(secret, `janas-woche:${user}:${pass}`);
-  const guestToken = await sign(secret, "janas-woche:guest");
-  const cookie = context.cookies.get(COOKIE) ?? "";
-  const isJana = safeEqual(cookie, token);
-  const isGuest = !isJana && safeEqual(cookie, guestToken);
-  const loggedIn = isJana || isGuest;
+  const loggedIn = safeEqual(context.cookies.get(COOKIE) ?? "", token);
 
   if (url.pathname === "/logout") return redirect("/", cookieHeader("", 0));
 
@@ -61,9 +55,6 @@ export default async (req: Request, context: Context) => {
       if (safeEqual(u, user.trim().toLowerCase()) && safeEqual(p, pass)) {
         return redirect("/", cookieHeader(token, MAX_AGE));
       }
-      if (u === GUEST_USER && p.trim().toLowerCase() === GUEST_PASS) {
-        return redirect("/", cookieHeader(guestToken, GUEST_MAX_AGE));
-      }
       return loginPage(true);
     }
     return loggedIn ? redirect("/") : loginPage(false);
@@ -72,16 +63,6 @@ export default async (req: Request, context: Context) => {
   if (url.pathname === "/api/weather") {
     if (!loggedIn) return json({ error: "Nicht angemeldet" }, 401);
     return weather(url, context);
-  }
-
-  // Gäste bekommen dieselbe Seite, aber mit Vorschau-Modus (eigene Beispieldaten, nichts wird gespeichert).
-  if (isGuest && (url.pathname === "/" || url.pathname === "/index.html")) {
-    const res = await context.next();
-    const html = await res.text();
-    const headers = new Headers(res.headers);
-    headers.set("Cache-Control", "no-store");
-    headers.delete("content-length");
-    return new Response(html.replace("<head>", "<head>\n<script>window.JANA_GUEST = true;</script>"), { status: res.status, headers });
   }
 
   if (loggedIn) return; // weiter zur eigentlichen Seite
