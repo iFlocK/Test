@@ -60,9 +60,76 @@ export default async (req: Request, context: Context) => {
     return loggedIn ? redirect("/") : loginPage(false);
   }
 
+  if (url.pathname === "/api/weather") {
+    if (!loggedIn) return json({ error: "Nicht angemeldet" }, 401);
+    return weather(url, context);
+  }
+
   if (loggedIn) return; // weiter zur eigentlichen Seite
   return loginPage(false);
 };
+
+// ---------- Wetter & Ort ----------
+function json(data: unknown, status = 200, extra: Record<string, string> = {}): Response {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...extra },
+  });
+}
+
+// Koordinaten auf ca. 1 km runden: genug für Wetter und Ortsnamen, weniger genau als der echte Standort.
+const round = (n: number) => Math.round(n * 100) / 100;
+
+async function placeName(lat: number, lon: number): Promise<{ city: string | null; region: string | null } | null> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10&accept-language=de`,
+      { headers: { "User-Agent": "janas-woche/1.0 (https://janas-woche.netlify.app)" }, signal: AbortSignal.timeout(4000) },
+    );
+    if (!res.ok) return null;
+    const j = await res.json();
+    const a = j.address ?? {};
+    return { city: a.city ?? a.town ?? a.village ?? a.municipality ?? a.county ?? null, region: a.state ?? null };
+  } catch {
+    return null;
+  }
+}
+
+async function weather(url: URL, context: Context): Promise<Response> {
+  const qLat = parseFloat(url.searchParams.get("lat") ?? "");
+  const qLon = parseFloat(url.searchParams.get("lon") ?? "");
+  const precise = Number.isFinite(qLat) && Number.isFinite(qLon) && Math.abs(qLat) <= 90 && Math.abs(qLon) <= 180;
+  const geoLat = context.geo?.latitude, geoLon = context.geo?.longitude;
+  if (!precise && (typeof geoLat !== "number" || typeof geoLon !== "number")) {
+    return json({ error: "Standort unbekannt" }, 503);
+  }
+  const lat = round(precise ? qLat : geoLat as number);
+  const lon = round(precise ? qLon : geoLon as number);
+
+  const wUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+    `&current=temperature_2m,apparent_temperature,weather_code,is_day,wind_speed_10m` +
+    `&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&forecast_days=2`;
+  const [wRes, place] = await Promise.all([
+    fetch(wUrl, { signal: AbortSignal.timeout(5000) }).catch(() => null),
+    placeName(lat, lon),
+  ]);
+  if (!wRes || !wRes.ok) return json({ error: "Wetterdienst gerade nicht erreichbar" }, 502);
+  const w = await wRes.json();
+  const c = w.current ?? {}, d = w.daily ?? {};
+
+  return json({
+    source: precise ? "precise" : "approx",
+    city: place?.city ?? context.geo?.city ?? null,
+    region: place?.region ?? context.geo?.subdivision?.name ?? null,
+    time: c.time ?? null,
+    current: {
+      temp: c.temperature_2m, feels: c.apparent_temperature, code: c.weather_code,
+      isDay: c.is_day === 1, wind: c.wind_speed_10m,
+    },
+    today: { max: d.temperature_2m_max?.[0], min: d.temperature_2m_min?.[0] },
+    sunrise: d.sunrise ?? [], sunset: d.sunset ?? [],
+  }, 200, { "Cache-Control": "private, max-age=600" });
+}
 
 export const config: Config = {
   path: "/*",

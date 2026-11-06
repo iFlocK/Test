@@ -47,7 +47,7 @@
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font-body); }
-  main { max-width: 1280px; margin: 0 auto; padding-block: 28px 120px;
+  main { max-width: 1280px; margin: 0 auto; padding-block: 28px 180px;
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
     display: grid; gap: 18px; }
   @media (min-width: 1560px) { main { max-width: 1560px; } }
@@ -116,6 +116,21 @@
   textarea { width: 100%; min-height: 110px; resize: vertical; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; background: var(--card); }
   .motto { text-align: center; color: var(--muted); font-size: .9rem; max-width: 60ch; margin: 4px auto 0; }
 
+  /* Heute: Wetter, Ort, Mond */
+  .today { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; }
+  #wxIcon { width: 96px; height: 96px; image-rendering: pixelated; background: var(--soft); border-radius: 20px; display: block; }
+  #wxIcon.night { background: #3b3352; }
+  .today-text { display: grid; gap: 3px; min-width: 0; }
+  .today h2 { font-size: 1.35rem; }
+  .today-date { color: var(--muted); font-size: .92rem; }
+  .today-wx { font-size: .95rem; }
+  .today-wx strong { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; margin-right: 2px; }
+  .today-moon { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: .88rem; }
+  .today-moon canvas { width: 32px; height: 32px; image-rendering: pixelated; flex: none; }
+  .loc-btn { justify-self: start; border: 1px dashed var(--accent); background: none; color: var(--accent-ink); border-radius: 999px;
+    padding: 3px 12px; font-weight: 800; font-size: .82rem; margin-top: 4px; }
+  @media (max-width: 440px) { #wxIcon { width: 72px; height: 72px; border-radius: 16px; } .today { gap: 12px; } }
+
   /* Langfristige To-dos */
   .todos-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
   .todos h2 { font-size: 1.15rem; }
@@ -145,10 +160,11 @@
   .quote:hover { background: color-mix(in srgb, var(--accent) 25%, var(--soft)); }
 
   /* Hundegarten mit Labrador */
-  .yard { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 4px); height: 72px; pointer-events: none; z-index: 20; }
-  .yard-clip { position: absolute; inset: -12px 0 calc(-4px - env(safe-area-inset-bottom, 0px)); overflow: hidden;
+  /* Netlify blendet im kostenlosen Tarif unten rechts ein Schild ein; der Garten steht deshalb darüber. */
+  .yard { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 58px); height: 72px; pointer-events: none; z-index: 20; }
+  .yard-clip { position: absolute; inset: -12px 0 calc(-58px - env(safe-area-inset-bottom, 0px)); overflow: hidden;
     background: linear-gradient(to top, var(--bg) 55%, transparent); }
-  .yard canvas { bottom: calc(4px + env(safe-area-inset-bottom, 0px)); }
+  .yard canvas { bottom: calc(58px + env(safe-area-inset-bottom, 0px)); }
   .yard canvas { position: absolute; left: 0; height: 72px; image-rendering: pixelated; display: block; }
   .bubble { position: absolute; bottom: 70px; left: 0; background: var(--card); color: var(--text); border: 2px solid var(--accent);
     border-radius: 12px; padding: 3px 10px; font: 800 .85rem var(--font-body); white-space: nowrap; opacity: 0; transition: opacity .15s, transform .15s; }
@@ -175,6 +191,17 @@
       <button class="pill" id="sound" type="button"></button>
     </div>
   </header>
+
+  <section class="card today" id="todayCard" aria-live="polite">
+    <canvas id="wxIcon" width="24" height="24" role="img" aria-label="Wetter"></canvas>
+    <div class="today-text">
+      <h2 id="greet">Hallo Jana!</h2>
+      <div class="today-date" id="dateLine"></div>
+      <div class="today-wx" id="wxLine">Wetter wird geladen…</div>
+      <div class="today-moon"><canvas id="moonIcon" width="16" height="16" aria-hidden="true"></canvas><span id="moonLine"></span></div>
+      <button class="loc-btn" id="locBtn" type="button" hidden>📍 Genauen Standort verwenden</button>
+    </div>
+  </section>
 
   <section class="days" id="days"></section>
 
@@ -663,6 +690,255 @@
   });
 
   requestAnimationFrame(loop);
+})();
+</script>
+<script>
+(() => {
+  // ---------- Heute: Begrüßung, Datum, Ort, Wetter (über /api/weather) und Mondphase ----------
+  const $ = (id) => document.getElementById(id);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const WX_KEY = 'janas-woche.weather', GEO_KEY = 'janas-woche.geo';
+  const FRESH = 15 * 60 * 1000;
+
+  // Mondphase (synodischer Monat ab Neumond am 6.1.2000, 18:14 UTC)
+  const SYN = 29.530588853;
+  function moon(date = new Date()) {
+    const age = (((date - Date.UTC(2000, 0, 6, 18, 14)) / 864e5) % SYN + SYN) % SYN;
+    const p = age / SYN;
+    const illum = (1 - Math.cos(2 * Math.PI * p)) / 2;
+    const names = [[1.85, 'Neumond'], [5.54, 'Zunehmende Sichel'], [9.23, 'Erstes Viertel'], [12.92, 'Zunehmender Mond'],
+      [16.61, 'Vollmond'], [20.3, 'Abnehmender Mond'], [23.99, 'Letztes Viertel'], [27.68, 'Abnehmende Sichel'], [99, 'Neumond']];
+    const name = names.find(([a]) => age < a)[1];
+    const toFull = (SYN / 2 - age + SYN) % SYN, toNew = SYN - age;
+    return { age, p, illum, name, toFull, toNew };
+  }
+
+  // Wettercodes (WMO) → Text und Bildart
+  function describe(code, isDay) {
+    const T = {
+      0: isDay ? 'Sonnig' : 'Klar', 1: isDay ? 'Heiter' : 'Überwiegend klar', 2: 'Teilweise bewölkt', 3: 'Bedeckt',
+      45: 'Nebel', 48: 'Nebel mit Reif', 51: 'Leichter Nieselregen', 53: 'Nieselregen', 55: 'Starker Nieselregen',
+      56: 'Gefrierender Nieselregen', 57: 'Gefrierender Nieselregen', 61: 'Leichter Regen', 63: 'Regen', 65: 'Starker Regen',
+      66: 'Gefrierender Regen', 67: 'Gefrierender Regen', 71: 'Leichter Schneefall', 73: 'Schneefall', 75: 'Starker Schneefall',
+      77: 'Schneegriesel', 80: 'Regenschauer', 81: 'Regenschauer', 82: 'Heftige Regenschauer', 85: 'Schneeschauer',
+      86: 'Starke Schneeschauer', 95: 'Gewitter', 96: 'Gewitter mit Hagel', 99: 'Gewitter mit Hagel',
+    };
+    const kind = code === 0 ? 'clear' : code <= 2 ? 'partly' : code === 3 ? 'cloudy' : code <= 48 ? 'fog'
+      : code <= 57 ? 'drizzle' : code <= 67 || (code >= 80 && code <= 82) ? 'rain'
+      : code <= 77 || code === 85 || code === 86 ? 'snow' : code >= 95 ? 'thunder' : 'cloudy';
+    return { text: T[code] ?? 'Wetter', kind };
+  }
+
+  // ---------- Pixel-Zeichnungen ----------
+  const P = {
+    o: '#4a3f55', sun: '#ffd36e', sunCore: '#ffe9a8', ray: '#f6b94a',
+    moonLit: '#fdf3c4', moonDark: '#6b6280', crater: '#eedc9a', star: '#fff6c9',
+    cloud: '#ffffff', cloudShade: '#e4dcec', grey: '#d9d2e3', greyShade: '#b9afc8', dark: '#9d93ad', darkShade: '#82789a',
+    drop: '#5f9be0', flake: '#ffffff', flakeEdge: '#8fb3e6', bolt: '#ffd84d', fog: '#cfc6db',
+  };
+  const dot = (g, x, y, c) => { g.fillStyle = c; g.fillRect(x, y, 1, 1); };
+  function disk(g, cx, cy, r, c) {
+    for (let y = Math.floor(cy - r - 1); y <= cy + r + 1; y++)
+      for (let x = Math.floor(cx - r - 1); x <= cx + r + 1; x++)
+        if ((x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2 <= r * r) dot(g, x, y, c);
+  }
+  function drawSun(g, cx, cy, r, t) {
+    const long = !reduce && Math.floor(t / 600) % 2 === 0;
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4, len = (i % 2 === 0) === long ? 3 : 2;
+      for (let k = 1; k <= len; k++) dot(g, Math.round(cx - 0.5 + Math.cos(a) * (r + 1 + k)), Math.round(cy - 0.5 + Math.sin(a) * (r + 1 + k)), P.ray);
+    }
+    disk(g, cx, cy, r + 1, P.o); disk(g, cx, cy, r, P.sun); disk(g, cx - 1, cy - 1, r * 0.45, P.sunCore);
+  }
+  function drawMoon(g, cx, cy, r, m) {
+    disk(g, cx, cy, r + 1, P.o);
+    const waxing = m.p < 0.5, k = Math.cos(2 * Math.PI * m.p);
+    for (let y = Math.floor(cy - r); y <= cy + r; y++)
+      for (let x = Math.floor(cx - r); x <= cx + r; x++) {
+        const nx = (x + 0.5 - cx) / r, ny = (y + 0.5 - cy) / r;
+        if (nx * nx + ny * ny > 1) continue;
+        const w = Math.sqrt(1 - ny * ny), xt = k * w;
+        const lit = waxing ? nx > xt : nx < -xt;
+        dot(g, x, y, lit ? P.moonLit : P.moonDark);
+      }
+    // Krater nur auf der hellen Seite sichtbar
+    for (const [dx, dy] of [[0.3, -0.3], [-0.35, 0.25], [0.15, 0.45]]) {
+      const x = Math.round(cx - 0.5 + dx * r), y = Math.round(cy - 0.5 + dy * r);
+      const nx = (x + 0.5 - cx) / r, ny = (y + 0.5 - cy) / r, w = Math.sqrt(Math.max(0, 1 - ny * ny));
+      if (r >= 5 && (waxing ? nx > k * w : nx < -k * w)) dot(g, x, y, P.crater);
+    }
+  }
+  function drawCloud(g, cx, cy, fill, shade) {
+    const blobs = [[cx - 4, cy + 1, 3.2], [cx, cy - 1, 4.3], [cx + 4, cy + 1, 3.4]];
+    for (const [x, y, r] of blobs) disk(g, x, y, r + 1, P.o);
+    g.fillStyle = P.o; g.fillRect(Math.round(cx - 8), Math.round(cy + 1), 16, 4);
+    for (const [x, y, r] of blobs) disk(g, x, y, r, fill);
+    g.fillStyle = fill; g.fillRect(Math.round(cx - 7), Math.round(cy + 1), 14, 3);
+    g.fillStyle = shade; g.fillRect(Math.round(cx - 7), Math.round(cy + 3), 14, 1);
+  }
+  function drawStars(g, t) {
+    [[3, 4], [20, 3], [21, 18], [4, 19], [16, 6]].forEach(([x, y], i) => {
+      if (reduce || Math.floor(t / 700 + i) % 3 !== 0) dot(g, x, y, P.star);
+    });
+  }
+  function scene(g, kind, isDay, m, t) {
+    g.clearRect(0, 0, 24, 24);
+    const drift = reduce ? 0 : Math.round(Math.sin(t / 1500));
+    const drops = (n, speed, c, len) => {
+      for (let i = 0; i < n; i++) {
+        const x = 6 + (i * 5) % 13, y = 16 + ((reduce ? i * 2 : t / speed + i * 2.3) % 7);
+        g.fillStyle = c; g.fillRect(x, Math.floor(y), 1, len);
+      }
+    };
+    switch (kind) {
+      case 'clear':
+        if (isDay) drawSun(g, 12, 12, 5, t); else { drawStars(g, t); drawMoon(g, 12, 12, 7, m); }
+        break;
+      case 'partly':
+        if (isDay) drawSun(g, 9, 9, 4, t); else { drawStars(g, t); drawMoon(g, 9, 9, 5, m); }
+        drawCloud(g, 13 + drift, 15, P.cloud, P.cloudShade);
+        break;
+      case 'cloudy':
+        drawCloud(g, 9, 10, P.grey, P.greyShade);
+        drawCloud(g, 14 + drift, 14, P.cloud, P.cloudShade);
+        break;
+      case 'fog':
+        drawCloud(g, 12 + drift, 9, P.grey, P.greyShade);
+        [16, 18, 20].forEach((y, i) => { g.fillStyle = P.fog; g.fillRect(4 + (reduce ? 0 : Math.round(Math.sin(t / 800 + i) * 2)) + i, y, 14, 1); });
+        break;
+      case 'drizzle':
+        drawCloud(g, 12 + drift, 9, P.grey, P.greyShade); drops(4, 160, P.drop, 1);
+        break;
+      case 'rain':
+        drawCloud(g, 12 + drift, 9, P.grey, P.greyShade); drops(6, 90, P.drop, 2);
+        break;
+      case 'snow':
+        drawCloud(g, 12 + drift, 9, P.cloud, P.cloudShade);
+        for (let i = 0; i < 5; i++) {
+          const y = 16 + ((reduce ? i * 2 : t / 260 + i * 2.6) % 7), x = 6 + (i * 5) % 13 + (reduce ? 0 : Math.round(Math.sin(t / 400 + i)));
+          const fy = Math.floor(y);
+          dot(g, x, fy, P.flake); dot(g, x - 1, fy, P.flakeEdge); dot(g, x + 1, fy, P.flakeEdge); dot(g, x, fy - 1, P.flakeEdge); dot(g, x, fy + 1, P.flakeEdge);
+        }
+        break;
+      case 'thunder':
+        drawCloud(g, 12 + drift, 8, P.dark, P.darkShade); drops(4, 90, P.drop, 2);
+        if (reduce || t % 2400 < 350) {
+          g.fillStyle = P.bolt;
+          [[12, 13], [11, 14], [11, 15], [12, 15], [13, 15], [12, 16], [12, 17], [11, 18], [11, 19]].forEach(([x, y]) => g.fillRect(x, y, 1, 1));
+        }
+        break;
+    }
+  }
+
+  // ---------- Anzeige ----------
+  const wxCanvas = $('wxIcon'), wx = wxCanvas.getContext('2d');
+  const mCanvas = $('moonIcon'), mg = mCanvas.getContext('2d');
+  let state = { kind: null, isDay: null };
+
+  function greeting(d = new Date()) {
+    const h = d.getHours();
+    return h >= 5 && h < 11 ? 'Guten Morgen, Jana!' : h < 17 && h >= 11 ? 'Hallo Jana, schönen Tag!' : h >= 17 && h < 22 ? 'Guten Abend, Jana!' : 'Gute Nacht, Jana!';
+  }
+  const hm = (iso) => (iso || '').slice(11, 16);
+  const deg = (n) => Number.isFinite(n) ? Math.round(n) + '°' : '–';
+
+  function renderStatic() {
+    const now = new Date();
+    $('greet').textContent = greeting(now);
+    const date = now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const c = state.data;
+    $('dateLine').textContent = c?.city ? `${date} · ${c.city}${c.source === 'approx' ? ' (ungefähr)' : ''}` : date;
+    const m = moon(now);
+    mg.clearRect(0, 0, 16, 16); drawMoon(mg, 8, 8, 6, m);
+    let extra = '';
+    if (m.name === 'Vollmond') extra = ' · Heute ist Vollmond 🌕';
+    else if (m.name === 'Neumond') extra = ' · Heute ist Neumond';
+    else if (m.p < 0.5) extra = ` · Vollmond in ${Math.max(1, Math.round(m.toFull))} ${Math.round(m.toFull) === 1 ? 'Tag' : 'Tagen'}`;
+    else extra = ` · Neumond in ${Math.max(1, Math.round(m.toNew))} ${Math.round(m.toNew) === 1 ? 'Tag' : 'Tagen'}`;
+    $('moonLine').textContent = `${m.name} · ${Math.round(m.illum * 100)} % beleuchtet${extra}`;
+  }
+
+  function renderWeather(data) {
+    state.data = data;
+    const cur = data.current || {};
+    const { text, kind } = describe(cur.code, cur.isDay);
+    state.kind = kind; state.isDay = !!cur.isDay;
+    // nächster Sonnenauf- bzw. -untergang nach der Ortszeit der Wetterdaten
+    const now = data.time || '';
+    const nextRise = (data.sunrise || []).find((s) => s > now), nextSet = (data.sunset || []).find((s) => s > now);
+    const sun = cur.isDay ? (nextSet ? ` · Sonnenuntergang ${hm(nextSet)}` : '') : (nextRise ? ` · Sonnenaufgang ${hm(nextRise)}` : '');
+    $('wxLine').innerHTML = `<strong>${deg(cur.temp)}</strong> ${text} · gefühlt ${deg(cur.feels)} · ↑${deg(data.today?.max)} ↓${deg(data.today?.min)}${sun}`;
+    $('wxIcon').setAttribute('aria-label', `${text}, ${deg(cur.temp)}`);
+    $('locBtn').hidden = data.source === 'precise';
+    renderStatic();
+  }
+
+  function fallbackScene() {
+    const h = new Date().getHours();
+    state.kind = 'clear'; state.isDay = h >= 7 && h < 18;
+  }
+
+  // ---------- Standort & Abruf ----------
+  let geoMode = 'approx';
+  try { geoMode = localStorage.getItem(GEO_KEY) || 'approx'; } catch {}
+  const position = () => new Promise((res, rej) => {
+    if (!navigator.geolocation) return rej(new Error('kein GPS'));
+    navigator.geolocation.getCurrentPosition(res, rej, { timeout: 9000, maximumAge: 10 * 60 * 1000, enableHighAccuracy: false });
+  });
+
+  async function load(force = false) {
+    try {
+      const cached = JSON.parse(localStorage.getItem(WX_KEY) || 'null');
+      if (cached?.data) renderWeather(cached.data);
+      if (!force && cached && Date.now() - cached.at < FRESH && cached.mode === geoMode) return;
+    } catch {}
+    let qs = '';
+    if (geoMode === 'precise') {
+      try { const p = await position(); qs = `?lat=${p.coords.latitude.toFixed(3)}&lon=${p.coords.longitude.toFixed(3)}`; }
+      catch { /* Standort gerade nicht verfügbar: ungefährer Ort */ }
+    }
+    try {
+      const res = await fetch('/api/weather' + qs, { credentials: 'same-origin', cache: 'no-store' });
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      renderWeather(data);
+      try { localStorage.setItem(WX_KEY, JSON.stringify({ at: Date.now(), mode: geoMode, data })); } catch {}
+    } catch {
+      if (!state.data) { $('wxLine').textContent = 'Wetter gerade nicht verfügbar. Ich versuche es gleich noch einmal.'; fallbackScene(); }
+    }
+  }
+
+  $('locBtn').addEventListener('click', async () => {
+    const btn = $('locBtn');
+    btn.textContent = '📍 Standort wird abgefragt…';
+    try {
+      await position();
+      geoMode = 'precise';
+      try { localStorage.setItem(GEO_KEY, 'precise'); } catch {}
+      await load(true);
+      btn.textContent = '📍 Genauen Standort verwenden';
+    } catch {
+      btn.textContent = '📍 Standort nicht erlaubt, ich nutze den ungefähren Ort';
+      setTimeout(() => { btn.textContent = '📍 Genauen Standort verwenden'; }, 4000);
+    }
+  });
+
+  // Animation: wenige Bilder pro Sekunde reichen für Pixel-Wetter
+  let lastDraw = 0;
+  function tick(t) {
+    if (t - lastDraw > 110 && state.kind) { lastDraw = t; wxCanvas.classList.toggle('night', !state.isDay); scene(wx, state.kind, state.isDay, moon(), t); }
+    if (!reduce) requestAnimationFrame(tick);
+  }
+
+  fallbackScene();
+  renderStatic();
+  load();
+  const still = () => { wxCanvas.classList.toggle('night', !state.isDay); scene(wx, state.kind, state.isDay, moon(), 0); };
+  if (reduce) { still(); setInterval(still, 60000); }
+  else requestAnimationFrame(tick);
+  setInterval(() => load(), FRESH);
+  setInterval(renderStatic, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { renderStatic(); load(); } });
 })();
 </script>
 </body>
