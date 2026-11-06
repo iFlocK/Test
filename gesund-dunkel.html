@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Janas Gesundheitsplan (Dunkel)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Layout: Merksatz als Formel oben, dann Woche + Big 10 nebeneinander, darunter die 9 Bereiche als Karten-Raster */
+  :root {
+    --bg: #1f1a24; --card: #2a2431; --text: #f3ecf7; --muted: #ab9fb8;
+    --border: #3b3245; --soft: #362c3d; --accent: #f0b3cf; --accent-2: #c9b3ec;
+    --accent-ink: #f0b3cf; --on-accent: #3a2233; --tint: 26%;
+    --c1: #8fcfb0; --c2: #f2c08a; --c3: #c2a6e6; --c4: #97bbe8; --c5: #f09bb0;
+    --c6: #f2959e; --c7: #a6c6d0; --c8: #b5d996; --c9: #eed585;
+    color-scheme: dark;
+    --font-display: Fraunces, Georgia, serif;
+    --font-body: Nunito, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.55 var(--font-body); }
+  main { max-width: 1180px; margin: 0 auto; padding-block: 32px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid; gap: 20px; }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 600; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.1; }
+  h2 { font-size: 1.3rem; }
+  h3 { font-size: 1.1rem; }
+  .eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: .75rem; font-weight: 800; color: var(--muted); }
+  .goal { max-width: 62ch; color: var(--muted); margin: 8px 0 0; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; min-width: 0; }
+
+  .formula { background: var(--soft); border-radius: 20px; padding: 18px 20px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .formula .term { background: var(--card); border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: .95rem; }
+  .formula .op { font-family: var(--font-display); font-size: 1.3rem; color: var(--muted); }
+  .formula .result { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; }
+
+  .two { display: grid; gap: 20px; grid-template-columns: 1fr; }
+  @media (min-width: 860px) { .two { grid-template-columns: 1.15fr 1fr; } }
+
+  .week-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; margin-bottom: 4px; }
+  .week-head .kw { color: var(--muted); font-size: .9rem; }
+  .bar { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; margin: 10px 0 4px; }
+  .bar > div { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 5px; transition: width .3s; }
+  .bar-label { font-size: .85rem; color: var(--muted); margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+  .groups { display: grid; gap: 14px 20px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .group h3 { font-family: var(--font-body); font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 4px; }
+
+  ul.check { list-style: none; padding: 0; margin: 0; display: grid; gap: 2px; }
+  ul.check label { display: grid; grid-template-columns: 22px 1fr; gap: 8px; align-items: start; padding: 5px 6px; border-radius: 10px; cursor: pointer; }
+  ul.check label:hover { background: var(--soft); }
+  ul.check input { width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--c, var(--accent)); cursor: pointer; }
+  ul.check input:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+  ul.check input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--c, var(--accent)); }
+
+  .big10 ol { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 2px; counter-reset: n; }
+  .big10 label { display: grid; grid-template-columns: 30px 22px 1fr; gap: 8px; align-items: start; padding: 5px 6px; border-radius: 10px; cursor: pointer; }
+  .big10 label:hover { background: var(--soft); }
+  .big10 .num { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; color: var(--accent-ink); text-align: right; font-variant-numeric: tabular-nums; line-height: 1.4; }
+  .big10 input { width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--accent); }
+  .big10 input:checked ~ span:last-child { color: var(--muted); text-decoration: line-through; }
+
+  .minimum { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--border); }
+  .minimum p { margin: 4px 0 10px; color: var(--muted); font-size: .92rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips span { background: var(--soft); color: var(--text); border-radius: 999px; padding: 4px 12px; font-size: .88rem; font-weight: 600; }
+
+  .areas-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-top: 8px; }
+  .areas { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); align-items: start; }
+  .area { padding: 0; overflow: hidden; }
+  .area header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: color-mix(in srgb, var(--c) var(--tint), var(--card)); }
+  .area .icon { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--card); font-size: 1.15rem; flex: none; }
+  .area header h3 { flex: 1; }
+  .area .count { font-size: .8rem; font-weight: 800; color: var(--text); background: var(--card); border-radius: 999px; padding: 2px 10px; font-variant-numeric: tabular-nums; }
+  .area ul.check { padding: 10px 12px 14px; }
+
+  .note { border-radius: 20px; padding: 16px 20px; background: var(--soft); }
+  .note strong { font-family: var(--font-display); }
+  .note p { margin: 4px 0 0; max-width: 75ch; }
+
+  .reset { font: inherit; font-size: .85rem; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  .reset:hover { color: var(--text); border-color: var(--accent); }
+  .reset.armed { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+
+  @media (prefers-reduced-motion: reduce) { .bar > div { transition: none; } }
+</style>
+</head>
+<body>
+
+<main>
+  <header>
+    <div class="eyebrow">Janas Gesundheitsplan</div>
+    <h1>Gesunder Lebensstil in den 20ern</h1>
+    <p class="goal"><strong>Ziel:</strong> Langfristig gesund bleiben und beeinflussbare Risikofaktoren für Herz-Kreislauf-Erkrankungen und kognitiven Abbau reduzieren.</p>
+  </header>
+
+  <section class="formula" aria-label="Merksatz">
+    <span class="term">Bewegen</span><span class="op">+</span>
+    <span class="term">Krafttraining</span><span class="op">+</span>
+    <span class="term">ausgewogen essen</span><span class="op">+</span>
+    <span class="term">gut schlafen</span><span class="op">+</span>
+    <span class="term">soziale Kontakte</span><span class="op">+</span>
+    <span class="term">nicht rauchen</span><span class="op">=</span>
+    <span class="result">starke Grundlage für langfristige Gesundheit</span>
+  </section>
+
+  <div class="two">
+    <section class="card">
+      <div class="week-head">
+        <h2>Diese Woche</h2>
+        <span class="kw" id="kw"></span>
+      </div>
+      <div class="bar"><div id="weekBar" style="width:0"></div></div>
+      <div class="bar-label" id="weekLabel"></div>
+      <div class="groups" id="weekGroups"></div>
+    </section>
+
+    <section class="card big10">
+      <h2>Die Big 10</h2>
+      <ol id="big10"></ol>
+      <div class="minimum">
+        <h3>Mein Mindeststandard</h3>
+        <p>Wenn ich nicht alles schaffe, konzentriere ich mich auf:</p>
+        <div class="chips" id="minimum"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="areas-head">
+    <h2>Die 9 Bereiche</h2>
+    <button class="reset" id="resetAll" type="button">Häkchen zurücksetzen</button>
+  </div>
+  <section class="areas" id="areas"></section>
+
+  <aside class="note">
+    <strong>Wichtig</strong>
+    <p>Ein gesunder Lebensstil kann das Risiko verschiedener Erkrankungen reduzieren, garantiert aber nicht, dass man später keine Demenz oder andere Krankheiten entwickelt. Entscheidend ist die langfristige Gewohnheit, nicht Perfektion.</p>
+  </aside>
+</main>
+
+<script>
+(() => {
+  const AREAS = [
+    ['ernaehrung', '🥗', 'Ernährung', 'var(--c1)', ['Täglich Obst & Gemüse', 'Häufig Vollkorn statt Weißmehl', 'Olivenöl, Nüsse & Samen als gesunde Fettquellen', '1–2× pro Woche Fisch oder andere Omega-3-Quellen', 'Hülsenfrüchte regelmäßig essen', 'Wenig stark verarbeitete Lebensmittel', 'Süßigkeiten & zuckerhaltige Getränke in Maßen', 'Wasser als Hauptgetränk', 'Insgesamt abwechslungsreich und ausgewogen essen']],
+    ['bewegung', '🏃', 'Bewegung', 'var(--c2)', ['150–300 Minuten moderate Bewegung pro Woche', '2–3× Krafttraining pro Woche', 'Regelmäßig spazieren / Fahrrad fahren / Alltagsbewegung', 'Langes Sitzen regelmäßig unterbrechen', 'Möglichst jeden Tag Bewegung']],
+    ['schlaf', '😴', 'Schlaf', 'var(--c3)', ['7–9 Stunden Schlaf anstreben', 'Möglichst regelmäßige Schlafenszeiten', 'Ausreichend Zeit zum Einschlafen und Abschalten', 'Schlafprobleme nicht dauerhaft ignorieren']],
+    ['gehirn', '🧠', 'Gehirn & Lernen', 'var(--c4)', ['Regelmäßig lesen', 'Neue Dinge lernen', 'Neue Fähigkeiten ausprobieren', 'Anspruchsvolle Hobbys pflegen', 'Sprache / Instrument / neues Fachgebiet etc.', 'Geistig neugierig bleiben']],
+    ['sozial', '👥', 'Soziale Gesundheit', 'var(--c5)', ['Regelmäßig Freunde treffen', 'Kontakt zu Familie pflegen', 'Zeit für gute Gespräche', 'Hobbys / Vereine / Gruppen', 'Nicht dauerhaft sozial isolieren']],
+    ['herz', '❤️', 'Herz & Stoffwechsel', 'var(--c6)', ['Blutdruck gelegentlich kontrollieren', 'Gesundes Körpergewicht anstreben', 'Blutzucker bei Vorsorge im Blick behalten', 'Cholesterin bei Vorsorge im Blick behalten', 'Regelmäßig bewegen', 'Nicht rauchen']],
+    ['schadstoffe', '🚭', 'Schadstoffe', 'var(--c7)', ['Nicht rauchen', 'Alkohol möglichst selten', 'Keine illegalen Drogen', 'Passivrauch möglichst vermeiden']],
+    ['psyche', '😌', 'Psyche & Stress', 'var(--c8)', ['Regelmäßig bewusst entspannen', 'Zeit für Hobbys', 'Bewegung als Stressausgleich', 'Genügend Freizeit', 'Ausreichend Erholung', 'Bei anhaltender psychischer Belastung Hilfe suchen']],
+    ['allgemein', '☀️', 'Allgemeine Gesundheit', 'var(--c9)', ['Sonnenschutz verwenden', '2× täglich Zähne putzen', 'Zahnzwischenräume reinigen', 'Regelmäßig zum Zahnarzt', 'Impfungen aktuell halten', 'Empfohlene Vorsorgeuntersuchungen wahrnehmen']],
+  ];
+  const WEEK = [
+    ['Bewegung', 'var(--c2)', ['150–300 Min. Ausdauer', '2–3× Krafttraining', 'Regelmäßig spazieren / Alltagsbewegung']],
+    ['Ernährung', 'var(--c1)', ['Täglich Gemüse & Obst', 'Mehrmals Hülsenfrüchte', '1–2× Fisch / Omega-3', 'Überwiegend unverarbeitete Lebensmittel']],
+    ['Schlaf', 'var(--c3)', ['7–9 Std. pro Nacht', 'Regelmäßiger Schlafrhythmus']],
+    ['Gehirn', 'var(--c4)', ['Mehrmals lernen / lesen', 'Neues ausprobieren']],
+    ['Soziales', 'var(--c5)', ['Freunde / Familie treffen', 'Zeit für soziale Aktivitäten']],
+    ['Erholung', 'var(--c8)', ['Zeit zum Abschalten', 'Hobby / Freizeit', 'Stressausgleich']],
+  ];
+  const BIG10 = ['Nicht rauchen', 'Regelmäßig bewegen', '2–3× pro Woche Krafttraining', 'Ausgewogen und überwiegend unverarbeitet essen', 'Blutdruck & Stoffwechselgesundheit im Blick behalten', 'Gesundes Körpergewicht anstreben', '7–9 Stunden schlafen', 'Soziale Kontakte pflegen', 'Geistig aktiv bleiben & lebenslang lernen', 'Alkohol möglichst selten oder gar nicht'];
+  const MINIMUM = ['Nicht rauchen', 'Regelmäßig bewegen', 'Krafttraining', 'Ausgewogen essen', 'Genug schlafen', 'Soziale Kontakte', 'Alkohol nur selten', 'Stress & Erholung im Gleichgewicht'];
+
+  const KEY = 'janas-gesundheitsplan.v1';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  function isoWeek(d) {
+    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+    const y = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+    return [t.getUTCFullYear(), Math.ceil(((t - y) / 864e5 + 1) / 7)];
+  }
+  const [wy, wn] = isoWeek(new Date());
+  const weekKey = `${wy}-W${wn}`;
+
+  let state = { checks: {}, weeks: {} };
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.checks) state = s; } catch {}
+  state.weeks ||= {};
+  state.weeks[weekKey] ||= {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
+
+  const item = (id, text, checked) =>
+    `<li><label><input type="checkbox" id="${id}" data-id="${id}" ${checked ? 'checked' : ''}><span>${esc(text)}</span></label></li>`;
+
+  // Wochenübersicht
+  $('kw').textContent = `KW ${wn} · startet jeden Montag neu`;
+  $('weekGroups').innerHTML = WEEK.map(([name, c, items], gi) => `
+    <div class="group" style="--c:${c}">
+      <h3>${name}</h3>
+      <ul class="check">${items.map((t, i) => item(`w-${gi}-${i}`, t, state.weeks[weekKey][`w-${gi}-${i}`])).join('')}</ul>
+    </div>`).join('');
+
+  // Big 10
+  $('big10').innerHTML = BIG10.map((t, i) => `<li><label>
+    <span class="num">${i + 1}</span>
+    <input type="checkbox" id="b-${i}" data-id="b-${i}" ${state.checks[`b-${i}`] ? 'checked' : ''}>
+    <span>${esc(t)}</span></label></li>`).join('');
+  $('minimum').innerHTML = MINIMUM.map(t => `<span>${esc(t)}</span>`).join('');
+
+  // Bereiche
+  $('areas').innerHTML = AREAS.map(([k, icon, name, c, items]) => `
+    <article class="card area" style="--c:${c}">
+      <header><span class="icon" aria-hidden="true">${icon}</span><h3>${name}</h3><span class="count" id="count-${k}"></span></header>
+      <ul class="check">${items.map((t, i) => item(`${k}-${i}`, t, state.checks[`${k}-${i}`])).join('')}</ul>
+    </article>`).join('');
+
+  function update() {
+    const ids = WEEK.flatMap(([, , items], gi) => items.map((_, i) => `w-${gi}-${i}`));
+    const done = ids.filter(id => state.weeks[weekKey][id]).length;
+    $('weekBar').style.width = (done / ids.length * 100) + '%';
+    $('weekLabel').textContent = done === ids.length ? `Alles geschafft diese Woche 🎉` : `${done} von ${ids.length} geschafft`;
+    for (const [k, , , , items] of AREAS) {
+      $(`count-${k}`).textContent = `${items.filter((_, i) => state.checks[`${k}-${i}`]).length}/${items.length}`;
+    }
+  }
+
+  document.addEventListener('change', (e) => {
+    const id = e.target.dataset?.id;
+    if (!id) return;
+    const bucket = id.startsWith('w-') ? state.weeks[weekKey] : state.checks;
+    if (e.target.checked) bucket[id] = true; else delete bucket[id];
+    save(); update();
+  });
+
+  const reset = $('resetAll');
+  reset.addEventListener('click', () => {
+    if (!reset.classList.contains('armed')) {
+      reset.classList.add('armed'); reset.textContent = 'Wirklich alle zurücksetzen?';
+      setTimeout(() => { reset.classList.remove('armed'); reset.textContent = 'Häkchen zurücksetzen'; }, 3000);
+      return;
+    }
+    state.checks = {}; save();
+    document.querySelectorAll('#areas input, #big10 input').forEach(i => { i.checked = false; });
+    reset.classList.remove('armed'); reset.textContent = 'Häkchen zurücksetzen';
+    update();
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
