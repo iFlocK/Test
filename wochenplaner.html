@@ -139,6 +139,7 @@
       <button class="pill" id="prev" aria-label="Vorherige Woche">← Woche</button>
       <button class="pill primary" id="today">Heute</button>
       <button class="pill" id="next" aria-label="Nächste Woche">Woche →</button>
+      <button class="pill" id="sound" type="button"></button>
     </div>
   </header>
 
@@ -382,7 +383,9 @@
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   function happy(msg) {
     happyUntil = performance.now() + 1500;
-    bubble.textContent = msg || pick(PRAISE);
+    const text = msg || pick(PRAISE);
+    bubble.textContent = text;
+    bark(Math.min(2, Math.max(1, (text.match(/wuff/gi) || []).length)));
     // Sprechblase im Bildschirm halten, Pfeil zeigt auf den Hund
     const bw = bubble.offsetWidth, vw = document.documentElement.clientWidth, center = x + 48;
     const left = Math.min(Math.max(8, center - bw / 2), vw - bw - 8);
@@ -392,6 +395,49 @@
     clearTimeout(hideTimer);
     hideTimer = setTimeout(() => bubble.classList.remove('show'), 1700);
   }
+  // Bellen: kurzer, synthetischer "Wuff"-Laut über Web Audio
+  const SOUND_KEY = 'janas-woche.sound';
+  let soundOn = true, actx = null;
+  try { soundOn = localStorage.getItem(SOUND_KEY) !== 'off'; } catch {}
+  const soundBtn = document.getElementById('sound');
+  const showSound = () => { soundBtn.textContent = soundOn ? '🔊 Ton an' : '🔈 Ton aus'; soundBtn.setAttribute('aria-pressed', soundOn); };
+  soundBtn.addEventListener('click', () => {
+    soundOn = !soundOn; showSound();
+    try { localStorage.setItem(SOUND_KEY, soundOn ? 'on' : 'off'); } catch {}
+  });
+  showSound();
+
+  function woof(t0) {
+    const base = 430 + Math.random() * 90;
+    const o = actx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(base * 0.8, t0);
+    o.frequency.linearRampToValueAtTime(base * 1.25, t0 + 0.03);
+    o.frequency.exponentialRampToValueAtTime(base * 0.45, t0 + 0.16);
+    const f = actx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1100; f.Q.value = 1.2;
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.6, t0 + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.19);
+    // etwas Rauschen für den Atem im Bellen
+    const len = Math.floor(actx.sampleRate * 0.12), buf = actx.createBuffer(1, len, actx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const n = actx.createBufferSource(); n.buffer = buf;
+    const nf = actx.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 1500; nf.Q.value = 0.8;
+    const ng = actx.createGain(); ng.gain.value = 0.3;
+    o.connect(f); f.connect(g); n.connect(nf); nf.connect(ng); ng.connect(g); g.connect(actx.destination);
+    o.start(t0); o.stop(t0 + 0.21); n.start(t0); n.stop(t0 + 0.13);
+  }
+  function bark(times) {
+    if (!soundOn) return;
+    try {
+      actx ||= new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === 'suspended') actx.resume();
+      const now = actx.currentTime + 0.01;
+      for (let i = 0; i < times; i++) woof(now + i * 0.24);
+    } catch {}
+  }
+
   window.janaDog = { happy };
 
   document.addEventListener('click', (e) => {
