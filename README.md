@@ -41,3 +41,7 @@ Benutzername, Passwort und Geheimschlüssel stehen nicht im Code, sondern als Ne
 `JANA_USER`, `JANA_PASS` und `AUTH_SECRET`. Nach einer Änderung dort neu deployen.
 Einträge werden nur im Browser des jeweiligen Geräts gespeichert (localStorage, Schlüssel `janas-woche.v2`).
 Bei Änderungen das Speicherformat beibehalten, damit vorhandene Einträge erhalten bleiben.
+
+## Gast-Zugang
+Benutzername `gast`, Passwort `gast`: zeigt eine automatische Vorschau aller Funktionen mit Beispieldaten.
+Im Gastmodus wird nichts gespeichert; Janas eigene Daten sind davon nicht betroffen.

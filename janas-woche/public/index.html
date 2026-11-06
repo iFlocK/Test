@@ -188,6 +188,17 @@
   details[open] .ach-icons { display: none; }
   @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
 
+  /* Gast-Vorschau */
+  .demo-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 140px); z-index: 25;
+    width: max-content; max-width: calc(100% - 24px); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 10px;
+    background: var(--card); border: 2px solid var(--accent); border-radius: 16px; padding: 8px 12px; box-shadow: 0 6px 24px rgba(120, 80, 110, .2); font-size: .85rem; }
+  .demo-tag { font-weight: 800; color: var(--accent-ink); }
+  .demo-label { font-weight: 700; text-align: center; }
+  .demo-ctrl { display: flex; align-items: center; gap: 4px; }
+  .demo-ctrl .pill { padding: 2px 9px; font-size: .8rem; }
+  .demo-step { color: var(--muted); font-size: .75rem; font-variant-numeric: tabular-nums; margin-right: 2px; }
+  .demo-out { color: var(--muted); font-size: .78rem; margin-left: 4px; }
+
   /* KW-Übersicht */
   .overlay { position: fixed; inset: 0; z-index: 40; background: rgba(40, 25, 45, .35); display: grid; place-items: center;
     padding: max(16px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
@@ -356,6 +367,17 @@
     <div class="kw-list" id="kwList"></div>
   </div>
 </div>
+<div class="demo-bar" id="demoBar" hidden>
+  <span class="demo-tag">👀 Gast-Vorschau</span>
+  <span class="demo-label" id="demoLabel"></span>
+  <span class="demo-ctrl">
+    <span class="demo-step" id="demoStep"></span>
+    <button class="pill" id="demoPrev" type="button" aria-label="Vorherige Szene">⏮</button>
+    <button class="pill" id="demoPause" type="button" aria-label="Vorschau anhalten">⏸</button>
+    <button class="pill" id="demoNext" type="button" aria-label="Nächste Szene">⏭</button>
+    <a class="demo-out" href="/logout">Abmelden</a>
+  </span>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <div class="sky" id="sky" aria-hidden="true"><canvas id="skyCanvas" width="130" height="24"></canvas></div>
 <div class="yard" id="yard" aria-hidden="true"><div class="yard-clip"><canvas id="yardCanvas" width="130" height="24"></canvas></div><div class="bubble" id="bubble"></div></div>
@@ -381,12 +403,40 @@
 
   let state = { tags: DEFAULT_TAGS, weeks: {} };
   try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.tags) state = s; } catch {}
-  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
+  const persist = () => { if (GUEST) return; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
   const save = () => { persist(); checkAchievements(); };
 
   const startOfWeek = (d) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
   const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
   const key = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+  // Gast-Vorschau: eigene Beispieldaten, nichts wird gespeichert
+  const GUEST = !!window.JANA_GUEST;
+  function demoState() {
+    const mon = startOfWeek(new Date()), last = addDays(mon, -7), last2 = addDays(mon, -14);
+    const it = (tag, done) => ({ id: uid() + Math.random().toString(36).slice(2, 5), tag, done, doneAt: done ? Date.now() : null });
+    const water = {};
+    for (let i = 0; i < 14; i++) { const d = addDays(last2, i + 7); water[key(d)] = i % 3 ? [500, 500, 500, 500, 500] : [500, 500, 250, 500]; }
+    water[key(new Date())] = [250, 500];
+    return {
+      tags: DEFAULT_TAGS.map((t) => ({ ...t })),
+      weeks: {
+        [key(mon)]: { days: [[it('kraft', true), it('gemuese', true)], [it('lesen', true), it('wasser', true)], [it('freunde', true), it('entspannen', false)],
+          [it('ausdauer', false), it('gemuese', true)], [it('lesen', false), it('spazieren', false)], [it('familie', false), it('hobby', false)], [it('kraft', false)]], note: 'Mehr schlafen und genug trinken 💧' },
+        [key(last)]: { days: [[it('kraft', true)], [it('lesen', true), it('gemuese', true)], [it('spazieren', true)], [it('ausdauer', true), it('lesen', true)],
+          [it('freunde', true)], [it('familie', true), it('entspannen', true)], [it('hobby', false)]], note: 'Gute Woche!' },
+        [key(last2)]: { days: [[it('gemuese', true)], [], [it('kraft', true), it('lesen', false)], [it('spazieren', true)], [], [it('freunde', true)], []], note: '' },
+      },
+      todos: [
+        { id: 'd1', text: 'Zahnarzttermin ausmachen', done: false, star: true, created: 1 },
+        { id: 'd2', text: 'Erste-Hilfe-Kurs auffrischen', done: false, star: false, created: 2 },
+        { id: 'd3', text: 'Fahrrad reparieren lassen', done: true, doneAt: Date.now() - 864e5, created: 3 },
+      ],
+      water, ach: { first: key(new Date()), five: key(new Date()), sip: key(new Date()), water: key(last), todo1: key(new Date()) }, flags: {},
+      achResetId: 'reset-2026-11-06', achSince: 0,
+    };
+  }
+  if (GUEST) state = demoState();
   function isoWeek(d) {
     const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
     t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
@@ -757,7 +807,7 @@
   addEventListener('jana:dogpat', () => { state.flags.dogPats = (state.flags.dogPats || 0) + 1; save(); });
 
   function renderSpecial() {
-    const sp = window.janaSpecial = getSpecial();
+    const sp = window.janaSpecial = window.JANA_DEMO_SPECIAL !== undefined ? window.JANA_DEMO_SPECIAL : getSpecial();
     const el = $('specialLine');
     el.hidden = !sp?.line;
     if (sp?.line) el.textContent = sp.line;
@@ -868,6 +918,7 @@
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('kwOverlay').hidden) closeOverview(); });
 
   // Einmaliges Zurücksetzen der Erfolge. Einträge bleiben, gezählt wird nur, was danach passiert.
+  window.janaApp = { getSpecial, easterSunday, renderSpecial: () => renderSpecial() };
   const ACH_RESET_ID = 'reset-2026-11-06';
   if (state.achResetId !== ACH_RESET_ID) {
     state.ach = {}; state.flags = {}; state.achSince = Date.now();
@@ -1099,7 +1150,7 @@
   const snowy = () => wxNow().kind === 'snow';
   const hot = () => Number.isFinite(wxNow().temp) && wxNow().temp >= 25;
   const cold = () => Number.isFinite(wxNow().temp) && wxNow().temp <= 3;
-  const hourNow = () => new Date().getHours();
+  const hourNow = () => window.JANA_HOUR ?? new Date().getHours();
   const lateNight = () => { const h = hourNow(); return h >= 22 || h < 6; };
   const night = () => wxNow().isDay === false || lateNight();
   const morning = () => { const h = hourNow(); return h >= 6 && h < 10 && !night(); };
@@ -1347,7 +1398,7 @@
   // Mondphase (synodischer Monat ab Neumond am 6.1.2000, 18:14 UTC)
   const SYN = 29.530588853;
   function moon(date = new Date()) {
-    const age = (((date - Date.UTC(2000, 0, 6, 18, 14)) / 864e5) % SYN + SYN) % SYN;
+    const age = window.JANA_MOONAGE != null ? window.JANA_MOONAGE : (((date - Date.UTC(2000, 0, 6, 18, 14)) / 864e5) % SYN + SYN) % SYN;
     const p = age / SYN;
     const illum = (1 - Math.cos(2 * Math.PI * p)) / 2;
     const names = [[1.85, 'Neumond'], [5.54, 'Zunehmende Sichel'], [9.23, 'Erstes Viertel'], [12.92, 'Zunehmender Mond'],
@@ -1482,7 +1533,7 @@
 
   function greeting(d = new Date()) {
     if (window.janaSpecial?.greet) return window.janaSpecial.greet;
-    const h = d.getHours();
+    const h = window.JANA_HOUR ?? d.getHours();
     return h >= 5 && h < 11 ? 'Guten Morgen, Jana!' : h < 17 && h >= 11 ? 'Hallo Jana, schönen Tag!' : h >= 17 && h < 22 ? 'Guten Abend, Jana!' : 'Gute Nacht, Jana!';
   }
   const hm = (iso) => (iso || '').slice(11, 16);
@@ -1519,6 +1570,8 @@
     renderStatic();
   }
 
+  window.janaWx = { show: (data) => renderWeather(data) };
+
   function fallbackScene() {
     const h = new Date().getHours();
     state.kind = 'clear'; state.isDay = h >= 7 && h < 18;
@@ -1534,6 +1587,7 @@
   });
 
   async function load(force = false) {
+    if (window.JANA_DEMO) return;   // Gast-Vorschau steuert das Wetter selbst
     try {
       const cached = JSON.parse(localStorage.getItem(WX_KEY) || 'null');
       if (cached?.data) renderWeather(cached.data);
@@ -1685,6 +1739,79 @@
   setInterval(() => load(), FRESH);
   setInterval(renderStatic, 60000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { renderStatic(); load(); } });
+})();
+</script>
+<script>
+(() => {
+  // ---------- Gast-Vorschau: zeigt alle Funktionen automatisch im Wechsel ----------
+  if (!window.JANA_GUEST) return;
+  window.JANA_DEMO = true;
+  const $ = (id) => document.getElementById(id);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const behavior = reduce ? 'auto' : 'smooth';
+  const app = window.janaApp, wxApi = window.janaWx;
+  const Y = new Date().getFullYear();
+  const wx = (code, isDay, temp) => ({ source: 'precise', city: 'Hamburg', region: 'Hamburg', time: '',
+    current: { temp, feels: temp - 2, code, isDay }, today: { max: temp + 3, min: temp - 4 }, sunrise: [], sunset: [] });
+  const toTop = () => scrollTo({ top: 0, behavior });
+  const toEl = (id) => $(id)?.scrollIntoView({ behavior, block: 'center' });
+  const later = (ms, fn) => { timers.push(setTimeout(fn, ms)); };
+  let timers = [];
+
+  const SCENES = [
+    { label: '☀️ Sonniger Tag: der Hund spielt, Vögel fliegen', hour: 11, wx: wx(0, true, 23), moon: 20 },
+    { label: '💧 Wasser trinken mit der Pixel-Flasche', hour: 10, wx: wx(1, true, 18), run: () => { toEl('waterCard'); later(1500, () => $('addGlass').click()); later(3500, () => $('addHalf').click()); } },
+    { label: '✅ Gewohnheit abhaken: der Hund lobt', hour: 9, wx: wx(1, true, 17), run: () => { toEl('days'); later(1600, () => document.querySelector('.item:not(.done) .toggle')?.click()); } },
+    { label: '🌧️ Regen: ab in die Hütte!', hour: 15, wx: wx(63, true, 9) },
+    { label: '❄️ Schnee rieselt', hour: 12, wx: wx(73, true, -2) },
+    { label: '⛈️ Gewitter', hour: 16, wx: wx(95, true, 14) },
+    { label: '🥵 Hitze: der Hund hechelt', hour: 14, wx: wx(0, true, 31) },
+    { label: '🌙 Sternenklare Nacht: Schlafenszeit', hour: 23, wx: wx(0, false, 6), moon: 8 },
+    { label: '🐺 Vollmond: der Hund wird zum Werwolf', hour: 21, wx: wx(0, false, 4), moon: 14.8, ms: 11000 },
+    { label: '🎂 Geburtstag am 25. August', hour: 14, wx: wx(0, true, 26), special: () => app.getSpecial(new Date(Y, 7, 25, 12)) },
+    { label: '💕 Jahrestag am 18. September', hour: 13, wx: wx(1, true, 19), special: () => app.getSpecial(new Date(Math.max(Y, 2026), 8, 18, 12)) },
+    { label: '🐣 Ostern', hour: 11, wx: wx(1, true, 15), special: () => { const e = app.easterSunday(Y); return app.getSpecial(new Date(e.getFullYear(), e.getMonth(), e.getDate(), 12)); } },
+    { label: '🎃 Halloween', hour: 20, wx: wx(0, false, 9), moon: 22, special: () => app.getSpecial(new Date(Y, 9, 31, 20)) },
+    { label: '🎄 Weihnachten', hour: 18, wx: wx(71, false, 0), moon: 3, special: () => app.getSpecial(new Date(Y, 11, 24, 18)) },
+    { label: '🎆 Silvester-Feuerwerk', hour: 22, wx: wx(0, false, 1), moon: 25, special: () => app.getSpecial(new Date(Y, 11, 31, 22)) },
+    { label: '💖 Valentinstag', hour: 12, wx: wx(2, true, 6), special: () => app.getSpecial(new Date(Y, 1, 14, 12)) },
+    { label: '📅 KW-Übersicht aller Wochen', hour: 18, wx: wx(2, true, 12), ms: 9000, run: () => { later(900, () => $('overviewBtn').click()); later(7600, () => { if (!$('kwOverlay').hidden) $('kwClose').click(); }); } },
+    { label: '🏆 Erfolge zum Aufklappen', hour: 19, wx: wx(2, false, 10), run: () => { toEl('achCard'); later(1000, () => { $('achDetails').open = true; }); }, after: () => { $('achDetails').open = false; } },
+    { label: '📝 Langfristige To-dos', hour: 17, wx: wx(1, true, 14), run: () => toEl('todos') },
+  ];
+
+  let i = -1, paused = false, timer = null, prev = null;
+  function show(n) {
+    timers.forEach(clearTimeout); timers = [];
+    prev?.after?.();
+    i = (n + SCENES.length) % SCENES.length;
+    const sc = SCENES[i]; prev = sc;
+    window.JANA_HOUR = sc.hour;
+    window.JANA_MOONAGE = sc.moon ?? 20;
+    window.JANA_DEMO_SPECIAL = sc.special ? sc.special() : null;
+    app.renderSpecial();
+    wxApi.show(sc.wx);
+    if (!sc.run) toTop();
+    sc.run?.();
+    $('demoLabel').textContent = sc.label;
+    $('demoStep').textContent = `${i + 1}/${SCENES.length}`;
+    schedule();
+  }
+  function schedule() {
+    clearTimeout(timer);
+    if (!paused) timer = setTimeout(() => show(i + 1), SCENES[i].ms || 8000);
+  }
+  $('demoBar').hidden = false;
+  $('demoPause').addEventListener('click', (e) => {
+    e.dogHandled = true;
+    paused = !paused;
+    $('demoPause').textContent = paused ? '▶︎' : '⏸';
+    $('demoPause').setAttribute('aria-label', paused ? 'Vorschau fortsetzen' : 'Vorschau anhalten');
+    schedule();
+  });
+  $('demoNext').addEventListener('click', (e) => { e.dogHandled = true; show(i + 1); });
+  $('demoPrev').addEventListener('click', (e) => { e.dogHandled = true; show(i - 1); });
+  setTimeout(() => show(0), 600);
 })();
 </script>
 </body>
