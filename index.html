@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Haushaltsbuch</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --text: #1d2330; --muted: #6b7280;
+    --border: #e3e6eb; --accent: #2f6fde; --pos: #1a8f4c; --neg: #d1433a;
+    --shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --card: #1b1f27; --text: #e7e9ee; --muted: #9aa1ad;
+      --border: #2a303b; --accent: #6b9cff; --pos: #4cc27f; --neg: #ff7a70;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  h2 { font-size: 1.05rem; margin: 0 0 12px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+  .toolbar .spacer { flex: 1; }
+  input, select, button {
+    font: inherit; color: var(--text); background: var(--card);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+  }
+  button { cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  button.ghost { background: transparent; }
+  button:hover { filter: brightness(1.05); }
+  form.entry { display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  form.entry input, form.entry button { min-width: 0; width: 100%; }
+  form.entry .seg { width: max-content; }
+  form.entry .full { grid-column: 1 / -1; }
+  @media (min-width: 720px) {
+    form.entry { grid-template-columns: auto 150px minmax(0, 1fr) 150px 110px auto; }
+    form.entry .full { grid-column: auto; }
+    form.entry input { min-width: 0; }
+  }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg label { padding: 8px 10px; cursor: pointer; user-select: none; }
+  .seg input { display: none; }
+  .seg input:checked + span { font-weight: 700; }
+  .seg label:has(input[value=out]:checked) { background: color-mix(in srgb, var(--neg) 15%, transparent); }
+  .seg label:has(input[value=in]:checked) { background: color-mix(in srgb, var(--pos) 15%, transparent); }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .stat .label { color: var(--muted); font-size: .85rem; }
+  .stat .value { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  @media (max-width: 520px) { .stats { grid-template-columns: 1fr; } }
+  .pos { color: var(--pos); } .neg { color: var(--neg); }
+  .bars { display: grid; gap: 8px; }
+  .bar-row { display: grid; grid-template-columns: 120px 1fr 100px; gap: 8px; align-items: center; font-size: .9rem; }
+  .bar { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
+  .bar > div { height: 100%; background: var(--neg); border-radius: 5px; }
+  .bar-row .amt { text-align: right; font-variant-numeric: tabular-nums; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: .85rem; }
+  td.amt, th.amt { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.act { width: 1%; white-space: nowrap; }
+  td.act button { padding: 4px 8px; font-size: .85rem; }
+  .empty { color: var(--muted); text-align: center; padding: 24px 0; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--border); font-size: .8rem; }
+  .table-wrap { overflow-x: auto; }
+  .hint { color: var(--muted); font-size: .85rem; margin-top: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Haushaltsbuch</h1>
+  <p class="sub">Einnahmen und Ausgaben erfassen, auswerten und sichern. Alle Daten bleiben in deinem Browser.</p>
+
+  <section class="card">
+    <h2>Neuer Eintrag</h2>
+    <form class="entry" id="form">
+      <div class="seg full">
+        <label><input type="radio" name="type" value="out" checked><span>Ausgabe</span></label>
+        <label><input type="radio" name="type" value="in"><span>Einnahme</span></label>
+      </div>
+      <input type="date" name="date" required aria-label="Datum">
+      <input type="text" name="desc" placeholder="Beschreibung" required aria-label="Beschreibung" class="full">
+      <input type="text" name="cat" placeholder="Kategorie" list="cats" required aria-label="Kategorie">
+      <input type="text" name="amount" placeholder="Betrag €" inputmode="decimal" required aria-label="Betrag">
+      <button class="primary" type="submit">Hinzufügen</button>
+      <datalist id="cats"></datalist>
+    </form>
+  </section>
+
+  <div class="toolbar">
+    <button class="ghost" id="prev" aria-label="Vorheriger Monat">◀</button>
+    <select id="month" aria-label="Monat"></select>
+    <button class="ghost" id="next" aria-label="Nächster Monat">▶</button>
+    <input type="search" id="search" placeholder="Suchen…" aria-label="Suchen">
+    <span class="spacer"></span>
+    <button id="export">CSV exportieren</button>
+    <button id="importBtn">CSV importieren</button>
+    <input type="file" id="importFile" accept=".csv,text/csv" hidden>
+  </div>
+
+  <section class="card stats">
+    <div class="stat"><div class="label">Einnahmen</div><div class="value pos" id="sIn">0,00 €</div></div>
+    <div class="stat"><div class="label">Ausgaben</div><div class="value neg" id="sOut">0,00 €</div></div>
+    <div class="stat"><div class="label">Saldo</div><div class="value" id="sBal">0,00 €</div></div>
+  </section>
+
+  <section class="card">
+    <h2>Ausgaben nach Kategorie</h2>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <section class="card">
+    <h2>Einträge</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Datum</th><th>Beschreibung</th><th>Kategorie</th><th class="amt">Betrag</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="hint">Tipp: Exportiere regelmäßig eine CSV-Datei als Sicherung. Sie lässt sich auch in Excel oder LibreOffice öffnen.</p>
+  </section>
+</main>
+
+<script>
+(() => {
+  const KEY = 'haushaltsbuch.v1';
+  const DEFAULT_CATS = ['Lebensmittel', 'Miete', 'Nebenkosten', 'Mobilität', 'Freizeit', 'Gesundheit', 'Kleidung', 'Versicherungen', 'Gehalt', 'Sonstiges'];
+  const eur = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
+  const $ = (id) => document.getElementById(id);
+
+  let entries = load();
+  let currentMonth = monthKey(new Date());
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(entries)); } catch { alert('Speichern im Browser nicht möglich. Bitte CSV exportieren.'); }
+  }
+  function monthKey(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+  function todayISO() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+  function parseAmount(s) {
+    s = String(s).trim().replace(/\s|€/g, '');
+    if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+    const n = Number(s);
+    return Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN;
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function fmtDate(iso) { const [y, m, d] = iso.split('-'); return `${d}.${m}.${y}`; }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  function months() {
+    const set = new Set(entries.map(e => e.date.slice(0, 7)));
+    set.add(monthKey(new Date()));
+    set.add(currentMonth);
+    return [...set].sort().reverse();
+  }
+  function monthLabel(k) {
+    const [y, m] = k.split('-').map(Number);
+    return new Date(y, m - 1, 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+  }
+  function shiftMonth(delta) {
+    const [y, m] = currentMonth.split('-').map(Number);
+    currentMonth = monthKey(new Date(y, m - 1 + delta, 1));
+    render();
+  }
+
+  function render() {
+    // Monatsauswahl
+    const sel = $('month');
+    sel.innerHTML = months().map(k => `<option value="${k}" ${k === currentMonth ? 'selected' : ''}>${monthLabel(k)}</option>`).join('');
+
+    // Kategorien-Vorschläge
+    const cats = new Set([...DEFAULT_CATS, ...entries.map(e => e.cat)]);
+    $('cats').innerHTML = [...cats].sort((a, b) => a.localeCompare(b, 'de')).map(c => `<option value="${esc(c)}">`).join('');
+
+    const q = $('search').value.trim().toLowerCase();
+    const list = entries
+      .filter(e => e.date.startsWith(currentMonth))
+      .filter(e => !q || (e.desc + ' ' + e.cat).toLowerCase().includes(q))
+      .sort((a, b) => b.date.localeCompare(a.date));
+
+    // Summen
+    let sumIn = 0, sumOut = 0;
+    const byCat = {};
+    for (const e of list) {
+      if (e.type === 'in') sumIn += e.amount;
+      else { sumOut += e.amount; byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; }
+    }
+    const bal = sumIn - sumOut;
+    $('sIn').textContent = eur.format(sumIn);
+    $('sOut').textContent = eur.format(sumOut);
+    $('sBal').textContent = eur.format(bal);
+    $('sBal').className = 'value ' + (bal >= 0 ? 'pos' : 'neg');
+
+    // Balken
+    const catList = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+    const max = catList.length ? catList[0][1] : 0;
+    $('bars').innerHTML = catList.length
+      ? catList.map(([c, v]) => `
+          <div class="bar-row">
+            <span>${esc(c)}</span>
+            <div class="bar"><div style="width:${(v / max * 100).toFixed(1)}%"></div></div>
+            <span class="amt">${eur.format(v)} <small style="color:var(--muted)">${Math.round(v / sumOut * 100)}%</small></span>
+          </div>`).join('')
+      : '<div class="empty">Noch keine Ausgaben in diesem Monat.</div>';
+
+    // Tabelle
+    $('rows').innerHTML = list.length
+      ? list.map(e => `
+          <tr>
+            <td>${fmtDate(e.date)}</td>
+            <td>${esc(e.desc)}</td>
+            <td><span class="tag">${esc(e.cat)}</span></td>
+            <td class="amt ${e.type === 'in' ? 'pos' : 'neg'}">${e.type === 'in' ? '+' : '−'}${eur.format(e.amount)}</td>
+            <td class="act"><button data-del="${e.id}" aria-label="Löschen">🗑</button></td>
+          </tr>`).join('')
+      : '<tr><td colspan="5" class="empty">Keine Einträge.</td></tr>';
+  }
+
+  // Neuer Eintrag
+  $('form').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const f = new FormData(ev.target);
+    const amount = parseAmount(f.get('amount'));
+    if (!(amount > 0)) { alert('Bitte einen gültigen Betrag größer 0 eingeben, z. B. 12,50'); return; }
+    const entry = {
+      id: uid(), type: f.get('type'), date: f.get('date'),
+      desc: f.get('desc').trim(), cat: f.get('cat').trim(), amount,
+    };
+    entries.push(entry);
+    save();
+    currentMonth = entry.date.slice(0, 7);
+    ev.target.desc.value = ''; ev.target.amount.value = '';
+    ev.target.desc.focus();
+    render();
+  });
+
+  // Löschen
+  $('rows').addEventListener('click', (ev) => {
+    const id = ev.target.closest('button')?.dataset.del;
+    if (!id) return;
+    const e = entries.find(x => x.id === id);
+    if (e && confirm(`„${e.desc}“ (${eur.format(e.amount)}) löschen?`)) {
+      entries = entries.filter(x => x.id !== id);
+      save(); render();
+    }
+  });
+
+  $('month').addEventListener('change', (ev) => { currentMonth = ev.target.value; render(); });
+  $('prev').addEventListener('click', () => shiftMonth(-1));
+  $('next').addEventListener('click', () => shiftMonth(1));
+  $('search').addEventListener('input', render);
+
+  // CSV-Export (Semikolon, deutsches Zahlenformat, BOM für Excel)
+  $('export').addEventListener('click', () => {
+    const csvCell = (s) => /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    const lines = ['Datum;Typ;Beschreibung;Kategorie;Betrag'];
+    for (const e of [...entries].sort((a, b) => a.date.localeCompare(b.date))) {
+      lines.push([e.date, e.type === 'in' ? 'Einnahme' : 'Ausgabe', csvCell(e.desc), csvCell(e.cat), e.amount.toFixed(2).replace('.', ',')].join(';'));
+    }
+    const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `haushaltsbuch-${todayISO()}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  // CSV-Import
+  function parseCSV(text) {
+    const rows = []; let row = [], cell = '', inQ = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQ) {
+        if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+        else if (c === '"') inQ = false;
+        else cell += c;
+      } else if (c === '"') inQ = true;
+      else if (c === ';') { row.push(cell); cell = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(cell); rows.push(row); row = []; cell = '';
+      } else cell += c;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    return rows;
+  }
+  $('importBtn').addEventListener('click', () => $('importFile').click());
+  $('importFile').addEventListener('change', async (ev) => {
+    const file = ev.target.files[0];
+    if (!file) return;
+    const rows = parseCSV((await file.text()).replace(/^﻿/, ''));
+    const imported = [];
+    for (const r of rows.slice(1)) {
+      if (r.length < 5) continue;
+      const [date, typ, desc, cat, amt] = r;
+      const amount = parseAmount(amt);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !(amount > 0)) continue;
+      imported.push({ id: uid(), date, type: /^einnahme$/i.test(typ.trim()) ? 'in' : 'out', desc: desc.trim(), cat: cat.trim() || 'Sonstiges', amount });
+    }
+    if (!imported.length) { alert('Keine gültigen Einträge in der Datei gefunden.'); }
+    else {
+      const replace = entries.length && confirm(`${imported.length} Einträge gefunden.\n\nOK = vorhandene Daten ersetzen\nAbbrechen = hinzufügen`);
+      entries = replace ? imported : entries.concat(imported);
+      save(); render();
+    }
+    ev.target.value = '';
+  });
+
+  document.querySelector('input[name=date]').value = todayISO();
+  render();
+})();
+</script>
+</body>
+</html>
