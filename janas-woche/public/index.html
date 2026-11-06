@@ -70,7 +70,7 @@
   .days { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr)); align-items: start; }
   .day > * { min-width: 0; }
   @media (min-width: 1560px) { .days { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
-  .day { display: flex; flex-direction: column; gap: 10px; min-height: 170px; }
+  .day { display: flex; flex-direction: column; gap: 10px; }
   .day.today { background: var(--today); border-color: var(--accent); }
   .day-head { display: flex; flex-wrap: wrap; gap: 0 8px; align-items: baseline; justify-content: space-between; }
   .day-head h3 { font-size: 1.1rem; }
@@ -117,31 +117,37 @@
   .motto { text-align: center; color: var(--muted); font-size: .9rem; max-width: 60ch; margin: 4px auto 0; }
 
   /* Heute: Wetter, Ort, Mond */
-  .today { display: grid; gap: 16px; align-items: center; }
-  .today-text { display: grid; gap: 3px; min-width: 0; }
-  .today h2 { font-size: 1.35rem; }
-  .today-date { color: var(--muted); font-size: .92rem; }
-  .today-wx { font-size: .95rem; }
-  .today-wx strong { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; margin-right: 2px; }
-  .today-moon { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: .88rem; }
-  .today-moon canvas { width: 32px; height: 32px; image-rendering: pixelated; flex: none; }
+  /* Obere Karten: nur so groß wie ihr Inhalt */
+  .top-cards { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+  .top-cards > .card { width: fit-content; max-width: 100%; padding: 12px 14px; }
+  #todayCard { display: grid; gap: 4px; align-items: center; }
+  .today-text { display: grid; gap: 2px; min-width: 0; }
+  #todayCard h2 { font-size: 1.1rem; }
+  .today-date { color: var(--muted); font-size: .82rem; }
+  .today-wx { font-size: .85rem; }
+  .today-wx strong { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; margin-right: 2px; }
+  .today-moon { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: .8rem; }
+  .today-moon canvas { width: 24px; height: 24px; image-rendering: pixelated; flex: none; }
   .loc-btn { justify-self: start; border: 1px dashed var(--accent); background: none; color: var(--accent-ink); border-radius: 999px;
     padding: 3px 12px; font-weight: 800; font-size: .82rem; margin-top: 4px; }
 
   /* Besondere Tage, Wasser, Erfolge */
   .special { justify-self: start; background: var(--soft); border-radius: 12px; padding: 4px 12px; font-weight: 700; font-size: .92rem; margin: 2px 0; }
-  .water { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; }
-  #bottle { width: 64px; height: 120px; image-rendering: pixelated; display: block; }
+  .water { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; }
+  #bottle { width: 40px; height: 75px; image-rendering: pixelated; display: block; }
   .water-main { display: grid; gap: 8px; min-width: 0; }
   .water-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-  .water h2 { font-size: 1.15rem; }
-  .water-amount { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .water h2 { font-size: 1rem; }
+  .water-amount { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .water-main { gap: 5px !important; }
+  .water .pill { padding: 3px 10px; font-size: .78rem; }
+  .water-head .muted { font-size: .78rem; }
   .water-amount small { font-family: var(--font-body); font-size: .88rem; color: var(--muted); font-weight: 700; }
   .water-btns { display: flex; flex-wrap: wrap; gap: 6px; }
   .pill.ghost { background: none; color: var(--muted); }
   .pill:disabled { opacity: .45; cursor: default; }
-  .water-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-items: end; height: 54px; max-width: 280px; }
-  .ww { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; height: 100%; font-size: .72rem; color: var(--muted); }
+  .water-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; align-items: end; height: 34px; max-width: 190px; }
+  .ww { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; height: 100%; font-size: .66rem; color: var(--muted); }
   .ww .b { width: 100%; max-width: 22px; border-radius: 5px 5px 3px 3px; background: #9cc6f2; min-height: 3px; }
   .ww.goal .b { background: #5f9be0; }
   .ww.today { color: var(--accent-ink); font-weight: 800; }
@@ -224,6 +230,7 @@
     </div>
   </header>
 
+  <div class="top-cards">
   <section class="card today" id="todayCard" aria-live="polite">
     <div class="today-text">
       <h2 id="greet">Hallo Jana!</h2>
@@ -248,6 +255,7 @@
       <div class="water-week" id="waterWeek" aria-label="Wasser diese Woche"></div>
     </div>
   </section>
+  </div>
 
   <section class="days" id="days"></section>
 
@@ -520,7 +528,7 @@
     const mon = startOfWeek(new Date()), tk = todayKey();
     $('waterWeek').innerHTML = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((n, i) => {
       const k = key(addDays(mon, i)), v = waterOf(k);
-      return `<div class="ww ${v >= GOAL ? 'goal' : ''} ${k === tk ? 'today' : ''}" title="${n}: ${fmtL(v)}"><div class="b" style="height:${Math.round(Math.min(1, v / GOAL) * 36)}px"></div>${n}</div>`;
+      return `<div class="ww ${v >= GOAL ? 'goal' : ''} ${k === tk ? 'today' : ''}" title="${n}: ${fmtL(v)}"><div class="b" style="height:${Math.round(Math.min(1, v / GOAL) * 18)}px"></div>${n}</div>`;
     }).join('');
   }
   function addWater(ml, e) {
