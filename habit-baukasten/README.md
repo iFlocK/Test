@@ -10,6 +10,7 @@ Test-Version von „Janas Woche“ als Vorlage für jeden. Janas Seite (`janas-w
   Abgaben & Deadlines, Lernziele pro Woche.
 - „📖 Gelesene Bücher“: Titel, Autor:in, 1–5 Sterne und Datum, mit Pixel-Bücherregal und Jahresstatistik.
 - „🐷 Sparziele“: Ziel mit Betrag und optionalem Datum, Einzahlen/Abheben, Pixel-Sparschwein füllt sich, Sparplan pro Monat.
+- „🌸 Zyklus“ (optional, im Assistenten wählbar): Periode starten/beenden, aktuelle Zyklusphase mit Farbstreifen, Schätzung der nächsten Periode und fruchtbaren Tage (lernt aus den Einträgen), Befinden-Chips, 🩸 in den Tageskarten. Bleibt nur auf dem Gerät; Schätzungen, nicht zur Verhütung.
 - Kein eigener Server nötig: Das Wetter kommt direkt von Open-Meteo, Daten liegen im Browser
   (Speicher-Präfix `habit-baukasten.`).
 

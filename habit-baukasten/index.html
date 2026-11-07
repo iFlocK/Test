@@ -281,6 +281,29 @@
   .progress > div { height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .3s; }
   @media (prefers-reduced-motion: reduce) { .progress > div { transition: none; } }
 
+  /* 🌸 Zyklus */
+  .cy-body { display: grid; gap: 12px; margin-top: 12px; }
+  .cy-now { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; }
+  .cy-icon { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 1.4rem; }
+  .cy-now b { display: block; font-size: 1rem; }
+  .cy-now small { color: var(--muted); font-size: .84rem; line-height: 1.4; }
+  .cy-strip { display: flex; flex-wrap: wrap; gap: 2px; }
+  .cy-strip i { width: 9px; height: 16px; border-radius: 3px; opacity: .85; }
+  .cy-strip i.now { outline: 2px solid var(--text); outline-offset: 1px; opacity: 1; }
+  .cy-next { margin: 0; font-size: .86rem; line-height: 1.5; }
+  .cy-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .cy-other { display: flex; gap: 6px; align-items: center; font-size: .8rem; color: var(--muted); }
+  .cy-other input, .cy-len input { font: inherit; font-size: .85rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 4px 8px; }
+  .cy-len input { width: 4.5em; }
+  .cy-sym { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .cy-hist { list-style: none; margin: 4px 0 0; padding: 0; display: grid; }
+  .cy-hist li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 5px 0; border-top: 1px solid var(--border); font-size: .86rem; }
+  .cy-hist small { color: var(--muted); }
+  .cy-len { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: .85rem; }
+  .cy-note { margin: 0; color: var(--muted); font-size: .78rem; line-height: 1.4; }
+  .pmark { font-size: .7rem; margin-right: 3px; vertical-align: 1px; }
+  .pmark.soon { opacity: .35; }
+
   /* 🐷 Sparziele */
   .piggy-mini { width: 27px; height: 21px; image-rendering: pixelated; }
   .save-body { display: grid; gap: 12px; margin-top: 12px; }
@@ -548,6 +571,26 @@
     </details>
   </section>
 
+  <section class="card cycle" id="cycleCard" hidden>
+    <details id="cycleDetails">
+      <summary class="ach-summary"><h2>🌸 Zyklus</h2><span class="muted" id="cycleSum"></span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="cy-body">
+        <div id="cyPhase"></div>
+        <div class="cy-strip" id="cyStrip" aria-hidden="true"></div>
+        <p class="cy-next" id="cyNext"></p>
+        <div class="cy-actions">
+          <button class="pill primary" id="cyStartBtn" type="button">🩸 Periode hat heute begonnen</button>
+          <label class="cy-other"><span>anderes Datum:</span><input type="date" id="cyStartOther" aria-label="Periode hat an einem anderen Tag begonnen"></label>
+          <button class="pill primary" id="cyEndBtn" type="button" hidden>✓ Periode beendet</button>
+        </div>
+        <div><span class="book-label">Wie fühlst du dich heute?</span><div class="cy-sym" id="cySym"></div></div>
+        <div><span class="book-label">Verlauf</span><ul class="cy-hist" id="cyHist"></ul></div>
+        <label class="cy-len"><span class="book-label">Zykluslänge (bis genug Einträge da sind)</span><input type="number" id="cyLen" min="18" max="45" inputmode="numeric"> Tage</label>
+        <p class="cy-note">🔒 Deine Zyklusdaten bleiben nur auf diesem Gerät. Alle Angaben sind Schätzungen aus deinen Einträgen, kein Ersatz für ärztlichen Rat und nicht zur Verhütung geeignet.</p>
+      </div>
+    </details>
+  </section>
+
   <section class="card savings" id="saveCard">
     <details id="saveDetails">
       <summary class="ach-summary"><h2>🐷 Sparziele</h2><img class="piggy-mini" id="saveMini" alt=""><span class="muted" id="saveCount"></span><span class="chev" aria-hidden="true">▾</span></summary>
@@ -682,6 +725,10 @@
       ],
       water, ach: { first: key(new Date()), five: key(new Date()), sip: key(new Date()), water: key(last), todo1: key(new Date()) }, flags: {},
       achResetId: 'reset-2026-11-06', achSince: 0,
+      cycle: {
+        periods: [-67, -39, -11].map((ago, i) => ({ id: 'cy' + i, start: key(addDays(new Date(), ago)), end: key(addDays(new Date(), ago + 4 + (i % 2))) })),
+        settings: { cycleLen: 28, periodLen: 5 }, symptoms: { [key(new Date())]: ['Viel Energie', 'Gute Laune'] },
+      },
       savings: [
         { id: 'sv1', name: 'iPhone', target: 1199, date: key(addDays(new Date(), 200)), done: false, createdAt: 1,
           entries: [150, 100, 50, 70, 50].map((amount, i) => ({ id: 'e1' + i, amount, at: addDays(new Date(), -40 + i * 9).getTime() })) },
@@ -707,7 +754,7 @@
           { id: 'g3', text: 'Vokabeln Unit 7', subject: 's3', done: false }, { id: 'g4', text: 'Altklausur 2024 rechnen', subject: 's1', done: false }] },
         timer: { phase: 'idle', round: 1 },
       },
-      profile: { name: 'Alex', uni: true, palette: 'lavendel', animal: 'dog', fur: 'golden', pet: 'Bello', birthday: '1998-08-25', together: { date: '2025-09-18', partner: 'Sam' }, city: 'Hamburg' },
+      profile: { name: 'Alex', uni: true, cycle: true, palette: 'lavendel', animal: 'dog', fur: 'golden', pet: 'Bello', birthday: '1998-08-25', together: { date: '2025-09-18', partner: 'Sam' }, city: 'Hamburg' },
       mood: Object.fromEntries([5, 4, 3, 4, 2, 5, 4, 3, 5, 4, 1, 4, 5].map((v, i) => [key(addDays(new Date(), -i - 1)), { v, at: Date.now() }])),
     };
   }
@@ -772,7 +819,7 @@
       const d = addDays(monday, i), items = w.days[i], isToday = key(d) === todayKey, open = openDay === i;
       const used = new Set(items.map(it => it.tag).filter(Boolean));
       return `<article class="card day ${isToday ? 'today' : ''}" data-day="${i}">
-        <div class="day-head"><h3>${name}${isToday ? '<span class="badge">heute</span>' : ''}</h3><span class="date">${moodImg(key(d))}${fmt(d, { day: 'numeric', month: 'short' })}</span></div>
+        <div class="day-head"><h3>${name}${isToday ? '<span class="badge">heute</span>' : ''}</h3><span class="date">${periodMark(key(d))}${moodImg(key(d))}${fmt(d, { day: 'numeric', month: 'short' })}</span></div>
         <ul class="items">${items.length ? items.map(it => `
           <li class="item ${it.done ? 'done' : ''}" data-style="--c: var(--c-${areaOf(it)})">
             <button class="toggle" data-toggle="${it.id}" aria-pressed="${!!it.done}" title="Erledigt umschalten">${esc(labelOf(it))}</button>
@@ -1223,7 +1270,7 @@
   // ---------- Einrichtungs-Assistent ----------
   const FUR_CHOICES = [['golden', 'Golden', '#ecc173'], ['schoko', 'Schoko', '#a8714a'], ['schwarz', 'Schwarz', '#4a4250'], ['weiss', 'Weiß', '#f4efe9']];
   const ANIMALS = [['dog', 'Hund', '🐶'], ['cat', 'Katze', '🐱'], ['rabbit', 'Kaninchen', '🐰']];
-  const SETUP_TITLES = ['Willkommen! 👋', 'Deine Farbe 🎨', 'Dein Haustier 🐾', 'Deine Gewohnheiten 🌱', 'Uni 🎓', 'Besondere Tage 🎂', 'Wetter 🌦️'];
+  const SETUP_TITLES = ['Willkommen! 👋', 'Deine Farbe 🎨', 'Dein Haustier 🐾', 'Deine Gewohnheiten 🌱', 'Uni 🎓', 'Zyklus 🌸', 'Besondere Tage 🎂', 'Wetter 🌦️'];
   let draft = null, step = 0;
   const allChoices = () => {
     const map = new Map();
@@ -1235,7 +1282,7 @@
     draft = {
       name: p.name || '', palette: p.palette || 'rosa', animal: p.animal || 'dog', fur: p.fur || 'golden', pet: p.pet || '',
       habits: state.profile ? state.tags.map((t) => t.id) : ['kraft', 'spazieren', 'gemuese', 'wasser', 'lesen', 'schlafen', 'freunde', 'entspannen'],
-      custom: [], uni: !!p.uni, subjects: (state.uni?.subjects || []).map((x) => ({ ...x })), birthday: p.birthday || '', together: { date: p.together?.date || '', partner: p.together?.partner || '' }, city: p.city || '',
+      custom: [], cycle: !!p.cycle, cycleStart: '', cycleLen: state.cycle?.settings?.cycleLen || 28, uni: !!p.uni, subjects: (state.uni?.subjects || []).map((x) => ({ ...x })), birthday: p.birthday || '', together: { date: p.together?.date || '', partner: p.together?.partner || '' }, city: p.city || '',
     };
     step = 0;
     $('setupClose').hidden = !state.profile;
@@ -1273,20 +1320,27 @@
       ${draft.uni ? `<label class="su-label" for="suSubj">Deine Fächer (optional, auch später möglich)</label>
       <div class="su-chips">${draft.subjects.map((x) => `<span class="tag" data-style="--c: var(--c-${x.color})">${esc(x.name)}<button type="button" class="su-x" data-rmsubj="${x.id}" aria-label="${esc(x.name)} entfernen">×</button></span>`).join('') || '<span class="su-hint">Noch keine Fächer.</span>'}</div>
       <form class="su-add" id="suSubjForm"><input id="suSubj" class="su-input" placeholder="z. B. Statistik" aria-label="Neues Fach"><button class="pill" type="submit">+ Fach</button></form>` : ''}`;
-    if (step === 5) b.innerHTML = `<label class="su-label" for="suBirth">Wann hast du Geburtstag? (optional)</label><input id="suBirth" class="su-input" type="date" value="${draft.birthday}">
+    if (step === 5) b.innerHTML = `<p>Möchtest du deinen Zyklus mittracken? Du siehst dann, in welcher Zyklusphase du gerade bist, und wann die nächste Periode ungefähr kommt.</p>
+      <div class="su-swatches"><button type="button" class="su-swatch" data-cyc="1" aria-pressed="${draft.cycle}"><span class="su-emoji">🌸</span>Ja, gern</button>
+      <button type="button" class="su-swatch" data-cyc="0" aria-pressed="${!draft.cycle}"><span class="su-emoji">🙅</span>Brauche ich nicht</button></div>
+      ${draft.cycle ? `<label class="su-label" for="suCyStart">Wann hat deine letzte Periode begonnen? (optional)</label><input id="suCyStart" class="su-input" type="date" value="${draft.cycleStart}">
+      <label class="su-label" for="suCyLen">Wie lang ist dein Zyklus ungefähr?</label><input id="suCyLen" class="su-input" type="number" min="18" max="45" inputmode="numeric" value="${draft.cycleLen}">
+      <p class="su-hint">🔒 Bleibt nur auf deinem Gerät. Alles sind Schätzungen, nicht zur Verhütung geeignet.</p>` : ''}`;
+    if (step === 6) b.innerHTML = `<label class="su-label" for="suBirth">Wann hast du Geburtstag? (optional)</label><input id="suBirth" class="su-input" type="date" value="${draft.birthday}">
       <p class="su-hint">An deinem Geburtstag gibt es Konfetti, Kuchen und einen Partyhut für dein Haustier.</p>
       <label class="su-label" for="suTog">Jahrestag mit deinem Schatz (optional)</label><input id="suTog" class="su-input" type="date" value="${draft.together.date}">
       <input id="suPartner" class="su-input" placeholder="Name deines Schatzes" aria-label="Name deines Schatzes" value="${esc(draft.together.partner)}">
       <p class="su-hint">Dann zählt eine kleine Karte, wie lange ihr schon zusammen seid.</p>`;
-    if (step === 6) b.innerHTML = `<label class="su-label" for="suCity">Wo wohnst du? (optional)</label><input id="suCity" class="su-input" placeholder="z. B. Hamburg" autocomplete="address-level2" value="${esc(draft.city)}">
+    if (step === 7) b.innerHTML = `<label class="su-label" for="suCity">Wo wohnst du? (optional)</label><input id="suCity" class="su-input" placeholder="z. B. Hamburg" autocomplete="address-level2" value="${esc(draft.city)}">
       <p class="su-hint">Dann zeigt der Himmel oben dein echtes Wetter, und dein Haustier verkriecht sich bei Regen in sein Häuschen. Alles kannst du später unter ⚙️ ändern.</p>`;
     b.querySelector('input')?.focus({ preventScroll: true });
   }
   function readStep() {
     if (step === 0) draft.name = $('suName').value.trim();
     if (step === 2) draft.pet = $('suPet').value.trim();
-    if (step === 5) { draft.birthday = $('suBirth').value; draft.together = { date: $('suTog').value, partner: $('suPartner').value.trim() }; }
-    if (step === 6) draft.city = $('suCity').value.trim();
+    if (step === 5 && draft.cycle) { draft.cycleStart = $('suCyStart').value; draft.cycleLen = parseInt($('suCyLen').value, 10) || 28; }
+    if (step === 6) { draft.birthday = $('suBirth').value; draft.together = { date: $('suTog').value, partner: $('suPartner').value.trim() }; }
+    if (step === 7) draft.city = $('suCity').value.trim();
   }
   $('setupBody').addEventListener('click', (e) => {
     if (e.target.closest('#suDemo')) {   // nur in der Test-Vorschau
@@ -1295,6 +1349,8 @@
       location.reload();
       return;
     }
+    const cyb = e.target.closest('[data-cyc]');
+    if (cyb) { e.dogHandled = true; if (draft.cycle && $('suCyStart')) { draft.cycleStart = $('suCyStart').value; draft.cycleLen = parseInt($('suCyLen').value, 10) || 28; } draft.cycle = cyb.dataset.cyc === '1'; renderSetup(); return; }
     const un = e.target.closest('[data-uni]'), rs = e.target.closest('[data-rmsubj]');
     if (un || rs) {
       e.dogHandled = true;
@@ -1344,10 +1400,14 @@
     for (const t of state.tags.filter((x) => !draft.habits.includes(x.id)))
       for (const w of Object.values(state.weeks)) for (const d of w.days) for (const it of d) if (it.tag === t.id) { it.text = t.name; delete it.tag; }
     state.tags = keep.map((t) => ({ id: t.id, name: t.name, area: t.area }));
-    const { custom, habits, subjects, ...profile } = draft;
+    const { custom, habits, subjects, cycleStart, cycleLen, ...profile } = draft;
     state.uni.subjects = subjects;
+    if (profile.cycle) {
+      state.cycle.settings.cycleLen = Math.min(45, Math.max(18, cycleLen || 28));
+      if (cycleStart && cycleStart <= todayKey() && !state.cycle.periods.some((x) => x.start === cycleStart)) state.cycle.periods.push({ id: uid(), start: cycleStart, end: '' });
+    }
     state.profile = profile;
-    save(); closeSetup(); render(); renderLove(); renderUni();
+    save(); closeSetup(); render(); renderLove(); renderUni(); window.renderCycle?.();
     window.janaApp.renderSpecial(); window.janaWx?.refresh?.(); window.habitReloadWeather?.();
     if (first) setTimeout(() => window.janaDog?.happy(`Wuff! Hallo ${profile.name}! ${profile.pet ? `Ich bin ${profile.pet}. ` : ''}🐾`), 500);
     window.habitProfile = state.profile;
@@ -1695,6 +1755,122 @@
   try { $('saveDetails').open = localStorage.getItem('habit-baukasten.saveOpen') === '1'; } catch {}
   $('saveDetails').addEventListener('toggle', () => { try { localStorage.setItem('habit-baukasten.saveOpen', $('saveDetails').open ? '1' : '0'); } catch {} });
   renderSavings();
+
+  // ---------- 🌸 Zyklus-Tracker (nur auf diesem Gerät, alles geschätzt) ----------
+  state.cycle ||= { periods: [], settings: { cycleLen: 28, periodLen: 5 }, symptoms: {} };
+  const CY = state.cycle;
+  const cyOn = () => !!state.profile?.cycle;
+  const dayNum = (k) => { const [y, m, d] = k.split('-').map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
+  const keyOfNum = (n) => { const d = new Date(n * 864e5); return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`; };
+  const median = (a) => { const b = [...a].sort((x, y) => x - y); return b.length ? (b.length % 2 ? b[(b.length - 1) / 2] : (b[b.length / 2 - 1] + b[b.length / 2]) / 2) : null; };
+  const SYMPTOMS = ['Krämpfe', 'Kopfweh', 'Müde', 'Heißhunger', 'Unreine Haut', 'Rückenweh', 'Blähbauch', 'Gereizt', 'Gute Laune', 'Viel Energie'];
+  const PHASES = {
+    mens: { name: 'Menstruation', icon: '🩸', col: '#f29a9a', tip: 'Gönn dir Ruhe. Wärme, viel trinken und sanfte Bewegung tun jetzt gut.' },
+    foll: { name: 'Follikelphase', icon: '🌱', col: '#a6dcc2', tip: 'Die Energie steigt meist an. Gut für Sport, Neues und Verabredungen.' },
+    fert: { name: 'Fruchtbare Tage', icon: '🌸', col: '#cdb4e8', tip: 'Rund um den Eisprung (geschätzt). Viele fühlen sich jetzt besonders fit und gesellig.' },
+    ovu: { name: 'Eisprung (geschätzt)', icon: '🌸', col: '#a67cc4', tip: 'Heute ist der geschätzte Eisprung, der Höhepunkt der fruchtbaren Tage.' },
+    lut: { name: 'Lutealphase', icon: '🌙', col: '#f8cfa0', tip: 'Plane etwas mehr Ruhe ein. Gegen Ende können PMS-Beschwerden auftreten.' },
+  };
+  function cycleModel() {
+    const ps = [...CY.periods].sort((a, b) => a.start.localeCompare(b.start));
+    const gaps = ps.slice(1).map((x, i) => dayNum(x.start) - dayNum(ps[i].start)).filter((g) => g >= 18 && g <= 45).slice(-6);
+    const lens = ps.filter((x) => x.end).map((x) => dayNum(x.end) - dayNum(x.start) + 1).filter((l) => l >= 1 && l <= 10).slice(-6);
+    const cycleLen = Math.round(median(gaps) ?? CY.settings.cycleLen ?? 28);
+    const periodLen = Math.round(median(lens) ?? CY.settings.periodLen ?? 5);
+    const ovu = Math.max(10, cycleLen - 14);
+    const phaseOf = (day, ongoing) => (ongoing || day <= periodLen) && day <= 10 ? 'mens' : day === ovu ? 'ovu' : day >= ovu - 5 && day <= ovu + 1 ? 'fert' : day < ovu - 5 ? 'foll' : 'lut';
+    // Nicht beendete Periode: läuft höchstens 10 Tage, danach gilt die übliche Länge
+    const isOpen = (x) => !x.end && dayNum(todayKey()) - dayNum(x.start) < 10;
+    const endOf = (x) => x.end ? dayNum(x.end) : isOpen(x) ? Math.max(dayNum(x.start) + periodLen - 1, dayNum(todayKey())) : dayNum(x.start) + periodLen - 1;
+    return { ps, last: ps[ps.length - 1], cycleLen, periodLen, ovu, phaseOf, isOpen, endOf, learned: gaps.length > 0 };
+  }
+  // In den Tageskarten: 🩸 für eingetragene, blass für erwartete Periodentage
+  function periodMark(k) {
+    if (!cyOn()) return '';
+    const n = dayNum(k), M = cycleModel();
+    for (const x of M.ps) {
+      const end = M.endOf(x);
+      if (n >= dayNum(x.start) && n <= end) return '<span class="pmark" title="Periode">🩸</span>';
+    }
+    if (M.last) {
+      const next = dayNum(M.last.start) + M.cycleLen;
+      if (n >= next && n < next + M.periodLen && n > dayNum(todayKey())) return '<span class="pmark soon" title="Periode erwartet">🩸</span>';
+    }
+    return '';
+  }
+  function renderCycle() {
+    $('cycleCard').hidden = !cyOn();
+    if (!cyOn()) return;
+    const M = cycleModel(), today = dayNum(todayKey()), fmt = (n) => new Date(n * 864e5).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+    const ongoing = M.last && M.isOpen(M.last);
+    $('cyStartBtn').hidden = !!ongoing; $('cyStartOther').hidden = !!ongoing; $('cyEndBtn').hidden = !ongoing;
+    if (!M.last) {
+      $('cycleSum').textContent = 'noch nichts eingetragen';
+      $('cyPhase').innerHTML = '<p class="muted">Trag ein, wann deine letzte Periode begonnen hat. Dann zeige ich dir deine aktuelle Zyklusphase.</p>';
+      $('cyStrip').innerHTML = ''; $('cyNext').textContent = '';
+    } else {
+      const day = today - dayNum(M.last.start) + 1, ph = PHASES[M.phaseOf(day, ongoing)];
+      const late = day > M.cycleLen;
+      $('cycleSum').textContent = `Tag ${day} · ${late ? 'Periode erwartet' : ph.name}`;
+      $('cyPhase').innerHTML = `<div class="cy-now"><span class="cy-icon" data-style="background:${ph.col}">${ph.icon}</span><div><b>Zyklustag ${day}: ${late ? 'Periode erwartet' : ph.name}</b><small>${late ? `Deine Periode ist nach meiner Schätzung seit ${daysWord(day - M.cycleLen)} fällig. Zyklen schwanken oft um ein paar Tage.` : ph.tip}</small></div></div>`;
+      const cells = Math.max(M.cycleLen, Math.min(day, 45));
+      $('cyStrip').innerHTML = Array.from({ length: cells }, (_, i) => {
+        const d = i + 1, p_ = d > M.cycleLen ? 'lut' : M.phaseOf(d, ongoing && d <= day);
+        return `<i class="${d === day ? 'now' : ''}" title="Tag ${d}: ${PHASES[p_].name}" data-style="background:${PHASES[p_].col}"></i>`;
+      }).join('');
+      const next = dayNum(M.last.start) + M.cycleLen, fertFrom = dayNum(M.last.start) + M.ovu - 6, fertTo = dayNum(M.last.start) + M.ovu;
+      const inN = next - today;
+      $('cyNext').innerHTML = `Nächste Periode ${inN > 0 ? `voraussichtlich <b>${fmt(next)}</b> (noch ${daysWord(inN)})` : inN === 0 ? '<b>heute erwartet</b>' : 'überfällig'} · fruchtbare Tage ca. ${fmt(fertFrom)}–${fmt(fertTo)}<br><span class="muted">Zyklus Ø ${M.cycleLen} Tage${M.learned ? ' (aus deinen Einträgen)' : ' (Standardwert)'} · Periode Ø ${M.periodLen} Tage</span>`;
+    }
+    // Beschwerden heute
+    const sym = CY.symptoms[todayKey()] || [];
+    $('cySym').innerHTML = SYMPTOMS.map((x) => `<button type="button" class="tag" data-sym="${x}" aria-pressed="${sym.includes(x)}" data-style="--c: var(--c-sozial)">${x}</button>`).join('');
+    // Verlauf
+    const hist = [...M.ps].reverse().slice(0, 6);
+    $('cyHist').innerHTML = hist.map((x, i) => {
+      const prev = M.ps[M.ps.length - 2 - i], gap = prev ? dayNum(x.start) - dayNum(prev.start) : null;
+      const len = x.end ? dayNum(x.end) - dayNum(x.start) + 1 : null;
+      return `<li><span>🩸 ${fmt(dayNum(x.start))}${M.isOpen(x) ? ' (läuft)' : x.end ? ` – ${fmt(dayNum(x.end))}` : ''}</span><small>${len ? `${len} ${len === 1 ? 'Tag' : 'Tage'}` : ''}${gap ? ` · Zyklus ${gap} Tage` : ''}</small><button class="todo-del" type="button" data-cydel="${x.id}" aria-label="Eintrag löschen">×</button></li>`;
+    }).join('') || '<li class="muted">Noch keine Einträge.</li>';
+    $('cyLen').value = CY.settings.cycleLen || 28;
+  }
+  function startPeriod(k, e) {
+    const M = cycleModel();
+    if (M.last && M.isOpen(M.last) && dayNum(k) - dayNum(M.last.start) < 10) return;
+    for (const x of M.ps) if (!x.end && x.start < k) x.end = keyOfNum(Math.min(dayNum(x.start) + M.periodLen - 1, dayNum(k) - 1));   // alte offene Periode abschließen
+    CY.periods.push({ id: uid(), start: k, end: '' });
+    e.dogHandled = true;
+    window.janaDog?.happy(pick2(['Ich bring dir eine Wärmflasche! 💕', 'Kuschelzeit! Ich bleib bei dir. 💕', 'Tee und Decke? Ich bin da! 🫖']));
+    save(); renderCycle(); render();
+  }
+  const pick2 = (a) => a[Math.floor(Math.random() * a.length)];
+  $('cyStartBtn').addEventListener('click', (e) => startPeriod(todayKey(), e));
+  $('cyStartOther').addEventListener('change', (e) => { if (e.target.value && e.target.value <= todayKey()) startPeriod(e.target.value, e); e.target.value = ''; });
+  $('cyEndBtn').addEventListener('click', (e) => {
+    const M = cycleModel(); if (!M.last) return;
+    M.last.end = todayKey() < M.last.start ? M.last.start : todayKey();
+    e.dogHandled = true; window.janaDog?.happy('Geschafft! Gut gemacht. 💕');
+    save(); renderCycle(); render();
+  });
+  $('cycleCard').addEventListener('click', (e) => {
+    const sb = e.target.closest('[data-sym]'), del = e.target.closest('[data-cydel]');
+    if (sb) {
+      e.dogHandled = true;
+      const list = (CY.symptoms[todayKey()] ||= []), x = sb.dataset.sym;
+      CY.symptoms[todayKey()] = list.includes(x) ? list.filter((y) => y !== x) : [...list, x];
+      save(); renderCycle();
+    }
+    if (del) {
+      e.dogHandled = true;
+      if (!del.classList.contains('armed')) { del.classList.add('armed'); del.textContent = 'Löschen?'; setTimeout(() => { if (del.isConnected) { del.classList.remove('armed'); del.textContent = '×'; } }, 3000); return; }
+      CY.periods = CY.periods.filter((x) => x.id !== del.dataset.cydel); save(); renderCycle(); render();
+    }
+  });
+  $('cyLen').addEventListener('change', (e) => { const v = parseInt(e.target.value, 10); if (v >= 18 && v <= 45) { CY.settings.cycleLen = v; save(); renderCycle(); render(); } });
+  try { $('cycleDetails').open = localStorage.getItem('habit-baukasten.cycleOpen') === '1'; } catch {}
+  $('cycleDetails').addEventListener('toggle', () => { try { localStorage.setItem('habit-baukasten.cycleOpen', $('cycleDetails').open ? '1' : '0'); } catch {} });
+  window.renderCycle = renderCycle;
+  renderCycle();
 
   // ---------- KW-Übersicht ----------
   const shortDate = (d) => d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
@@ -2817,6 +2993,7 @@
     { label: '🎄 Weihnachten', hour: 18, wx: wx(71, false, 0), moon: 3, special: () => app.getSpecial(new Date(Y, 11, 24, 18)) },
     { label: '🎆 Silvester-Feuerwerk', hour: 22, wx: wx(0, false, 1), moon: 25, special: () => app.getSpecial(new Date(Y, 11, 31, 22)) },
     { label: '💖 Valentinstag', hour: 12, wx: wx(2, true, 6), special: () => app.getSpecial(new Date(Y, 1, 14, 12)) },
+    { label: '🌸 Zyklus-Tracker mit aktueller Phase', hour: 12, wx: wx(1, true, 15), ms: 9000, run: () => { toEl('cycleCard'); later(700, () => { $('cycleDetails').open = true; }); }, after: () => { $('cycleDetails').open = false; } },
     { label: '🐷 Sparziele mit Pixel-Sparschwein', hour: 13, wx: wx(1, true, 15), ms: 9000, run: () => { toEl('saveCard'); later(700, () => { $('saveDetails').open = true; }); later(2400, () => document.querySelector('#saveList [data-quick="50"]')?.click()); later(5200, () => document.querySelector('#saveList [data-quick="50"]')?.click()); }, after: () => { $('saveDetails').open = false; } },
     { label: '📖 Gelesene Bücher mit Bücherregal', hour: 20, wx: wx(1, false, 9), moon: 20, ms: 9000, run: () => { toEl('bookCard'); later(700, () => { $('bookDetails').open = true; }); later(2000, () => { const f = $('bookForm'); f.elements.title.value = 'Momo'; f.elements.author.value = 'Michael Ende'; document.querySelector('#bookStars [data-star="5"]')?.click(); }); later(4200, () => $('bookForm').requestSubmit()); }, after: () => { $('bookDetails').open = false; } },
     { label: '⏱️ Lern-Timer: 25 Minuten lernen, Haustier bleibt still', hour: 15, wx: wx(1, true, 16), run: () => { toEl('timerCard'); later(1200, () => $('timerStart').click()); }, after: () => { if ($('timerStop') && !$('timerStop').hidden) $('timerStop').click(); } },
