@@ -9,6 +9,7 @@ Test-Version von „Janas Woche“ als Vorlage für jeden. Janas Seite (`janas-w
 - Optionaler Bereich „🎓 Uni“: Lern-Timer (25/5, lange Pause nach 4 Runden), Fächer mit Lernzeit,
   Abgaben & Deadlines, Lernziele pro Woche.
 - „📖 Gelesene Bücher“: Titel, Autor:in, 1–5 Sterne und Datum, mit Pixel-Bücherregal und Jahresstatistik.
+- „🐷 Sparziele“: Ziel mit Betrag und optionalem Datum, Einzahlen/Abheben, Pixel-Sparschwein füllt sich, Sparplan pro Monat.
 - Kein eigener Server nötig: Das Wetter kommt direkt von Open-Meteo, Daten liegen im Browser
   (Speicher-Präfix `habit-baukasten.`).
 

@@ -276,6 +276,36 @@
   .uni .todo { padding: 6px 2px; }
   .su-x { border: none; background: none; padding: 0 0 0 4px; color: var(--muted); font-weight: 800; }
 
+  /* Fortschrittsbalken (Lernziele, Sparziele) */
+  .progress { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress > div { height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .3s; }
+  @media (prefers-reduced-motion: reduce) { .progress > div { transition: none; } }
+
+  /* 🐷 Sparziele */
+  .piggy-mini { width: 27px; height: 21px; image-rendering: pixelated; }
+  .save-body { display: grid; gap: 12px; margin-top: 12px; }
+  .save-list { display: grid; gap: 10px; }
+  .goal { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; padding: 10px; border-radius: 14px; background: var(--soft); }
+  .goal.reached { opacity: .85; }
+  .piggy { width: 54px; height: 42px; image-rendering: pixelated; }
+  .goal-main { display: grid; gap: 4px; min-width: 0; }
+  .goal-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .goal-top b { font-size: 1rem; overflow-wrap: anywhere; }
+  .goal-amount { font-size: .88rem; font-variant-numeric: tabular-nums; }
+  .goal-amount strong { font-family: var(--font-display); font-size: 1.15rem; }
+  .save-bar { margin: 2px 0; height: 8px; }
+  .save-bar > div { background: linear-gradient(90deg, #f6c94a, #f2a9c8); }
+  .goal-hint, .goal-last { color: var(--muted); font-size: .78rem; }
+  .goal-last span { font-weight: 700; color: #3f9a73; font-variant-numeric: tabular-nums; }
+  .goal-last span.neg { color: #c2453a; }
+  .goal-form { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .goal-form .pill { padding: 3px 10px; font-size: .8rem; }
+  .goal-form input, .save-new input { font: inherit; font-size: .88rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 5px 9px; min-width: 0; }
+  .goal-form input { width: 6.5em; }
+  .save-new { display: grid; gap: 6px; border-top: 1px dashed var(--border); padding-top: 12px; }
+  .save-new input[name="target"] { width: 9em; }
+  .save-new .pill { justify-self: start; }
+
   /* 📖 Gelesene Bücher */
   .book-mini { display: flex; gap: 2px; align-items: flex-end; height: 18px; }
   .book-mini i { width: 4px; height: 16px; border-radius: 1px; border: 1px solid rgba(60, 40, 60, .25); }
@@ -318,6 +348,7 @@
   .su-add { display: flex; gap: 6px; align-items: center; }
   .su-add .su-input { margin: 0; flex: 1; min-width: 0; }
   .setup-nav { display: flex; gap: 8px; margin-top: 16px; }
+  .su-demo { border: none; background: none; padding: 4px 0; color: var(--accent-ink); font: inherit; font-weight: 800; font-size: .88rem; text-decoration: underline; cursor: pointer; }
   .setup-nav #setupNext { margin-left: auto; }
 
   /* KW-Übersicht */
@@ -517,6 +548,23 @@
     </details>
   </section>
 
+  <section class="card savings" id="saveCard">
+    <details id="saveDetails">
+      <summary class="ach-summary"><h2>🐷 Sparziele</h2><img class="piggy-mini" id="saveMini" alt=""><span class="muted" id="saveCount"></span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="save-body">
+        <div class="save-list" id="saveList"></div>
+        <details id="saveDoneWrap" hidden><summary>Erreicht (<span id="saveDoneCount">0</span>)</summary><div class="save-list" id="saveDone"></div></details>
+        <form class="save-new" id="saveNew">
+          <span class="book-label">Neues Sparziel</span>
+          <input name="name" placeholder="Wofür sparst du? z. B. iPhone" aria-label="Wofür sparst du?" autocomplete="off">
+          <div class="book-row"><input name="target" inputmode="decimal" placeholder="Zielbetrag €" aria-label="Zielbetrag in Euro" autocomplete="off">
+            <label class="book-label" for="saveDate">bis (optional)</label><input name="date" id="saveDate" type="date"></div>
+          <button class="pill primary" type="submit">+ Sparziel anlegen</button>
+        </form>
+      </div>
+    </details>
+  </section>
+
   <div class="two">
     <section class="card manage">
       <h2>Meine Gewohnheiten</h2>
@@ -634,6 +682,14 @@
       ],
       water, ach: { first: key(new Date()), five: key(new Date()), sip: key(new Date()), water: key(last), todo1: key(new Date()) }, flags: {},
       achResetId: 'reset-2026-11-06', achSince: 0,
+      savings: [
+        { id: 'sv1', name: 'iPhone', target: 1199, date: key(addDays(new Date(), 200)), done: false, createdAt: 1,
+          entries: [150, 100, 50, 70, 50].map((amount, i) => ({ id: 'e1' + i, amount, at: addDays(new Date(), -40 + i * 9).getTime() })) },
+        { id: 'sv2', name: 'Urlaub am Meer', target: 800, date: '', done: false, createdAt: 2,
+          entries: [300, 200, 150].map((amount, i) => ({ id: 'e2' + i, amount, at: addDays(new Date(), -20 + i * 8).getTime() })) },
+        { id: 'sv3', name: 'Kopfhörer', target: 120, date: '', done: true, doneAt: addDays(new Date(), -30).getTime(), createdAt: 0,
+          entries: [{ id: 'e30', amount: 120, at: addDays(new Date(), -30).getTime() }] },
+      ],
       books: [
         ['Der kleine Prinz', 'Antoine de Saint-Exupéry', 5, 40], ['Atomic Habits', 'James Clear', 4, 30], ['Die Mitternachtsbibliothek', 'Matt Haig', 5, 18],
         ['Das Café am Rande der Welt', 'John Strelecky', 3, 9], ['Eine kurze Geschichte der Menschheit', 'Yuval Noah Harari', 4, 2],
@@ -993,6 +1049,8 @@
     ['deadline5', '📬', 'Fristgerecht', '5 Abgaben erledigt', (s) => s.deadlinesDone >= 5],
     ['book5', '🐭', 'Lesemaus', '5 Bücher gelesen und ins Regal gestellt', (s) => s.books >= 5],
     ['book25', '🏛️', 'Bibliothek', '25 Bücher gelesen', (s) => s.books >= 25],
+    ['save10', '🐷', 'Sparschwein', '10-mal etwas aufs Sparziel gelegt', (s) => s.deposits >= 10],
+    ['savegoal', '🦊', 'Sparfuchs', 'Das erste Sparziel erreicht', (s) => s.savedGoals >= 1],
   ];
   function runLength(dates) {
     let best = 0, run = 0, prev = null;
@@ -1040,6 +1098,8 @@
       focusRounds: (state.uni?.sessions || []).filter((x) => x.full && x.at >= since).length,
       deadlinesDone: (state.uni?.deadlines || []).filter((x) => x.done && (x.doneAt || 0) >= since).length,
       books: (state.books || []).filter((b) => (b.at || 0) >= since).length,
+      deposits: (state.savings || []).reduce((a, g) => a + g.entries.filter((x) => x.amount > 0 && x.at >= since).length, 0),
+      savedGoals: (state.savings || []).filter((g) => g.done && (g.doneAt || 0) >= since).length,
       custom: state.tags.some((t) => t.id.startsWith('t') && created(t) >= since),
     };
   }
@@ -1196,7 +1256,7 @@
     const b = $('setupBody');
     if (step === 0) b.innerHTML = `<p>Schön, dass du da bist! In ein paar Schritten richtest du deinen eigenen Habit Tracker ein.</p>
       <label class="su-label" for="suName">Wie heißt du?</label><input id="suName" class="su-input" placeholder="Dein Name" autocomplete="given-name" value="${esc(draft.name)}">
-      <p class="su-hint">Daraus wird der Titel deiner Seite, z. B. „${esc(genitive(draft.name || 'Alex'))} Woche“.</p><p class="su-err" id="suErr" hidden>Bitte gib einen Namen ein.</p>`;
+      <p class="su-hint">Daraus wird der Titel deiner Seite, z. B. „${esc(genitive(draft.name || 'Alex'))} Woche“.</p><p class="su-err" id="suErr" hidden>Bitte gib einen Namen ein.</p>${window.JANA_PREVIEW ? '<button type="button" class="su-demo" id="suDemo">🧪 Lieber erst die Demo ansehen</button>' : ''}`;
     if (step === 1) b.innerHTML = `<p>Welche Farbe gefällt dir? Die Seite zeigt sie sofort.</p><div class="su-swatches">${Object.entries(PALETTES).map(([k, p]) =>
       `<button type="button" class="su-swatch" data-pal="${k}" aria-pressed="${draft.palette === k}" data-style="--sw:${p.a};--sw2:${p.a2}"><span></span>${p.name}</button>`).join('')}</div>`;
     if (step === 2) b.innerHTML = `<p>Unten auf der Seite wohnt ein kleines Pixel-Haustier mit eigenem Häuschen. Wer soll es sein?</p>
@@ -1229,6 +1289,12 @@
     if (step === 6) draft.city = $('suCity').value.trim();
   }
   $('setupBody').addEventListener('click', (e) => {
+    if (e.target.closest('#suDemo')) {   // nur in der Test-Vorschau
+      e.dogHandled = true;
+      try { localStorage.setItem('habit-baukasten.previewMode', 'demo'); } catch {}
+      location.reload();
+      return;
+    }
     const un = e.target.closest('[data-uni]'), rs = e.target.closest('[data-rmsubj]');
     if (un || rs) {
       e.dogHandled = true;
@@ -1528,6 +1594,108 @@
   renderStarPick();
   renderBooks();
 
+  // ---------- 🐷 Sparziele ----------
+  state.savings ||= [];
+  const eur = (v) => v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: v % 1 ? 2 : 0 });
+  const parseEur = (t) => { const n = parseFloat(String(t).replace(/\s|€/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.')); return Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN; };
+  const savedOf = (g) => g.entries.reduce((a, x) => a + x.amount, 0);
+  const piggyCache = {};
+  function piggyURL(frac) {   // Pixel-Sparschwein, das sich von unten mit Münzen füllt
+    const k = Math.round(Math.max(0, Math.min(1, frac)) * 8);
+    if (piggyCache[k]) return piggyCache[k];
+    const c = document.createElement('canvas'); c.width = 18; c.height = 14;
+    const g = c.getContext('2d'), px = (x, y, col) => { g.fillStyle = col; g.fillRect(x, y, 1, 1); };
+    const inBody = (x, y) => ((x + 0.5 - 8.5) / 6.6) ** 2 + ((y + 0.5 - 7) / 4.8) ** 2 <= 1;
+    const level = 11.5 - (k / 8) * 8.5;
+    for (let y = 0; y < 14; y++) for (let x = 0; x < 18; x++) {
+      if (!inBody(x, y)) continue;
+      const edge = !inBody(x - 1, y) || !inBody(x + 1, y) || !inBody(x, y - 1) || !inBody(x, y + 1);
+      px(x, y, edge ? '#4a3f55' : y >= level ? ((x + y) % 3 ? '#f6c94a' : '#ffe08a') : '#f8c9dc');
+    }
+    [[15, 6], [15, 7], [16, 6], [16, 7]].forEach(([x, y]) => px(x, y, '#f292ad')); px(17, 6, '#4a3f55'); px(17, 7, '#4a3f55');   // Rüssel
+    px(16, 6, '#4a3f55');
+    [[11, 1], [12, 1], [11, 2]].forEach(([x, y]) => px(x, y, '#4a3f55')); px(12, 2, '#f292ad');                                  // Ohr
+    [[4, 11], [4, 12], [6, 11], [6, 12], [10, 11], [10, 12], [12, 11], [12, 12]].forEach(([x, y]) => px(x, y, '#4a3f55'));     // Beine
+    [[1, 5], [0, 6], [1, 7]].forEach(([x, y]) => px(x, y, '#4a3f55'));                                                          // Ringelschwanz
+    [[7, 2], [8, 2], [9, 2]].forEach(([x, y]) => px(x, y, '#2a1a12'));                                                          // Münzschlitz
+    px(13, 5, '#2a1a12');                                                                                                         // Auge
+    return (piggyCache[k] = c.toDataURL());
+  }
+  function planText(g, left) {
+    if (!g.date || left <= 0) return '';
+    const [y, m, d] = g.date.split('-').map(Number), end = new Date(y, m - 1, d), now = new Date();
+    const days = Math.round((end - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 864e5);
+    const nice = end.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: end.getFullYear() === now.getFullYear() ? undefined : 'numeric' });
+    if (days < 0) return ` · Zieldatum ${nice} ist vorbei`;
+    const months = days / 30.44;
+    return months >= 1 ? ` · bis ${nice} ≈ ${eur(Math.ceil(left / months))} pro Monat` : ` · bis ${nice} ≈ ${eur(Math.ceil(left / Math.max(1, days / 7)))} pro Woche`;
+  }
+  function renderSavings() {
+    const open = state.savings.filter((g) => !g.done), reached = state.savings.filter((g) => g.done);
+    const total = state.savings.reduce((a, g) => a + savedOf(g), 0);
+    $('saveCount').textContent = state.savings.length ? `${eur(total)} gespart` : 'noch kein Ziel';
+    $('saveMini').src = piggyURL(open.length ? open.reduce((a, g) => a + Math.min(1, savedOf(g) / g.target), 0) / open.length : 0);
+    const card = (g) => {
+      const saved = savedOf(g), frac = Math.min(1, saved / g.target), left = Math.max(0, g.target - saved);
+      const last = g.entries.slice(-3).reverse().map((x) => `<span class="${x.amount < 0 ? 'neg' : ''}">${x.amount < 0 ? '−' : '+'}${eur(Math.abs(x.amount))}</span>`).join(' ');
+      return `<article class="goal ${g.done ? 'reached' : ''}" data-goal="${g.id}">
+        <img class="piggy" src="${piggyURL(frac)}" alt="Sparschwein, ${Math.round(frac * 100)} % gefüllt">
+        <div class="goal-main">
+          <div class="goal-top"><b>${esc(g.name)}</b><button class="todo-del" type="button" data-sdel="${g.id}" aria-label="Sparziel ${esc(g.name)} löschen">×</button></div>
+          <div class="goal-amount"><strong>${eur(saved)}</strong> von ${eur(g.target)} · ${Math.round(frac * 100)} %</div>
+          <div class="progress save-bar"><div data-style="width:${Math.round(frac * 100)}%"></div></div>
+          <small class="goal-hint">${g.done ? `Erreicht am ${new Date(g.doneAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' })} 🎉` : `Noch ${eur(left)}${planText(g, left)}`}</small>
+          ${g.done ? '' : `<form class="goal-form" data-sform="${g.id}">
+            <button class="pill" type="button" data-quick="10">+10 €</button><button class="pill" type="button" data-quick="50">+50 €</button>
+            <input name="amount" inputmode="decimal" placeholder="Betrag" aria-label="Betrag in Euro für ${esc(g.name)}" autocomplete="off">
+            <button class="pill primary" type="submit" name="dir" value="in">Einzahlen</button><button class="pill ghost" type="submit" name="dir" value="out">Abheben</button>
+          </form>`}
+          ${last ? `<small class="goal-last">Zuletzt: ${last}</small>` : ''}
+        </div>
+      </article>`;
+    };
+    $('saveList').innerHTML = open.length ? open.map(card).join('') : '<p class="muted">Leg unten dein erstes Sparziel an, z. B. ein neues Handy oder einen Urlaub.</p>';
+    $('saveDoneWrap').hidden = !reached.length; $('saveDoneCount').textContent = reached.length; $('saveDone').innerHTML = reached.map(card).join('');
+  }
+  function deposit(g, amount, e) {
+    if (!Number.isFinite(amount) || !amount) return;
+    const before = savedOf(g);
+    if (amount < 0 && before + amount < 0) amount = -before;
+    g.entries.push({ id: uid(), amount, at: Date.now() });
+    const after = savedOf(g);
+    e.dogHandled = true;
+    if (!g.done && after >= g.target) { g.done = true; g.doneAt = Date.now(); window.janaDog?.happy(`Wuff! Du hast es geschafft: ${g.name}! 🎉`); }
+    else if (amount > 0) window.janaDog?.happy(`Klimper! 💰 Noch ${eur(Math.max(0, g.target - after))} bis ${g.name}!`);
+    save(); renderSavings();
+  }
+  $('saveCard').addEventListener('click', (e) => {
+    const q = e.target.closest('[data-quick]'), del = e.target.closest('[data-sdel]');
+    if (q) { const g = state.savings.find((x) => x.id === q.closest('[data-sform]').dataset.sform); deposit(g, +q.dataset.quick, e); }
+    if (del) {
+      e.dogHandled = true;
+      if (!del.classList.contains('armed')) { del.classList.add('armed'); del.textContent = 'Löschen?'; setTimeout(() => { if (del.isConnected) { del.classList.remove('armed'); del.textContent = '×'; } }, 3000); return; }
+      state.savings = state.savings.filter((x) => x.id !== del.dataset.sdel); save(); renderSavings();
+    }
+  });
+  $('saveCard').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target;
+    if (f.id === 'saveNew') {
+      const name = f.elements.name.value.trim(), target = parseEur(f.elements.target.value);
+      if (!name) { f.elements.name.focus(); return; }
+      if (!(target > 0)) { f.elements.target.focus(); return; }
+      state.savings.push({ id: uid(), name, target, date: f.elements.date.value || '', entries: [], done: false, createdAt: Date.now() });
+      f.reset(); save(); renderSavings(); return;
+    }
+    const g = state.savings.find((x) => x.id === f.dataset.sform);
+    const amount = parseEur(f.elements.amount.value);
+    if (!(amount > 0)) { f.elements.amount.focus(); return; }
+    deposit(g, e.submitter?.value === 'out' ? -amount : amount, e);
+  });
+  try { $('saveDetails').open = localStorage.getItem('habit-baukasten.saveOpen') === '1'; } catch {}
+  $('saveDetails').addEventListener('toggle', () => { try { localStorage.setItem('habit-baukasten.saveOpen', $('saveDetails').open ? '1' : '0'); } catch {} });
+  renderSavings();
+
   // ---------- KW-Übersicht ----------
   const shortDate = (d) => d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
   function weekStats(mk) {
@@ -1547,6 +1715,7 @@
     return {
       mon, planned, done, perDay, waterGoals: water.filter((v) => v >= GOAL).length, waterSum: water.reduce((a, b) => a + b, 0),
       note: (w?.note || '').trim(), top: Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 3),
+      saved: (state.savings || []).reduce((a, g) => a + g.entries.filter((x) => x.at >= mon.getTime() && x.at < addDays(mon, 7).getTime()).reduce((b, x) => b + x.amount, 0), 0),
       booksDone: (state.books || []).filter((b) => b.date >= key(mon) && b.date <= key(addDays(mon, 6))).length,
       study: (state.uni?.sessions || []).filter((x) => x.at >= mon.getTime() && x.at < addDays(mon, 7).getTime()).reduce((a, x) => a + x.minutes, 0),
       mood: (() => { const vs = Array.from({ length: 7 }, (_, i) => state.mood[key(addDays(mon, i))]?.v).filter(Boolean); return vs.length ? Math.round(vs.reduce((a, b) => a + b, 0) / vs.length) : 0; })(),
@@ -1569,6 +1738,7 @@
       const parts = [s.planned ? `✅\u00a0${s.done} von ${s.planned} erledigt` : 'Keine Gewohnheiten'];
       if (s.waterGoals) parts.push(`💧\u00a0${s.waterGoals}×\u00a02,5\u00a0l`); else if (s.waterSum) parts.push(`💧\u00a0${fmtL(s.waterSum).replace(' ', '\u00a0')}`);
       if (s.note) parts.push('📝 Notiz');
+      if (s.saved > 0) parts.push(`💰\u00a0${s.saved.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).replace(/ /g, '\u00a0')}\u00a0gespart`);
       if (s.booksDone) parts.push(`📖\u00a0${s.booksDone}\u00a0${s.booksDone === 1 ? 'Buch' : 'Bücher'}`);
       if (s.study) parts.push(`📚\u00a0${fmtMin(s.study).replace(/ /g, '\u00a0')}`);
       const maxD = Math.max(3, ...s.perDay);
@@ -2647,6 +2817,7 @@
     { label: '🎄 Weihnachten', hour: 18, wx: wx(71, false, 0), moon: 3, special: () => app.getSpecial(new Date(Y, 11, 24, 18)) },
     { label: '🎆 Silvester-Feuerwerk', hour: 22, wx: wx(0, false, 1), moon: 25, special: () => app.getSpecial(new Date(Y, 11, 31, 22)) },
     { label: '💖 Valentinstag', hour: 12, wx: wx(2, true, 6), special: () => app.getSpecial(new Date(Y, 1, 14, 12)) },
+    { label: '🐷 Sparziele mit Pixel-Sparschwein', hour: 13, wx: wx(1, true, 15), ms: 9000, run: () => { toEl('saveCard'); later(700, () => { $('saveDetails').open = true; }); later(2400, () => document.querySelector('#saveList [data-quick="50"]')?.click()); later(5200, () => document.querySelector('#saveList [data-quick="50"]')?.click()); }, after: () => { $('saveDetails').open = false; } },
     { label: '📖 Gelesene Bücher mit Bücherregal', hour: 20, wx: wx(1, false, 9), moon: 20, ms: 9000, run: () => { toEl('bookCard'); later(700, () => { $('bookDetails').open = true; }); later(2000, () => { const f = $('bookForm'); f.elements.title.value = 'Momo'; f.elements.author.value = 'Michael Ende'; document.querySelector('#bookStars [data-star="5"]')?.click(); }); later(4200, () => $('bookForm').requestSubmit()); }, after: () => { $('bookDetails').open = false; } },
     { label: '⏱️ Lern-Timer: 25 Minuten lernen, Haustier bleibt still', hour: 15, wx: wx(1, true, 16), run: () => { toEl('timerCard'); later(1200, () => $('timerStart').click()); }, after: () => { if ($('timerStop') && !$('timerStop').hidden) $('timerStop').click(); } },
     { label: '🎓 Uni: Lernzeit, Abgaben und Lernziele', hour: 16, wx: wx(1, true, 16), ms: 9000, run: () => { toEl('uniCard'); later(3500, () => document.querySelector('#goalList [data-gcheck]:not([aria-pressed="true"])')?.click()); } },
