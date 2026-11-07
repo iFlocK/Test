@@ -22,7 +22,8 @@ html = html.replace("</head>\n<body>\n", "", 1).replace("</body>\n</html>\n", ""
 html = re.sub(r'<link rel="(manifest|apple-touch-icon|icon)"[^>]*>\n', "", html)
 html = html.replace("<title>Janas Woche</title>", '<title>Janas Woche Vorschau</title>\n<meta name="claude:viewport-fit-sides" content="cover">', 1)
 # Vorschau-Modus einschalten, bevor die Skripte laufen.
-html = html.replace("<script>", "<script>window.JANA_GUEST = true; window.JANA_PREVIEW = true;</script>\n<script>", 1)
+# Demo an (Standard) oder aus: der Schalter in der Vorschau merkt sich die Wahl im Browser.
+html = html.replace("<script>", "<script>window.JANA_PREVIEW = true; try { window.JANA_GUEST = localStorage.getItem('janas-woche.previewMode') !== 'echt'; } catch { window.JANA_GUEST = true; }</script>\n<script>", 1)
 
 for bad in ("<!doctype", "<html", "<body", "</head>"):
     assert bad not in html.lower(), bad

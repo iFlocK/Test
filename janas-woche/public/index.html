@@ -1664,6 +1664,7 @@
 
   async function load(force = false) {
     if (window.JANA_DEMO) return;   // Gast-Vorschau steuert das Wetter selbst
+    if (window.JANA_PREVIEW) { $('wxLine').textContent = 'Echtes Wetter gibt es nur auf der Live-Seite.'; return; }
     try {
       const cached = JSON.parse(localStorage.getItem(WX_KEY) || 'null');
       if (cached?.data) renderWeather(cached.data);
@@ -1820,6 +1821,19 @@
 <script>
 (() => {
   // ---------- Test-Vorschau (nur im Claude-Artifact, nicht auf der Live-Seite): zeigt alle Funktionen im Wechsel ----------
+  if (window.JANA_PREVIEW) {   // Schalter Demo an/aus, nur in der Vorschau
+    const t = document.createElement('button');
+    t.type = 'button'; t.className = 'pill'; t.id = 'demoToggle';
+    t.textContent = window.JANA_GUEST ? '🧪 Demo: an' : '🧪 Demo: aus';
+    t.setAttribute('aria-pressed', window.JANA_GUEST ? 'true' : 'false');
+    t.title = window.JANA_GUEST ? 'Ausschalten: leere Seite, Einträge werden in diesem Browser gespeichert' : 'Einschalten: Beispieldaten und automatische Tour';
+    t.addEventListener('click', (e) => {
+      e.dogHandled = true;
+      try { localStorage.setItem('janas-woche.previewMode', window.JANA_GUEST ? 'echt' : 'demo'); } catch {}
+      location.reload();
+    });
+    document.querySelector('header .nav').append(t);
+  }
   if (!window.JANA_GUEST) return;
   window.JANA_DEMO = true;
   const $ = (id) => document.getElementById(id);
