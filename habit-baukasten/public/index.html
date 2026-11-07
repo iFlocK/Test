@@ -403,6 +403,17 @@
   .card.collapsed > .c-head h2 { margin-bottom: 0; }
   @media (prefers-reduced-motion: reduce) { .c-toggle { transition: none; } }
 
+  /* 💾 Datensicherung */
+  .backup-fab { position: fixed; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); z-index: 22;
+    width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--accent); background: var(--card); font-size: 1.2rem; line-height: 1;
+    box-shadow: 0 4px 14px rgba(120, 80, 110, .2); display: grid; place-items: center; }
+  .backup-fab.due::after { content: ""; position: absolute; top: 2px; right: 2px; width: 10px; height: 10px; border-radius: 50%; background: #e2574c; border: 2px solid var(--card); }
+  .backup { max-width: 440px; display: grid; gap: 10px; }
+  .backup p { margin: 0; }
+  .backup .pill { justify-self: start; padding: 8px 16px; }
+  .backup-msg { font-weight: 800; color: var(--accent-ink); }
+  .backup-msg.err { color: #c2453a; }
+
   /* Patch Notes */
   .news { max-width: 460px; display: grid; gap: 10px; position: relative; z-index: 1; }
   #newsOverlay { background: rgba(30, 18, 40, .62); place-items: end center; }
@@ -747,6 +758,21 @@
     <div class="setup-dots" id="setupDots" aria-hidden="true"></div>
     <div id="setupBody"></div>
     <div class="setup-nav"><button class="pill" id="setupBack" type="button">← Zurück</button><button class="pill primary" id="setupNext" type="button">Weiter →</button></div>
+  </div>
+</div>
+<button class="backup-fab" id="backupBtn" type="button" aria-label="Datensicherung" title="Datensicherung">💾</button>
+<div class="overlay" id="backupOverlay" hidden>
+  <div class="sheet backup" role="dialog" aria-modal="true" aria-labelledby="backupTitle">
+    <div class="sheet-head"><h2 id="backupTitle">💾 Datensicherung</h2><button class="pill" id="backupClose" type="button" aria-label="Datensicherung schließen">✕</button></div>
+    <p>Deine Einträge liegen nur auf diesem Gerät. Speichere ab und zu eine Sicherung, dann ist nichts verloren, wenn das Handy kaputtgeht oder du den Browser-Verlauf löschst.</p>
+    <p class="muted" id="backupLast"></p>
+    <button class="pill primary" id="backupSave" type="button">⬇️ Sicherung speichern</button>
+    <h3>Wiederherstellen</h3>
+    <p class="muted">Ersetzt alle Einträge auf diesem Gerät durch die Einträge aus einer Sicherungsdatei.</p>
+    <input type="file" id="backupFile" accept="application/json,.json" hidden>
+    <button class="pill" id="backupLoad" type="button">⬆️ Sicherung auswählen</button>
+    <div id="backupConfirm" hidden><p id="backupInfo"></p><button class="pill primary" id="backupApply" type="button">Ja, wiederherstellen</button></div>
+    <p class="backup-msg" id="backupMsg" role="status" hidden></p>
   </div>
 </div>
 <div class="overlay" id="newsOverlay" hidden>
@@ -2420,9 +2446,73 @@
   }
   window.janaOpenCard = (id) => $(id)?.classList.remove('collapsed');
 
+  // ---------- 💾 Datensicherung: alles als Datei speichern und wiederherstellen ----------
+  const APP_ID = KEY.split('.')[0], BACKUP_KEY = APP_ID + '.lastBackup';
+  const fmtDT = (ts) => new Date(ts).toLocaleString('de-DE', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' Uhr';
+  let lastBackup = 0, pendingRestore = null;
+  try { lastBackup = +localStorage.getItem(BACKUP_KEY) || 0; } catch {}
+  const hasData = () => Object.values(state.weeks || {}).some((w) => w.days.some((d) => d.length)) || (state.todos || []).length || (state.uni?.deadlines || []).length;
+  function renderBackup() {
+    $('backupBtn').hidden = !!window.HB_LOCKED;
+    $('backupBtn').classList.toggle('due', !GUEST && hasData() && Date.now() - lastBackup > 14 * 864e5);
+    $('backupLast').textContent = lastBackup ? `Letzte Sicherung: ${fmtDT(lastBackup)}` : 'Du hast noch keine Sicherung gespeichert.';
+  }
+  const bmsg = (t, err) => { const m = $('backupMsg'); m.textContent = t; m.hidden = !t; m.classList.toggle('err', !!err); };
+  $('backupBtn').addEventListener('click', (e) => { e.dogHandled = true; pendingRestore = null; $('backupConfirm').hidden = true; bmsg(''); renderBackup(); $('backupOverlay').hidden = false; $('backupClose').focus(); });
+  const closeBackup = () => { $('backupOverlay').hidden = true; $('backupBtn').focus(); };
+  $('backupClose').addEventListener('click', (e) => { e.dogHandled = true; closeBackup(); });
+  $('backupOverlay').addEventListener('click', (e) => { if (e.target === $('backupOverlay')) closeBackup(); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('backupOverlay').hidden) closeBackup(); });
+  $('backupSave').addEventListener('click', async (e) => {
+    e.dogHandled = true;
+    const prefs = {};
+    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith(APP_ID + '.') && !/\.(v2|accounts|session|previewMode|fixtures|teams|weather)(:|$)/.test(k)) prefs[k.slice(APP_ID.length + 1)] = localStorage.getItem(k); } } catch {}
+    const data = { app: APP_ID, version: typeof APP_VERSION !== 'undefined' ? APP_VERSION : '', created: new Date().toISOString(), user: window.HB_USER || null, state, prefs };
+    const name = `${APP_ID}-sicherung-${key(new Date())}.json`;
+    const file = new File([JSON.stringify(data, null, 1)], name, { type: 'application/json' });
+    let done = false;
+    try {   // iPhone: über „Teilen“ in Dateien sichern, AirDrop, Mail …
+      if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: 'Datensicherung' }); done = true; }
+    } catch (err) { if (err?.name === 'AbortError') return; }
+    if (!done) {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name;
+      document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }
+    lastBackup = Date.now(); try { localStorage.setItem(BACKUP_KEY, String(lastBackup)); } catch {}
+    renderBackup(); bmsg('Sicherung gespeichert ✓');
+    window.janaDog?.happy('Wuff! Alles gut gesichert! 💾');
+  });
+  $('backupLoad').addEventListener('click', (e) => { e.dogHandled = true; $('backupFile').value = ''; $('backupFile').click(); });
+  $('backupFile').addEventListener('change', async () => {
+    const f = $('backupFile').files?.[0]; if (!f) return;
+    try {
+      const d = JSON.parse(await f.text());
+      if (!d || typeof d !== 'object' || !d.state || !Array.isArray(d.state.tags) || typeof d.state.weeks !== 'object') throw new Error('kein Format');
+      pendingRestore = d;
+      const weeks = Object.keys(d.state.weeks).length, todos = (d.state.todos || []).length, dls = (d.state.uni?.deadlines || []).length;
+      $('backupInfo').textContent = `Sicherung vom ${d.created ? fmtDT(Date.parse(d.created)) : 'unbekannten Datum'}: ${weeks} ${weeks === 1 ? 'Woche' : 'Wochen'}, ${todos} ${todos === 1 ? 'To-do' : 'To-dos'}, ${dls} ${dls === 1 ? 'Abgabe' : 'Abgaben'}. Wirklich alle Einträge auf diesem Gerät ersetzen?`;
+      $('backupConfirm').hidden = false; bmsg('');
+    } catch { pendingRestore = null; $('backupConfirm').hidden = true; bmsg('Diese Datei ist keine gültige Sicherung.', true); }
+  });
+  $('backupApply').addEventListener('click', (e) => {
+    e.dogHandled = true;
+    if (!pendingRestore || GUEST) { bmsg(GUEST ? 'In der Demo wird nichts gespeichert.' : ''); return; }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(pendingRestore.state));
+      for (const [k, v] of Object.entries(pendingRestore.prefs || {})) if (typeof v === 'string' && !/^(v2|accounts|session)/.test(k)) localStorage.setItem(APP_ID + '.' + k, v);
+      localStorage.setItem(BACKUP_KEY, String(Date.now()));
+    } catch { bmsg('Wiederherstellen hat nicht geklappt (Speicher voll?).', true); return; }
+    location.reload();
+  });
+  renderBackup();
+  setInterval(renderBackup, 60 * 60 * 1000);
+
   // ---------- Versionsnummer und Patch Notes ----------
   // Bei jedem Upload: Version erhöhen und oben einen neuen Eintrag ergänzen.
   const CHANGELOG = [
+    { v: '0.3.0', title: 'Datensicherung', notes: [
+      ['💾', 'Datensicherung', 'Unten rechts gibt es jetzt den 💾-Knopf: Speichere deine Einträge als Datei und stelle sie bei Bedarf wieder her. Ein roter Punkt erinnert dich, wenn die letzte Sicherung länger als zwei Wochen her ist.'],
+    ] },
     { v: '0.2.0', title: 'Tabs und Live-Spielplan', notes: [
       ['⚙️', 'Einstellungen mit Tabs', 'Alle Bereiche der Einstellungen stehen oben als Tabs. Ein Tipp, und du bist da.'],
       ['⚽', 'Spielplan automatisch', 'Bundesliga, DFB-Pokal und Champions League kommen von selbst, während eines Spiels sogar mit Spielstand.'],

@@ -35,3 +35,5 @@ Vorschau erzeugen:
   Claude-Vorschauen dürfen keine fremden Seiten abrufen. Für die Vorschau den Spielplan deshalb mit einbetten:
   `python3 janas-woche/tools/make-preview.py vorschau.html habit-baukasten/public/index.html && python3 habit-baukasten/tools/fixture-snapshot.py vorschau.html`
 - Dazu alle Funktionen von Janas Seite: Easter Eggs, Patch Notes mit Feuerwerk, einklappbare Tabs, Discord-Lerngruppe, Ton immer an.
+- „💾 Datensicherung“ (Knopf unten rechts): alle Einträge als JSON-Datei speichern (auf dem iPhone über „Teilen“) und wiederherstellen.
+  Ein roter Punkt erinnert, wenn die letzte Sicherung älter als 14 Tage ist.

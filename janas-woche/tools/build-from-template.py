@@ -19,6 +19,9 @@ CONFIG = {
     'preset': {'name': 'Jana', 'gender': 'w', 'palette': 'rosa', 'animal': 'dog', 'fur': 'golden', 'pet': '', 'uni': True, 'cycle': False,
                'club': '', 'clubName': '', 'clubShort': '', 'birthday': '2000-08-25', 'together': {'date': '2025-09-18', 'partner': ''}, 'city': ''},
     'changelog': [
+        {'v': '0.10.1', 'title': 'Datensicherung', 'notes': [
+            ['💾', 'Datensicherung', 'Unten rechts gibt es jetzt den 💾-Knopf: Speichere deine Einträge (Deadlines, Gewohnheiten, Bücher …) als Datei, zum Beispiel über „In Dateien sichern“, und stelle sie bei Bedarf wieder her. Ein roter Punkt erinnert dich, wenn die letzte Sicherung länger als zwei Wochen her ist.'],
+        ]},
         {'v': '0.10.0', 'title': 'Deine eigenen Einstellungen', 'notes': [
             ['⚙️', 'Einstellungen mit Tabs', 'Oben unter ⚙️ Einstellungen findest du alles als Tabs: Name, Farbe, Haustier, Gewohnheiten, Uni, Zyklus, Verein, besondere Tage und Wetter.'],
             ['🐾', 'Katze oder Kaninchen', 'Statt des Hundes kannst du auch eine Katze oder ein Kaninchen haben, jeweils mit eigenem Häuschen und eigener Fellfarbe.'],
