@@ -1,0 +1,2110 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Habit Tracker">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#fdf6fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1f1a24" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>Mein Habit Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Layout: Kopf + Wochenziele-Leiste, darunter 7 Tageskarten; jeder Tag hat eine Tag-Auswahl als Shortcut */
+  :root {
+    --bg: #fdf6fa; --card: #ffffff; --text: #4a3f55; --muted: #85798f;
+    --border: #f0e3ef; --soft: #fbeaf2; --accent: #f2a9c8; --accent-2: #cdb7ef;
+    --accent-ink: #b8557f; --on-accent: #4a2340; --today: #fff3f8; --chip-ink: #3b3040; --tint: 40%;
+    --c-ern: #a6dcc2; --c-bew: #f8cfa0; --c-schlaf: #cdb4e8; --c-gehirn: #a9c8ec;
+    --c-sozial: #f4a7b9; --c-psyche: #c6e3a9; --c-allg: #f6df96; --c-eigen: #e3d3c8;
+    --font-display: Fraunces, Georgia, serif;
+    --font-body: Nunito, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1f1a24; --card: #2a2431; --text: #f3ecf7; --muted: #ab9fb8;
+      --border: #3b3245; --soft: #362c3d; --accent: #f0b3cf; --accent-2: #c9b3ec;
+      --accent-ink: #f0b3cf; --on-accent: #3a2233; --today: #33293a; --tint: 30%;
+      --c-ern: #8fcfb0; --c-bew: #f2c08a; --c-schlaf: #c2a6e6; --c-gehirn: #97bbe8;
+      --c-sozial: #f09bb0; --c-psyche: #b5d996; --c-allg: #eed585; --c-eigen: #d4c2b6;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+      --bg: #1f1a24; --card: #2a2431; --text: #f3ecf7; --muted: #ab9fb8;
+      --border: #3b3245; --soft: #362c3d; --accent: #f0b3cf; --accent-2: #c9b3ec;
+      --accent-ink: #f0b3cf; --on-accent: #3a2233; --today: #33293a; --tint: 30%;
+      --c-ern: #8fcfb0; --c-bew: #f2c08a; --c-schlaf: #c2a6e6; --c-gehirn: #97bbe8;
+      --c-sozial: #f09bb0; --c-psyche: #b5d996; --c-allg: #eed585; --c-eigen: #d4c2b6;
+      color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font-body); }
+  main { max-width: 1280px; margin: 0 auto; padding-block: 84px 180px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid; gap: 18px; }
+  @media (min-width: 1560px) { main { max-width: 1560px; } }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 600; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(1.8rem, 5vw, 2.4rem); line-height: 1.1; }
+  button, input, select, textarea { font: inherit; color: var(--text); }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; min-width: 0; }
+  .muted { color: var(--muted); }
+
+  .top { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between; }
+  .week { color: var(--muted); margin-top: 4px; }
+  .nav { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill { background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: .9rem; }
+  .pill:hover { border-color: var(--accent); }
+  .pill.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+  /* Tage */
+  .days { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr)); align-items: start; }
+  .day > * { min-width: 0; }
+  @media (min-width: 1560px) { .days { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+  .day { display: flex; flex-direction: column; gap: 10px; }
+  .day.today { background: var(--today); border-color: var(--accent); }
+  .day-head { display: flex; flex-wrap: wrap; gap: 0 8px; align-items: baseline; justify-content: space-between; }
+  .day-head h3 { font-size: 1.1rem; }
+  .day-head .date { color: var(--muted); font-size: .85rem; }
+  .badge { margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--accent); color: var(--on-accent);
+    font: 800 .7rem var(--font-body); vertical-align: middle; }
+  ul.items { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; flex: 1; align-content: flex-start; }
+  .empty { color: var(--muted); font-size: .85rem; font-style: italic; }
+  .item { display: inline-flex; align-items: center; border-radius: 999px; background: color-mix(in srgb, var(--c) var(--tint), var(--card));
+    border: 1px solid color-mix(in srgb, var(--c) 70%, transparent); overflow: hidden; max-width: 100%; }
+  .item .toggle { border: none; background: none; padding: 5px 4px 5px 10px; display: inline-flex; gap: 6px; align-items: center; font-weight: 700; font-size: .88rem; min-width: 0; text-align: left; }
+  .item .toggle::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--c) 60%, var(--text)); flex: none; }
+  .item.done { background: var(--c); }
+  .item.done .toggle { color: var(--chip-ink); }
+  .item.done .toggle::before { content: "✓"; border-color: transparent; background: var(--card); color: var(--accent-ink); font-size: .65rem; display: grid; place-items: center; font-weight: 900; }
+  .item .x { border: none; background: none; padding: 5px 10px 5px 4px; color: var(--muted); font-size: 1rem; line-height: 1; }
+  .item.done .x { color: var(--chip-ink); opacity: .6; }
+
+  .add-btn { align-self: flex-start; border: 1px dashed var(--accent); background: none; color: var(--accent-ink); border-radius: 999px; padding: 4px 14px; font-weight: 800; font-size: .88rem; }
+  .add-btn[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); border-style: solid; }
+  .picker { border-top: 1px dashed var(--border); padding-top: 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .picker .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { border: 1px solid color-mix(in srgb, var(--c) 80%, transparent); background: var(--card); border-radius: 999px; padding: 4px 11px; font-size: .84rem; font-weight: 700; }
+  .picker .tag:hover { background: color-mix(in srgb, var(--c) var(--tint), var(--card)); }
+  .tag[aria-pressed="true"] { background: var(--c); color: var(--chip-ink); }
+  .tag[aria-pressed="true"]::before { content: "✓ "; }
+  .picker form { display: flex; gap: 6px; }
+  .picker input { flex: 1; min-width: 0; border: 1px solid var(--border); background: var(--card); border-radius: 10px; padding: 6px 10px; }
+  .picker form button { border: 1px solid var(--border); background: var(--card); border-radius: 10px; padding: 6px 12px; font-weight: 800; }
+
+  /* Tags verwalten + Notiz */
+  .two { display: grid; gap: 18px; grid-template-columns: 1fr; }
+  @media (min-width: 860px) { .two { grid-template-columns: 1.3fr 1fr; } }
+  .two h2 { font-size: 1.15rem; margin-bottom: 8px; }
+  .manage .row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .manage .tag { display: inline-flex; gap: 6px; align-items: center; background: color-mix(in srgb, var(--c) var(--tint), var(--card)); }
+  .manage .tag button { border: none; background: none; padding: 0; color: var(--muted); font-weight: 800; }
+  .manage .tag button.armed { color: var(--accent-ink); }
+  .manage form { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .manage form input, .manage form select { border: 1px solid var(--border); background: var(--card); border-radius: 10px; padding: 6px 10px; min-width: 0; }
+  .manage form input[name=name] { flex: 1 1 160px; }
+  .manage .hint { font-size: .85rem; color: var(--muted); margin: 0 0 10px; }
+  textarea { width: 100%; min-height: 110px; resize: vertical; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; background: var(--card); }
+  .motto { text-align: center; color: var(--muted); font-size: .9rem; max-width: 60ch; margin: 4px auto 0; }
+
+  /* Heute: Wetter, Ort, Mond */
+  /* Obere Karten: nur so groß wie ihr Inhalt */
+  .top-cards { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+  .top-cards > .card { width: fit-content; max-width: 100%; padding: 12px 14px; }
+  #todayCard { display: grid; gap: 4px; align-items: center; }
+  .today-text { display: grid; gap: 2px; min-width: 0; }
+  #todayCard h2 { font-size: 1.1rem; }
+  .today-date { color: var(--muted); font-size: .82rem; }
+  .today-wx { font-size: .85rem; }
+  .today-wx strong { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; margin-right: 2px; }
+  .today-moon { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: .8rem; }
+  .today-moon canvas { width: 24px; height: 24px; image-rendering: pixelated; flex: none; cursor: pointer; }
+  .poke { animation: poke .3s ease-out; }
+  @keyframes poke { 50% { transform: scale(1.35) rotate(-12deg); } }
+  @media (prefers-reduced-motion: reduce) { .poke { animation: none; } }
+  .loc-btn { justify-self: start; border: 1px dashed var(--accent); background: none; color: var(--accent-ink); border-radius: 999px;
+    padding: 3px 12px; font-weight: 800; font-size: .82rem; margin-top: 4px; }
+
+  /* Besondere Tage, Wasser, Erfolge */
+  .special { justify-self: start; background: var(--soft); border-radius: 12px; padding: 4px 12px; font-weight: 700; font-size: .92rem; margin: 2px 0; }
+  .water { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; }
+  #bottle { width: 40px; height: 75px; image-rendering: pixelated; display: block; }
+  .water-main { display: grid; gap: 8px; min-width: 0; }
+  .water-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .water h2 { font-size: 1rem; }
+  .water-amount { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .water-main { gap: 5px !important; }
+  .water .pill { padding: 3px 10px; font-size: .78rem; }
+  .water-head .muted { font-size: .78rem; }
+  .water-amount small { font-family: var(--font-body); font-size: .88rem; color: var(--muted); font-weight: 700; }
+  .water-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill.ghost { background: none; color: var(--muted); }
+  .pill:disabled { opacity: .45; cursor: default; }
+  .water-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; align-items: end; height: 34px; max-width: 190px; }
+  .ww { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; height: 100%; font-size: .66rem; color: var(--muted); }
+  .ww .b { width: 100%; max-width: 22px; border-radius: 5px 5px 3px 3px; background: #9cc6f2; min-height: 3px; }
+  .ww.goal .b { background: #5f9be0; }
+  .ww.today { color: var(--accent-ink); font-weight: 800; }
+  .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 8px; margin-top: 12px; }
+  .ach { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; padding: 8px; border-radius: 14px; background: var(--soft); border: 1px solid transparent; }
+  .ach .ic { font-size: 1.4rem; width: 1.8rem; text-align: center; }
+  .ach b { display: block; font-size: .85rem; line-height: 1.25; }
+  .ach span { display: block; font-size: .74rem; color: var(--muted); line-height: 1.3; }
+  .ach.locked { background: none; border-color: var(--border); border-style: dashed; }
+  .ach.locked .ic { filter: grayscale(1); opacity: .35; }
+  .ach.locked b { color: var(--muted); }
+  .toast { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 14px); transform: translateX(-50%); z-index: 30; background: var(--card);
+    border: 2px solid var(--accent); border-radius: 16px; padding: 10px 16px; box-shadow: 0 6px 24px rgba(120, 80, 110, .2); font-weight: 800;
+    width: max-content; max-width: calc(100% - 32px); text-align: center; }
+  .toast small { display: block; font-weight: 600; color: var(--muted); }
+
+  /* Stimmungsbarometer */
+  .mood { display: grid; gap: 6px; }
+  .mood-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .mood h2 { font-size: 1rem; }
+  .mood-head .muted { font-size: .78rem; font-weight: 700; }
+  .mood-row { display: flex; gap: 4px; }
+  .mood-btn { border: 2px solid transparent; background: none; border-radius: 12px; padding: 3px; line-height: 0; transition: transform .12s; }
+  .mood-btn img { width: 32px; height: 32px; image-rendering: pixelated; }
+  .mood-btn:hover { transform: scale(1.08); }
+  .mood-btn[aria-checked="true"] { background: var(--soft); border-color: var(--accent); transform: scale(1.1); }
+  .mood-week { display: flex; gap: 7px; }
+  .mw { display: grid; justify-items: center; gap: 1px; font-size: .64rem; color: var(--muted); }
+  .mw img, .mw .dot { width: 18px; height: 18px; image-rendering: pixelated; }
+  .mw .dot { display: grid; place-items: center; }
+  .mw .dot::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+  .mw.today { color: var(--accent-ink); font-weight: 800; }
+  .mood-mini { width: 16px; height: 16px; image-rendering: pixelated; vertical-align: -3px; margin-right: 4px; }
+  @media (prefers-reduced-motion: reduce) { .mood-btn { transition: none; } }
+
+  /* Zusammen-Zähler */
+  .love { display: grid; gap: 2px; }
+  .love-head { font-size: .82rem; color: var(--muted); font-weight: 700; }
+  .love-big { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; }
+  .love-live { font-size: .8rem; font-variant-numeric: tabular-nums; }
+  .love-next { font-size: .78rem; color: var(--accent-ink); font-weight: 700; }
+  .heart { display: inline-block; animation: beat 1.4s ease-in-out infinite; }
+  @keyframes beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.25); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } }
+  @media (prefers-reduced-motion: reduce) { .heart { animation: none; } }
+
+  /* Erfolge zum Aufklappen */
+  .ach-summary { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; cursor: pointer; list-style: none; border-radius: 10px; }
+  .ach-summary::-webkit-details-marker { display: none; }
+  .ach-summary h2 { font-size: 1.15rem; }
+  .ach-summary .muted { margin-left: auto; font-size: .85rem; }
+  .ach-icons { font-size: .95rem; letter-spacing: 1px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 50%; }
+  .chev { transition: transform .2s; color: var(--muted); }
+  details[open] .chev { transform: rotate(180deg); }
+  details[open] .ach-icons { display: none; }
+  @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
+
+  /* Gast-Vorschau */
+  .demo-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 140px); z-index: 25;
+    width: max-content; max-width: calc(100% - 24px); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 10px;
+    background: var(--card); border: 2px solid var(--accent); border-radius: 16px; padding: 8px 12px; box-shadow: 0 6px 24px rgba(120, 80, 110, .2); font-size: .85rem; }
+  .demo-tag { font-weight: 800; color: var(--accent-ink); }
+  .demo-label { font-weight: 700; text-align: center; }
+  .demo-ctrl { display: flex; align-items: center; gap: 4px; }
+  .demo-ctrl .pill { padding: 2px 9px; font-size: .8rem; }
+  .demo-step { color: var(--muted); font-size: .75rem; font-variant-numeric: tabular-nums; margin-right: 2px; }
+  .demo-out { color: var(--muted); font-size: .78rem; margin-left: 4px; }
+
+  /* Einrichtungs-Assistent */
+  .setup p { margin: 0 0 10px; }
+  .setup-dots { display: flex; gap: 6px; margin: 0 0 14px; }
+  .setup-dots i { width: 22px; height: 6px; border-radius: 3px; background: var(--border); }
+  .setup-dots i.on { background: var(--accent); }
+  .setup-dots i.done { background: var(--accent-2); }
+  .su-input { font: inherit; width: 100%; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+  .su-label { display: block; font-weight: 800; font-size: .85rem; margin: 6px 0 4px; }
+  .su-hint { color: var(--muted); font-size: .82rem; }
+  .su-err { color: var(--accent-ink); font-weight: 700; font-size: .85rem; }
+  .su-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .su-swatch { display: grid; justify-items: center; gap: 6px; padding: 10px 6px; border-radius: 14px; border: 2px solid var(--border); background: var(--card); color: var(--text); font-weight: 700; font-size: .85rem; }
+  .su-swatch span { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--sw) 50%, var(--sw2) 50%); border: 2px solid rgba(60, 40, 60, .12); }
+  .su-swatch[aria-pressed="true"] { border-color: var(--accent); background: var(--soft); }
+  .su-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .su-add { display: flex; gap: 6px; align-items: center; }
+  .su-add .su-input { margin: 0; flex: 1; min-width: 0; }
+  .setup-nav { display: flex; gap: 8px; margin-top: 16px; }
+  .setup-nav #setupNext { margin-left: auto; }
+
+  /* KW-Übersicht */
+  .overlay { position: fixed; inset: 0; z-index: 40; background: rgba(40, 25, 45, .35); display: grid; place-items: center;
+    padding: max(16px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+  .sheet { width: 100%; max-width: 640px; max-height: 100%; overflow: auto; overscroll-behavior: contain; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 20px; padding: 16px; box-shadow: 0 12px 40px rgba(60, 30, 60, .25); }
+  .sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; position: sticky; top: -16px; background: var(--bg); padding: 4px 0 8px; z-index: 1; }
+  .sheet-head h2 { font-size: 1.25rem; }
+  .kw-sum { margin: 0 0 12px; color: var(--muted); font-size: .85rem; }
+  .kw-list { display: grid; gap: 8px; }
+  .kw-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; text-align: left; width: 100%;
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 10px 12px; }
+  .kw-row:hover { border-color: var(--accent); }
+  .kw-row.cur { border-color: var(--accent); background: var(--today); }
+  .kw-badge { display: grid; justify-items: center; min-width: 3.6rem; padding: 4px 6px; border-radius: 10px; background: var(--soft);
+    font-family: var(--font-display); font-weight: 600; font-size: .95rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .kw-badge small { font-family: var(--font-body); font-size: .68rem; color: var(--muted); font-weight: 700; }
+  .kw-info { display: grid; gap: 1px; min-width: 0; font-size: .82rem; }
+  .kw-info b { font-size: .88rem; }
+  .kw-info em { white-space: nowrap; font-style: normal; font-size: .7rem; font-weight: 800; color: var(--on-accent); background: var(--accent); border-radius: 999px; padding: 1px 7px; margin-left: 4px; vertical-align: middle; }
+  .kw-info small { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kw-days { display: flex; gap: 2px; align-items: flex-end; height: 24px; }
+  .kw-days i { display: block; width: 5px; border-radius: 2px; background: var(--border); }
+  .kw-days i.on { background: var(--accent); }
+
+  /* Langfristige To-dos */
+  .todos-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+  .todos h2 { font-size: 1.15rem; }
+  .todos .hint { font-size: .85rem; color: var(--muted); margin: 4px 0 12px; }
+  .todo-add { display: flex; gap: 8px; margin-bottom: 10px; }
+  .todo-add input { flex: 1; min-width: 0; border: 1px solid var(--border); background: var(--card); border-radius: 10px; padding: 8px 12px; }
+  .todo-list { list-style: none; margin: 0; padding: 0; display: grid; }
+  .todo { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 2px; border-top: 1px solid var(--border); }
+  .todo-check { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--accent); background: var(--card); padding: 0; display: grid; place-items: center; color: var(--on-accent); font-weight: 900; font-size: .8rem; }
+  .todo-check:hover { background: var(--soft); }
+  .todo.done .todo-check { background: var(--accent); }
+  .todo.done .todo-check::after { content: "✓"; }
+  .todo-text { overflow-wrap: break-word; min-width: 0; }
+  .todo-text small { display: block; color: var(--muted); font-size: .78rem; }
+  .todo.done .todo-text .t { color: var(--muted); text-decoration: line-through; }
+  .todo-star, .todo-del { border: none; background: none; padding: 4px 6px; color: var(--muted); font-size: 1.1rem; line-height: 1; }
+  .todo-star[aria-pressed="true"] { color: var(--accent-ink); }
+  .todo-del.armed { font-size: .8rem; font-weight: 800; color: var(--accent-ink); }
+  .todos details { margin-top: 12px; }
+  .todos summary { cursor: pointer; font-weight: 800; color: var(--muted); font-size: .9rem; padding: 4px 0; }
+  .todos .empty { padding: 10px 2px; border-top: 1px solid var(--border); }
+
+  /* Spruch unter der Überschrift */
+  .quote { margin-top: 10px; border: none; background: var(--soft); color: var(--text); border-radius: 14px; padding: 7px 14px;
+    font-family: var(--font-display); font-style: italic; font-size: 1.02rem; text-align: left; max-width: 62ch; line-height: 1.4; }
+  .quote::before { content: "„"; } .quote::after { content: "“"; }
+  .quote:hover { background: color-mix(in srgb, var(--accent) 25%, var(--soft)); }
+
+  /* Himmel oben: Wetter rechts, Vögel und Sterne */
+  .sky { position: fixed; top: 0; left: 0; right: 0; height: calc(80px + env(safe-area-inset-top, 0px)); pointer-events: none; z-index: 19;
+    background: linear-gradient(to bottom, var(--bg) 55%, transparent); }
+  .sky canvas { position: absolute; left: 0; top: calc(4px + env(safe-area-inset-top, 0px)); height: 72px; image-rendering: pixelated; display: block; }
+
+  /* Hundegarten mit Labrador */
+  /* Netlify blendet im kostenlosen Tarif unten rechts ein Schild ein; der Garten steht deshalb darüber. */
+  .yard { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 58px); height: 72px; pointer-events: none; z-index: 20; }
+  .yard-clip { position: absolute; inset: -12px 0 calc(-58px - env(safe-area-inset-bottom, 0px)); overflow: hidden;
+    background: linear-gradient(to top, var(--bg) 55%, transparent); }
+  .yard canvas { bottom: calc(58px + env(safe-area-inset-bottom, 0px)); }
+  .yard canvas { position: absolute; left: 0; height: 72px; image-rendering: pixelated; display: block; }
+  .bubble { position: absolute; bottom: 70px; left: 0; background: var(--card); color: var(--text); border: 2px solid var(--accent);
+    border-radius: 12px; padding: 3px 10px; font: 800 .85rem var(--font-body); white-space: nowrap; opacity: 0; transition: opacity .15s, transform .15s; }
+  .bubble.show { opacity: 1; transform: translateY(-4px); }
+  .bubble::after { content: ""; position: absolute; left: var(--arrow, 50%); bottom: -7px; width: 10px; height: 10px; margin-left: -5px; background: var(--card);
+    border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(45deg); }
+  @media (prefers-reduced-motion: reduce) { .bubble { transition: none; } }
+  :root { padding-top: env(safe-area-inset-top, 0px); }
+</style>
+</head>
+<body>
+
+<main>
+  <header class="top">
+    <div>
+      <h1 id="pageTitle">Mein Habit Tracker</h1>
+      <div class="week" id="weekLabel"></div>
+      <button class="quote" id="quote" type="button" title="Antippen für einen neuen Spruch"></button>
+    </div>
+    <div class="nav">
+      <button class="pill" id="prev" aria-label="Vorherige Woche">← Woche</button>
+      <button class="pill primary" id="today">Heute</button>
+      <button class="pill" id="next" aria-label="Nächste Woche">Woche →</button>
+      <button class="pill" id="overviewBtn" type="button">📅 KW-Übersicht</button>
+      <button class="pill" id="setupBtn" type="button" aria-label="Einstellungen">⚙️</button>
+      <button class="pill" id="sound" type="button"></button>
+    </div>
+  </header>
+
+  <div class="top-cards">
+  <section class="card today" id="todayCard" aria-live="polite">
+    <div class="today-text">
+      <h2 id="greet">Hallo!</h2>
+      <div class="special" id="specialLine" hidden></div>
+      <div class="today-date" id="dateLine"></div>
+      <div class="today-wx" id="wxLine">Wetter wird geladen…</div>
+      <div class="today-moon"><canvas id="moonIcon" width="16" height="16" aria-hidden="true"></canvas><span id="moonLine"></span></div>
+      <button class="loc-btn" id="locBtn" type="button" hidden>📍 Genauen Standort verwenden</button>
+    </div>
+  </section>
+
+  <section class="card water" id="waterCard">
+    <canvas id="bottle" width="16" height="30" role="img" aria-label="Wasserflasche"></canvas>
+    <div class="water-main">
+      <div class="water-head"><h2>Wasser heute</h2><span class="muted">Ziel 2,5 l</span></div>
+      <div class="water-amount" id="waterAmount">0 l</div>
+      <div class="water-btns">
+        <button class="pill primary" id="addGlass" type="button">🥛 + Glas · 250 ml</button>
+        <button class="pill primary" id="addHalf" type="button">💧 + ½ Liter</button>
+        <button class="pill ghost" id="undoWater" type="button">↶ Rückgängig</button>
+      </div>
+      <div class="water-week" id="waterWeek" aria-label="Wasser diese Woche"></div>
+    </div>
+  </section>
+  <section class="card mood" id="moodCard">
+    <div class="mood-head"><h2>Stimmung heute</h2><span class="muted" id="moodLabel">Wie geht’s dir?</span></div>
+    <div class="mood-row" id="moodRow" role="radiogroup" aria-label="Stimmung heute"></div>
+    <div class="mood-week" id="moodWeek" aria-label="Stimmung diese Woche"></div>
+  </section>
+  <section class="card love" id="loveCard" hidden>
+    <div class="love-head"><span class="heart" aria-hidden="true">💕</span> <span id="loveHead"></span></div>
+    <div class="love-big" id="loveYmd"></div>
+    <div class="love-live" id="loveLive"></div>
+    <div class="love-next" id="loveNext"></div>
+  </section>
+  </div>
+
+  <section class="days" id="days"></section>
+
+  <div class="two">
+    <section class="card manage">
+      <h2>Meine Gewohnheiten</h2>
+      <p class="hint">Deine Gewohnheiten erscheinen bei jedem Tag unter „+ Tag“. Eigene kannst du hier oder direkt bei einem Tag anlegen.</p>
+      <div class="row" id="tagList"></div>
+      <form id="tagForm">
+        <input name="name" id="newTagName" placeholder="Neue Gewohnheit, z. B. Yoga" aria-label="Name der neuen Gewohnheit" required>
+        <select name="area" id="areaSelect" aria-label="Bereich"></select>
+        <button class="pill primary" type="submit">Anlegen</button>
+      </form>
+    </section>
+    <section class="card">
+      <h2>Wochen-Notiz</h2>
+      <textarea id="note" placeholder="Was lief gut? Worauf achte ich nächste Woche?"></textarea>
+    </section>
+  </div>
+
+  <section class="card todos" id="todos">
+    <div class="todos-head"><h2>Langfristige To-dos</h2><span class="muted" id="todoCount"></span></div>
+    <p class="hint">Für alles, was irgendwann erledigt werden soll. Mit ☆ markierst du Wichtiges, das rutscht nach oben.</p>
+    <form id="todoForm" class="todo-add"><input name="text" id="todoInput" placeholder="Neues To-do, z. B. Zahnarzttermin ausmachen" aria-label="Neues To-do" autocomplete="off"><button class="pill primary" type="submit">Hinzufügen</button></form>
+    <ul class="todo-list" id="todoOpen"></ul>
+    <details id="todoDoneWrap" hidden><summary>Erledigt (<span id="todoDoneCount">0</span>)</summary><ul class="todo-list" id="todoDone"></ul></details>
+  </section>
+
+  <section class="card achievements" id="achCard">
+    <details id="achDetails">
+      <summary class="ach-summary"><h2>Erfolge</h2><span class="ach-icons" id="achIcons" aria-hidden="true"></span><span class="muted" id="achCount"></span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="ach-grid" id="achGrid"></div>
+    </details>
+  </section>
+
+  <p class="motto">Entscheidend ist die langfristige Gewohnheit, nicht Perfektion.</p>
+</main>
+
+<div class="overlay" id="setupOverlay" hidden>
+  <div class="sheet setup" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+    <div class="sheet-head"><h2 id="setupTitle">Willkommen!</h2><button class="pill" id="setupClose" type="button" aria-label="Einstellungen schließen" hidden>✕</button></div>
+    <div class="setup-dots" id="setupDots" aria-hidden="true"></div>
+    <div id="setupBody"></div>
+    <div class="setup-nav"><button class="pill" id="setupBack" type="button">← Zurück</button><button class="pill primary" id="setupNext" type="button">Weiter →</button></div>
+  </div>
+</div>
+<div class="overlay" id="kwOverlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="kwTitle">
+    <div class="sheet-head"><h2 id="kwTitle">Alle Kalenderwochen</h2><button class="pill" id="kwClose" type="button" aria-label="Übersicht schließen">✕</button></div>
+    <p class="kw-sum" id="kwSum"></p>
+    <div class="kw-list" id="kwList"></div>
+  </div>
+</div>
+<div class="demo-bar" id="demoBar" hidden>
+  <span class="demo-tag">👀 Gast-Vorschau</span>
+  <span class="demo-label" id="demoLabel"></span>
+  <span class="demo-ctrl">
+    <span class="demo-step" id="demoStep"></span>
+    <button class="pill" id="demoPrev" type="button" aria-label="Vorherige Szene">⏮</button>
+    <button class="pill" id="demoPause" type="button" aria-label="Vorschau anhalten">⏸</button>
+    <button class="pill" id="demoNext" type="button" aria-label="Nächste Szene">⏭</button>
+    <a class="demo-out" href="/logout">Abmelden</a>
+  </span>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="sky" id="sky" aria-hidden="true"><canvas id="skyCanvas" width="130" height="24"></canvas></div>
+<div class="yard" id="yard" aria-hidden="true"><div class="yard-clip"><canvas id="yardCanvas" width="130" height="24"></canvas></div><div class="bubble" id="bubble"></div></div>
+
+<script>
+(() => {
+  const KEY = 'habit-baukasten.v2';
+  const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+  const AREAS = { bew: 'Bewegung', ern: 'Ernährung', schlaf: 'Schlaf', gehirn: 'Gehirn', sozial: 'Soziales', psyche: 'Erholung', allg: 'Gesundheit', eigen: 'Eigenes' };
+  const DEFAULT_TAGS = [
+    ['kraft', 'Krafttraining', 'bew', 2], ['ausdauer', 'Ausdauer', 'bew', 3], ['spazieren', 'Spazieren', 'bew'], ['rad', 'Fahrrad', 'bew'],
+    ['gemuese', 'Obst & Gemüse', 'ern'], ['huelsen', 'Hülsenfrüchte', 'ern', 3], ['fisch', 'Fisch / Omega-3', 'ern', 1], ['vollkorn', 'Vollkorn', 'ern'], ['wasser', 'Viel Wasser', 'ern'],
+    ['schlafen', 'Früh ins Bett', 'schlaf'], ['handy', 'Handyfrei vorm Schlafen', 'schlaf'],
+    ['lesen', 'Lesen', 'gehirn', 3], ['lernen', 'Neues lernen', 'gehirn'],
+    ['freunde', 'Freunde treffen', 'sozial', 2], ['familie', 'Familie', 'sozial'],
+    ['entspannen', 'Entspannen', 'psyche'], ['hobby', 'Hobby-Zeit', 'psyche'],
+    ['zahnseide', 'Zahnzwischenräume', 'allg'], ['sonne', 'Sonnenschutz', 'allg'], ['alkoholfrei', 'Alkoholfrei', 'allg'], ['vorsorge', 'Vorsorge / Arzt', 'allg'],
+  ].map(([id, name, area]) => ({ id, name, area }));
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+  let state = { tags: DEFAULT_TAGS, weeks: {} };
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.tags) state = s; } catch {}
+  const persist = () => { if (GUEST) return; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
+  const save = () => { persist(); checkAchievements(); };
+
+  const startOfWeek = (d) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const key = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+  // Gast-Vorschau: eigene Beispieldaten, nichts wird gespeichert
+  const GUEST = !!window.JANA_GUEST;
+  function demoState() {
+    const mon = startOfWeek(new Date()), last = addDays(mon, -7), last2 = addDays(mon, -14);
+    const it = (tag, done) => ({ id: uid() + Math.random().toString(36).slice(2, 5), tag, done, doneAt: done ? Date.now() : null });
+    const water = {};
+    for (let i = 0; i < 14; i++) { const d = addDays(last2, i + 7); water[key(d)] = i % 3 ? [500, 500, 500, 500, 500] : [500, 500, 250, 500]; }
+    water[key(new Date())] = [250, 500];
+    return {
+      tags: DEFAULT_TAGS.map((t) => ({ ...t })),
+      weeks: {
+        [key(mon)]: { days: [[it('kraft', true), it('gemuese', true)], [it('lesen', true), it('wasser', true)], [it('freunde', true), it('entspannen', false)],
+          [it('ausdauer', false), it('gemuese', true)], [it('lesen', false), it('spazieren', false)], [it('familie', false), it('hobby', false)], [it('kraft', false)]], note: 'Mehr schlafen und genug trinken 💧' },
+        [key(last)]: { days: [[it('kraft', true)], [it('lesen', true), it('gemuese', true)], [it('spazieren', true)], [it('ausdauer', true), it('lesen', true)],
+          [it('freunde', true)], [it('familie', true), it('entspannen', true)], [it('hobby', false)]], note: 'Gute Woche!' },
+        [key(last2)]: { days: [[it('gemuese', true)], [], [it('kraft', true), it('lesen', false)], [it('spazieren', true)], [], [it('freunde', true)], []], note: '' },
+      },
+      todos: [
+        { id: 'd1', text: 'Zahnarzttermin ausmachen', done: false, star: true, created: 1 },
+        { id: 'd2', text: 'Erste-Hilfe-Kurs auffrischen', done: false, star: false, created: 2 },
+        { id: 'd3', text: 'Fahrrad reparieren lassen', done: true, doneAt: Date.now() - 864e5, created: 3 },
+      ],
+      water, ach: { first: key(new Date()), five: key(new Date()), sip: key(new Date()), water: key(last), todo1: key(new Date()) }, flags: {},
+      achResetId: 'reset-2026-11-06', achSince: 0,
+      profile: { name: 'Alex', palette: 'lavendel', fur: 'golden', pet: 'Bello', birthday: '1998-08-25', together: { date: '2025-09-18', partner: 'Sam' }, city: 'Hamburg' },
+      mood: Object.fromEntries([5, 4, 3, 4, 2, 5, 4, 3, 5, 4, 1, 4, 5].map((v, i) => [key(addDays(new Date(), -i - 1)), { v, at: Date.now() }])),
+    };
+  }
+  if (GUEST) state = demoState();
+
+  // ---------- Profil (Vorlage): Name, Farbe, Hund, besondere Tage ----------
+  const PALETTES = {
+    rosa: { name: 'Rosa', a: '#f2a9c8', a2: '#cdb7ef', ink: '#b8557f', inkD: '#f0b3cf', on: '#4a2340', soft: '#fbeaf2', softD: '#362c3d', today: '#fff4f9', todayD: '#33293a', bg: '#fdf6fa' },
+    lavendel: { name: 'Lavendel', a: '#c9b3ec', a2: '#a9c8ec', ink: '#7a58b8', inkD: '#cbb6f0', on: '#2f2146', soft: '#f1ebfb', softD: '#302a3f', today: '#f6f1fd', todayD: '#2d2838', bg: '#f9f6fd' },
+    mint: { name: 'Mint', a: '#9fd8c0', a2: '#a9c8ec', ink: '#2f8a68', inkD: '#9fdcc3', on: '#123a2c', soft: '#e7f6ef', softD: '#25352f', today: '#f0faf5', todayD: '#26322d', bg: '#f5fbf8' },
+    pfirsich: { name: 'Pfirsich', a: '#f8c9a0', a2: '#f4a7b9', ink: '#b8642a', inkD: '#f6c49c', on: '#45260f', soft: '#fdf0e4', softD: '#3a2e27', today: '#fff6ee', todayD: '#352a24', bg: '#fdf8f3' },
+    himmel: { name: 'Himmelblau', a: '#a9c8ec', a2: '#cdb7ef', ink: '#3f6fa8', inkD: '#a9c8ec', on: '#142a45', soft: '#eaf2fb', softD: '#283140', today: '#f2f7fd', todayD: '#272e3a', bg: '#f6f9fd' },
+  };
+  const genitive = (n) => (/[sßxz]$/i.test(n) ? n + '’' : n + 's');
+  function applyProfile(paletteOverride) {
+    const p = state.profile || {};
+    window.habitProfile = p;
+    const pal = PALETTES[paletteOverride || p.palette] || PALETTES.rosa;
+    let st = document.getElementById('paletteStyle');
+    if (!st) { st = document.createElement('style'); st.id = 'paletteStyle'; document.head.append(st); }
+    const dark = `--accent:${pal.a};--accent-2:${pal.a2};--on-accent:${pal.on};--accent-ink:${pal.inkD};--soft:${pal.softD};--accent-soft:${pal.softD};--today:${pal.todayD};`;
+    st.textContent = `:root{--accent:${pal.a};--accent-2:${pal.a2};--on-accent:${pal.on};--accent-ink:${pal.ink};--soft:${pal.soft};--accent-soft:${pal.soft};--today:${pal.today};--bg:${pal.bg};}`
+      + `@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){${dark}}}:root[data-theme="dark"]{${dark}}`;
+    const title = p.name ? `${genitive(p.name)} Woche` : 'Mein Habit Tracker';
+    $('pageTitle').textContent = title;
+    document.title = title;
+    window.habitApplyFur?.();
+  }
+  // Texte mit „Jana“ werden mit dem eigenen Namen angezeigt
+  window.P = (t) => { const n = state.profile?.name || 'du'; return String(t).replace(/Janas/g, genitive(n)).replace(/Jana/g, n); };
+  applyProfile();
+  function isoWeek(d) {
+    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+    return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
+  }
+
+  let monday = startOfWeek(new Date());
+  let openDay = -1;
+  const week = () => (state.weeks[key(monday)] ||= { days: [[], [], [], [], [], [], []], note: '' });
+  const tagOf = (id) => state.tags.find(t => t.id === id);
+  const areaOf = (it) => it.tag ? (tagOf(it.tag)?.area || 'eigen') : 'eigen';
+  const labelOf = (it) => it.tag ? (tagOf(it.tag)?.name || it.text || '?') : it.text;
+
+  $('areaSelect').innerHTML = Object.entries(AREAS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+
+  function render() {
+    const w = week();
+    const todayKey = key(new Date());
+    const fmt = (d, o) => d.toLocaleDateString('de-DE', o);
+    $('weekLabel').textContent = `KW ${isoWeek(monday)} · ${fmt(monday, { day: 'numeric', month: 'long' })} – ${fmt(addDays(monday, 6), { day: 'numeric', month: 'long', year: 'numeric' })}`;
+
+    $('days').innerHTML = DAYS.map((name, i) => {
+      const d = addDays(monday, i), items = w.days[i], isToday = key(d) === todayKey, open = openDay === i;
+      const used = new Set(items.map(it => it.tag).filter(Boolean));
+      return `<article class="card day ${isToday ? 'today' : ''}" data-day="${i}">
+        <div class="day-head"><h3>${name}${isToday ? '<span class="badge">heute</span>' : ''}</h3><span class="date">${moodImg(key(d))}${fmt(d, { day: 'numeric', month: 'short' })}</span></div>
+        <ul class="items">${items.length ? items.map(it => `
+          <li class="item ${it.done ? 'done' : ''}" style="--c: var(--c-${areaOf(it)})">
+            <button class="toggle" data-toggle="${it.id}" aria-pressed="${!!it.done}" title="Erledigt umschalten">${esc(labelOf(it))}</button>
+            <button class="x" data-del="${it.id}" aria-label="${esc(labelOf(it))} entfernen">×</button>
+          </li>`).join('') : '<li class="empty">Noch nichts ausgewählt</li>'}</ul>
+        <button class="add-btn" data-open="${i}" aria-expanded="${open}">${open ? 'Fertig' : '+ Tag'}</button>
+        ${open ? `<div class="picker">
+          <div class="tags">${state.tags.map(t => `<button class="tag" style="--c: var(--c-${t.area})" data-pick="${t.id}" aria-pressed="${used.has(t.id)}">${esc(t.name)}</button>`).join('')}</div>
+          <form data-custom="${i}"><input name="text" id="custom-${i}" placeholder="Eigene Gewohnheit…" aria-label="Eigener Eintrag für ${name}" autocomplete="off"><button type="submit">+</button></form>
+        </div>` : ''}
+      </article>`;
+    }).join('');
+
+    $('tagList').innerHTML = Object.keys(AREAS).flatMap(a => state.tags.filter(t => t.area === a)).map(t =>
+      `<span class="tag" style="--c: var(--c-${t.area})">${esc(t.name)}<button data-rmtag="${t.id}" aria-label="Tag ${esc(t.name)} löschen">×</button></span>`).join('');
+
+    $('note').value = w.note || '';
+  }
+
+  $('days').addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    const w = week(), day = +b.closest('[data-day]').dataset.day;
+    if (b.dataset.open !== undefined) { openDay = openDay === day ? -1 : day; render(); return; }
+    if (b.dataset.pick) {
+      const list = w.days[day], idx = list.findIndex(i => i.tag === b.dataset.pick);
+      if (idx >= 0) list.splice(idx, 1); else list.push({ id: uid(), tag: b.dataset.pick, done: false });
+      save(); render(); return;
+    }
+    if (b.dataset.toggle) {
+      const it = w.days[day].find(i => i.id === b.dataset.toggle); it.done = !it.done; it.doneAt = it.done ? Date.now() : null;
+      if (it.done) { const h = new Date().getHours(); if (h >= 4 && h < 8) state.flags.early = true; if (h >= 22 || h < 4) state.flags.owl = true; }
+      save(); render();
+      if (it.done) { e.dogHandled = true; window.janaDog?.happy(); }
+      return;
+    }
+    if (b.dataset.del) { w.days[day] = w.days[day].filter(i => i.id !== b.dataset.del); save(); render(); }
+  });
+  $('days').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target, day = +f.dataset.custom, text = f.text.value.trim();
+    if (!text) return;
+    let t = state.tags.find(x => x.name.toLowerCase() === text.toLowerCase());
+    if (!t) { t = { id: 't' + uid(), name: text, area: 'eigen' }; state.tags.push(t); }
+    const list = week().days[day];
+    if (!list.some(i => i.tag === t.id)) list.push({ id: uid(), tag: t.id, done: false });
+    save(); render();
+    $(`custom-${day}`)?.focus();
+  });
+
+  $('tagList').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rmtag]');
+    if (!b) return;
+    if (!b.classList.contains('armed')) {
+      b.classList.add('armed'); b.textContent = 'löschen?';
+      setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = '×'; } }, 3000);
+      return;
+    }
+    const t = tagOf(b.dataset.rmtag);
+    // Schon eingetragene Tage behalten den Namen als eigenen Eintrag
+    for (const w of Object.values(state.weeks)) for (const d of w.days) for (const it of d) if (it.tag === t.id) { it.text = t.name; delete it.tag; }
+    state.tags = state.tags.filter(x => x.id !== t.id);
+    save(); render();
+  });
+  $('tagForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target, name = f.name.value.trim();
+    if (!name) return;
+    state.tags.push({ id: 't' + uid(), name, area: f.area.value });
+    f.name.value = '';
+    save(); render();
+  });
+  $('note').addEventListener('input', (e) => { week().note = e.target.value; save(); });
+  $('prev').addEventListener('click', () => { monday = addDays(monday, -7); openDay = -1; render(); });
+  $('next').addEventListener('click', () => { monday = addDays(monday, 7); openDay = -1; render(); });
+  $('today').addEventListener('click', () => { monday = startOfWeek(new Date()); openDay = -1; render(); });
+
+  // Langfristige To-dos (zusätzlich im selben Speicher, bestehende Einträge bleiben unberührt)
+  state.todos ||= [];
+  const fmtDone = (ts) => new Date(ts).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' });
+  const todoRow = (t) => `<li class="todo ${t.done ? 'done' : ''}">
+      <button class="todo-check" data-tcheck="${t.id}" aria-pressed="${!!t.done}" aria-label="${t.done ? 'Wieder öffnen' : 'Abhaken'}: ${esc(t.text)}"></button>
+      <span class="todo-text"><span class="t">${esc(t.text)}</span>${t.done ? `<small>erledigt am ${fmtDone(t.doneAt)}</small>` : ''}</span>
+      ${t.done ? '<span></span>' : `<button class="todo-star" data-tstar="${t.id}" aria-pressed="${!!t.star}" aria-label="Als wichtig markieren">${t.star ? '★' : '☆'}</button>`}
+      <button class="todo-del" data-tdel="${t.id}" aria-label="${esc(t.text)} löschen">×</button>
+    </li>`;
+  function renderTodos() {
+    const open = state.todos.filter(t => !t.done).sort((a, b) => (b.star ? 1 : 0) - (a.star ? 1 : 0) || a.created - b.created);
+    const done = state.todos.filter(t => t.done).sort((a, b) => b.doneAt - a.doneAt);
+    $('todoOpen').innerHTML = open.length ? open.map(todoRow).join('') : '<li class="empty">Noch nichts auf der Liste. Was möchtest du irgendwann erledigen?</li>';
+    $('todoDoneWrap').hidden = !done.length;
+    $('todoDoneCount').textContent = done.length;
+    $('todoDone').innerHTML = done.map(todoRow).join('');
+    $('todoCount').textContent = open.length ? `${open.length} offen` : (done.length ? 'Alles erledigt 🎉' : '');
+  }
+  $('todoForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const v = e.target.text.value.trim();
+    if (!v) return;
+    state.todos.push({ id: uid(), text: v, done: false, star: false, created: Date.now() });
+    e.target.text.value = '';
+    save(); renderTodos();
+  });
+  $('todos').addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    const id = b.dataset.tcheck || b.dataset.tstar || b.dataset.tdel;
+    const t = state.todos.find(x => x.id === id);
+    if (!t) return;
+    if (b.dataset.tcheck) {
+      t.done = !t.done; t.doneAt = t.done ? Date.now() : null;
+      save(); renderTodos();
+      if (t.done) { e.dogHandled = true; window.janaDog?.happy(); }
+      return;
+    }
+    if (b.dataset.tstar) { t.star = !t.star; save(); renderTodos(); return; }
+    if (!b.classList.contains('armed')) {
+      b.classList.add('armed'); b.textContent = 'Löschen?';
+      setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = '×'; } }, 3000);
+      return;
+    }
+    state.todos = state.todos.filter(x => x.id !== id);
+    save(); renderTodos();
+  });
+  renderTodos();
+
+  // ---------- Besondere Tage ----------
+  function easterSunday(y) {
+    const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4;
+    const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31), day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(y, month - 1, day);
+  }
+  const birthOf = () => { const b = state.profile?.birthday; if (!b) return null; const [yy, mm, dd] = b.split('-').map(Number); return { year: yy, month: mm, day: dd }; };
+  const daysWord = (n) => `${n} ${n === 1 ? 'Tag' : 'Tage'}`;
+  function getSpecial(now = new Date()) {
+    const BIRTH = birthOf() || { month: 0, day: 0, year: 0 };
+    const T = state.profile?.together?.date ? state.profile.together.date.split('-').map(Number) : null;
+    const y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
+    const today = new Date(y, m - 1, d);
+    if (m === BIRTH.month && d === BIRTH.day) return { id: 'birthday', greet: `Alles Gute zum ${y - BIRTH.year}. Geburtstag, Jana! 🎂`,
+      line: 'Heute ist dein Tag! Der Hund hat extra einen Kuchen gebacken.', hat: 'party', decor: 'cake', sky: 'confetti', bark: 'Happy Birthday, Jana! 🎉' };
+    if (T && m === T[1] && d === T[2] && y > T[0]) return { id: 'anniversary', greet: 'Alles Liebe zum Jahrestag, Jana! 💕',
+      line: `Heute seid ihr ${y - T[0]} ${y - T[0] === 1 ? 'Jahr' : 'Jahre'} zusammen! 💞`, sky: 'hearts', bark: 'Wuff! Alles Liebe zum Jahrestag! 💕' };
+    if (m === 12 && d >= 24 && d <= 26) return { id: 'christmas', greet: 'Frohe Weihnachten, Jana! 🎄',
+      line: d === 24 ? 'Heute ist Heiligabend. ✨' : `${d - 24}. Weihnachtsfeiertag – lass es dir gut gehen.`, hat: 'santa', decor: 'tree', lights: true, bark: 'Wuff! Frohe Weihnachten! 🎄' };
+    if (m === 12 && d === 31) return { id: 'nye', greet: 'Guten Rutsch, Jana! 🎆', line: `Morgen beginnt ${y + 1}. Heute Abend gibt es Feuerwerk!`, hat: 'party', sky: 'fireworks', bark: 'Wuff! Guten Rutsch! 🎆' };
+    if (m === 1 && d === 1) return { id: 'newyear', greet: `Frohes neues Jahr ${y}, Jana! 🥂`, line: 'Neues Jahr, neue Häkchen.', hat: 'party', sky: 'fireworks', bark: 'Wuff! Frohes neues Jahr! 🎉' };
+    const diff = Math.round((today - easterSunday(y)) / 864e5);
+    if (diff >= -2 && diff <= 1) return { id: 'easter', greet: 'Frohe Ostern, Jana! 🐣',
+      line: ['Karfreitag', 'Karsamstag', 'Ostersonntag – der Hund hat Eier im Garten versteckt!', 'Ostermontag'][diff + 2], hat: 'bunny', decor: 'eggs', bark: 'Wuff! Frohe Ostern! 🐰' };
+    if (m === 2 && d === 14) return { id: 'valentine', greet: 'Alles Liebe zum Valentinstag, Jana! 💕', line: 'Du bist toll, so wie du bist.', sky: 'hearts', bark: 'Wuff! Hab dich lieb! 💕' };
+    if (m === 10 && d === 31) return { id: 'halloween', greet: 'Happy Halloween, Jana! 🎃', line: 'Süßes oder Saures! Heute Abend fliegen Fledermäuse.', decor: 'pumpkin', sky: 'bats', bark: 'Wuff! Buh! 🎃' };
+    if (m === 12 && d === 6) return { id: 'nikolaus', greet: 'Schönen Nikolaustag, Jana! 🎅', line: 'Hast du deine Stiefel geputzt?', hat: 'santa', lights: true, bark: 'Wuff! Der Nikolaus war da! 🍫' };
+    if (m === 12 && d < 24) return { id: 'advent', line: `Noch ${daysWord(24 - d)} bis Heiligabend 🎄`, lights: true };
+    if (m === 3 && d === 20) return { id: 'spring', line: 'Frühlingsanfang 🌷 Die Tage werden wieder länger!' };
+    if (m === 6 && d === 21) return { id: 'summer', line: 'Sommeranfang ☀️ Heute ist der längste Tag des Jahres.' };
+    const bday = new Date(y, BIRTH.month - 1, BIRTH.day), toB = Math.round((bday - today) / 864e5);
+    if (toB > 0 && toB <= 7) return { id: 'bdaysoon', line: `Noch ${daysWord(toB)} bis zu deinem Geburtstag 🎂` };
+    return null;
+  }
+  window.janaSpecial = getSpecial();
+
+  // ---------- Wasser ----------
+  state.water ||= {};
+  state.ach ||= {};
+  state.flags ||= {};
+  const GOAL = 2500;
+  const todayKey = () => key(new Date());
+  const waterOf = (k) => (state.water[k] || []).reduce((a, b) => a + b, 0);
+  const fmtL = (ml) => (ml / 1000).toLocaleString('de-DE', { maximumFractionDigits: 2 }) + ' l';
+  const pickOne = (a) => a[Math.floor(Math.random() * a.length)];
+  let bottleLevel = 0;   // angezeigte Füllhöhe (läuft sanft zum Ziel)
+
+  function renderWater() {
+    const ml = waterOf(todayKey());
+    $('waterAmount').innerHTML = `${fmtL(ml)} <small>von 2,5 l${ml >= GOAL ? ' · Ziel erreicht! 🎉' : ''}</small>`;
+    $('bottle').setAttribute('aria-label', `Wasserflasche: ${fmtL(ml)} von 2,5 l getrunken`);
+    $('undoWater').disabled = !(state.water[todayKey()] || []).length;
+    const mon = startOfWeek(new Date()), tk = todayKey();
+    $('waterWeek').innerHTML = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((n, i) => {
+      const k = key(addDays(mon, i)), v = waterOf(k);
+      return `<div class="ww ${v >= GOAL ? 'goal' : ''} ${k === tk ? 'today' : ''}" title="${n}: ${fmtL(v)}"><div class="b" style="height:${Math.round(Math.min(1, v / GOAL) * 18)}px"></div>${n}</div>`;
+    }).join('');
+  }
+  function addWater(ml, e) {
+    e.dogHandled = true;
+    const k = todayKey(), before = waterOf(k);
+    (state.water[k] ||= []).push(ml);
+    save(); renderWater();
+    if (before < GOAL && before + ml >= GOAL) window.janaDog?.happy('Wuff! 2,5 Liter geschafft! 💧🎉');
+    else window.janaDog?.happy(pickOne(['Prost! 💧', 'Gluck gluck! 💧', 'Wuff! Schön trinken! 💧']));
+  }
+  $('addGlass').addEventListener('click', (e) => addWater(250, e));
+  $('addHalf').addEventListener('click', (e) => addWater(500, e));
+  $('undoWater').addEventListener('click', (e) => {
+    e.dogHandled = true;
+    const list = state.water[todayKey()] || [];
+    if (!list.length) return;
+    list.pop(); persist(); renderWater();
+  });
+
+  // Pixel-Flasche: 16×30 Pixel, Wasser mit Wellen und Bläschen
+  const bottle = $('bottle'), bg = bottle.getContext('2d');
+  const BC = { o: '#4a3f55', cap: '#f2a9c8', capHi: '#f8c9dc', glass: '#eaf4fd', water: '#7fb8f0', waterDark: '#5f9be0', top: '#b7dcff', bubble: '#e3f2ff', tick: '#a79cbd', shine: '#ffffff' };
+  const bfill = (x, y, w, h, c) => { bg.fillStyle = BC[c]; bg.fillRect(x, y, w, h); };
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function drawBottle(t) {
+    bg.clearRect(0, 0, 16, 30);
+    // Umriss
+    bfill(5, 0, 6, 4, 'o'); bfill(5, 3, 6, 4, 'o'); bfill(3, 6, 10, 2, 'o'); bfill(2, 7, 12, 22, 'o'); bfill(3, 29, 10, 1, 'o');
+    // Deckel und Glas
+    bfill(6, 1, 4, 2, 'cap'); bfill(6, 1, 2, 1, 'capHi');
+    bfill(6, 3, 4, 3, 'glass'); bfill(4, 6, 8, 1, 'glass'); bfill(3, 7, 10, 22, 'glass');
+    // Wasser: Innenraum y 8..28 (21 Reihen)
+    const target = Math.min(1, waterOf(todayKey()) / GOAL);
+    bottleLevel += (target - bottleLevel) * (reduceMotion ? 1 : 0.15);
+    const rows = Math.round(bottleLevel * 21);
+    if (rows > 0) {
+      const top = 29 - rows;
+      bfill(3, top, 10, rows, 'water');
+      bfill(3, 27, 10, 2, 'waterDark');
+      for (let x = 3; x < 13; x++) {                       // Wellen an der Oberfläche
+        const up = reduceMotion ? 0 : Math.round(Math.sin(t / 260 + x * 0.9));
+        if (up < 0) { bfill(x, top, 1, 1, 'glass'); } else bfill(x, top, 1, 1, 'top');
+      }
+      if (!reduceMotion && rows > 3) for (let i = 0; i < 3; i++) {   // Bläschen
+        const y = 28 - Math.floor((t / 140 + i * 6) % (rows - 2));
+        bfill(4 + ((i * 3 + Math.floor(t / 2000)) % 7), y, 1, 1, 'bubble');
+      }
+    }
+    for (let k = 1; k < 5; k++) bfill(12, 29 - Math.round(k * 21 / 5), 1, 1, 'tick');   // Markierung alle 0,5 l
+    bfill(4, 9, 1, 8, 'shine');
+  }
+  let lastBottle = 0;
+  (function bottleLoop(t) {
+    if (t - lastBottle > 90) { lastBottle = t; drawBottle(t); }
+    requestAnimationFrame(bottleLoop);
+  })(0);
+
+  // ---------- Erfolge ----------
+  const ACH = [
+    ['first', '✅', 'Erster Haken', 'Die erste Gewohnheit abgehakt', (s) => s.done >= 1],
+    ['five', '🌱', 'Kleiner Anfang', '5 Gewohnheiten abgehakt', (s) => s.done >= 5],
+    ['quarter', '🌿', 'Am Wachsen', '25 Gewohnheiten abgehakt', (s) => s.done >= 25],
+    ['hundred', '🌳', 'Gewohnheits-Profi', '100 Gewohnheiten abgehakt', (s) => s.done >= 100],
+    ['streak3', '🔥', 'Drei am Stück', '3 Tage hintereinander etwas abgehakt', (s) => s.best >= 3],
+    ['streak7', '⭐', 'Eine ganze Woche', '7 Tage hintereinander etwas abgehakt', (s) => s.best >= 7],
+    ['streak30', '🏆', 'Monats-Marathon', '30 Tage hintereinander etwas abgehakt', (s) => s.best >= 30],
+    ['fullweek', '📅', 'Wochen-Runde', 'An allen 7 Tagen einer Woche etwas abgehakt', (s) => s.fullWeek],
+    ['perfect', '💯', 'Perfekter Tag', 'Mindestens 3 Gewohnheiten an einem Tag, alle erledigt', (s) => s.perfectDay],
+    ['sport', '💪', 'Sportskanone', '10× Bewegung abgehakt', (s) => s.bew >= 10],
+    ['books', '📚', 'Bücherwurm', '10× Lesen abgehakt', (s) => s.lesen >= 10],
+    ['sip', '💧', 'Erster Schluck', 'Das erste Glas Wasser eingetragen', (s) => s.anyWater],
+    ['water', '🐳', 'Wassernixe', '2,5 Liter an einem Tag getrunken', (s) => s.waterGoal >= 1],
+    ['water7', '🌊', 'Wasser-Woche', '7 Tage hintereinander 2,5 Liter', (s) => s.wBest >= 7],
+    ['todo1', '📝', 'Erledigt!', 'Das erste langfristige To-do abgehakt', (s) => s.todosDone >= 1],
+    ['todo10', '🎯', 'Macher-Modus', '10 langfristige To-dos erledigt', (s) => s.todosDone >= 10],
+    ['custom', '✨', 'Ganz meins', 'Eine eigene Gewohnheit angelegt', (s) => s.custom],
+    ['early', '🐦', 'Früher Vogel', 'Vor 8 Uhr morgens etwas abgehakt', () => !!state.flags.early],
+    ['owl', '🦉', 'Nachteule', 'Nach 22 Uhr etwas abgehakt', () => !!state.flags.owl],
+    ['dog', '🐶', 'Bester Freund', 'Den Hund 20-mal angetippt', () => (state.flags.dogPats || 0) >= 20],
+    ['birthday', '🎂', 'Geburtstagskind', 'Am Geburtstag vorbeigeschaut', () => !!state.flags.birthday],
+    ['xmas', '🎄', 'Weihnachtself', 'An Weihnachten vorbeigeschaut', () => !!state.flags.christmas],
+    ['easter', '🐣', 'Osterhase', 'An Ostern vorbeigeschaut', () => !!state.flags.easter],
+    ['nye', '🎆', 'Party-Pfote', 'An Silvester oder Neujahr vorbeigeschaut', () => !!(state.flags.nye || state.flags.newyear)],
+    ['anniv', '💞', 'Jahrestag', 'Am Jahrestag vorbeigeschaut', () => !!state.flags.anniversary],
+    ['wolf', '🐺', 'Werwolf gesichtet', 'Den Hund bei Vollmond als Wolf erlebt', () => !!state.flags.wolf],
+    ['moonclick', '🌝', 'Mondsüchtig', 'Ein Geheimnis entdeckt', () => !!state.flags.moonclick],
+    ['mood7', '🎭', 'Gefühlsprofi', 'An 7 Tagen die Stimmung eingetragen', (s) => s.moodDays >= 7],
+  ];
+  function runLength(dates) {
+    let best = 0, run = 0, prev = null;
+    for (const ds of [...dates].sort()) {
+      const cur = new Date(ds + 'T12:00:00');
+      run = prev && (cur - prev) / 864e5 < 1.5 ? run + 1 : 1;
+      best = Math.max(best, run); prev = cur;
+    }
+    return best;
+  }
+  function stats() {
+    // Nach einem Zurücksetzen zählt nur, was ab achSince passiert ist.
+    const since = state.achSince || 0, sinceKey = since ? key(new Date(since)) : '';
+    // Häkchen ohne Zeitstempel stammen von vor dem Zurücksetzen und zählen dann nicht mehr.
+    const counts = (it) => it.done && (it.doneAt ? it.doneAt >= since : !since);
+    let done = 0, perfectDay = false, fullWeek = false;
+    const tagDone = {}, doneDates = new Set();
+    for (const [mk, w] of Object.entries(state.weeks)) {
+      const [yy, mm, dd] = mk.split('-').map(Number);
+      let daysWith = 0;
+      w.days.forEach((items, i) => {
+        const dk = key(new Date(yy, mm - 1, dd + i));
+        const dn = items.filter((it) => counts(it));
+        done += dn.length;
+        if (dn.length) { doneDates.add(dk); daysWith++; }
+        for (const it of dn) if (it.tag) tagDone[it.tag] = (tagDone[it.tag] || 0) + 1;
+        if (items.length >= 3 && dn.length === items.length) perfectDay = true;
+      });
+      if (daysWith === 7) fullWeek = true;
+    }
+    const sum = (a) => a.reduce((x, y) => x + y, 0);
+    const waterSince = (k) => {
+      const list = state.water[k] || [];
+      if (!since || k > sinceKey) return sum(list);
+      return k < sinceKey ? 0 : sum(list.slice(state.waterBase || 0));
+    };
+    const waterDays = Object.keys(state.water).filter((k) => waterSince(k) >= GOAL);
+    const created = (t) => { const ts = parseInt(t.id.slice(1, -4), 36); return Number.isFinite(ts) ? ts : 0; };
+    const areaDone = (area) => Object.entries(tagDone).reduce((a, [id, n]) => a + (state.tags.find((t) => t.id === id)?.area === area ? n : 0), 0);
+    return {
+      done, perfectDay, fullWeek, best: runLength(doneDates), bew: areaDone('bew'), lesen: tagDone.lesen || 0,
+      anyWater: Object.keys(state.water).some((k) => waterSince(k) > 0), waterGoal: waterDays.length, wBest: runLength(waterDays),
+      todosDone: (state.todos || []).filter((t) => t.done && (t.doneAt || 0) >= since).length,
+      moodDays: Object.values(state.mood || {}).filter((m) => (m.at || 0) >= since).length,
+      custom: state.tags.some((t) => t.id.startsWith('t') && created(t) >= since),
+    };
+  }
+  function renderAch() {
+    const n = ACH.filter(([id]) => state.ach[id]).length;
+    $('achCount').textContent = `${n} von ${ACH.length}`;
+    $('achIcons').textContent = ACH.filter(([id]) => state.ach[id]).map(([, icon]) => icon).join('');
+    $('achGrid').innerHTML = ACH.map(([id, icon, name, desc]) => {
+      const got = state.ach[id];
+      const when = got ? new Date(got + 'T12:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      return `<div class="ach ${got ? '' : 'locked'}"><div class="ic" aria-hidden="true">${icon}</div><div><b>${name}</b><span>${desc}${got ? ` · ${when}` : ''}</span></div></div>`;
+    }).join('');
+  }
+  let toastTimer;
+  function toast(fresh) {
+    const el = $('toast');
+    const [icon, name] = fresh[0];
+    el.innerHTML = `${icon} Erfolg freigeschaltet: ${name}${fresh.length > 1 ? `<small>und ${fresh.length - 1} weitere</small>` : ''}`;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.hidden = true; }, 4000);
+    setTimeout(() => window.janaDog?.happy('Wuff! Neuer Erfolg! 🏆'), 1600);
+  }
+  function checkAchievements() {
+    const s = stats(), fresh = [];
+    for (const [id, icon, name, , test] of ACH) if (!state.ach[id] && test(s)) { state.ach[id] = todayKey(); fresh.push([icon, name]); }
+    if (fresh.length) { persist(); renderAch(); toast(fresh); }
+  }
+  addEventListener('jana:forcewolf', () => { if (!state.flags.moonclick) { state.flags.moonclick = true; save(); } });
+  addEventListener('jana:wolf', () => { if (!state.flags.wolf) { state.flags.wolf = true; save(); } });
+  addEventListener('jana:dogpat', () => { state.flags.dogPats = (state.flags.dogPats || 0) + 1; save(); });
+
+  function renderSpecial() {
+    const sp = window.janaSpecial = window.JANA_DEMO_SPECIAL !== undefined ? window.JANA_DEMO_SPECIAL : getSpecial();
+    const el = $('specialLine');
+    el.hidden = !sp?.line;
+    if (sp?.line) el.textContent = window.P(sp.line);
+    if (sp && ['birthday', 'christmas', 'easter', 'nye', 'newyear', 'anniversary'].includes(sp.id) && !state.flags[sp.id]) { state.flags[sp.id] = true; save(); }
+  }
+  // ---------- Zusammen seit 18.09.2025 ----------
+  const TOG = () => { const t = state.profile?.together; if (!t?.date) return null; const [y, m, d] = t.date.split('-').map(Number); return { y, m, d, partner: t.partner }; };
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  const inDays = (n) => (n === 1 ? 'morgen' : `in ${n} Tagen`);
+  function renderLove() {
+    const TOGETHER = TOG();
+    $('loveCard').hidden = !TOGETHER;
+    if (!TOGETHER) return;
+    $('loveHead').textContent = `${TOGETHER.partner ? `Du & ${TOGETHER.partner} · ` : ''}zusammen seit ${new Date(TOGETHER.y, TOGETHER.m - 1, TOGETHER.d).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+    const now = new Date();
+    let y = now.getFullYear() - TOGETHER.y, mo = now.getMonth() + 1 - TOGETHER.m, d = now.getDate() - TOGETHER.d;
+    if (d < 0) { mo--; d += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
+    if (mo < 0) { y--; mo += 12; }
+    const parts = [y && plural(y, 'Jahr', 'Jahre'), mo && plural(mo, 'Monat', 'Monate'), d && plural(d, 'Tag', 'Tage')].filter(Boolean);
+    $('loveYmd').textContent = !parts.length ? 'Heute ist euer erster Tag! 💕'
+      : parts.length === 1 ? parts[0] : parts.slice(0, -1).join(', ') + ' und ' + parts[parts.length - 1];
+    const dayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const days = Math.round((dayUTC - Date.UTC(TOGETHER.y, TOGETHER.m - 1, TOGETHER.d)) / 864e5);
+    const p2 = (n) => String(n).padStart(2, '0');
+    $('loveLive').textContent = `= ${days.toLocaleString('de-DE')} Tage · ${p2(now.getHours())} Std. · ${p2(now.getMinutes())} Min. · ${p2(now.getSeconds())} Sek.`;
+    const thisYear = Date.UTC(now.getFullYear(), TOGETHER.m - 1, TOGETHER.d);
+    const annivYear = dayUTC > thisYear ? now.getFullYear() + 1 : now.getFullYear();
+    const toAnniv = Math.round((Date.UTC(annivYear, TOGETHER.m - 1, TOGETHER.d) - dayUTC) / 864e5);
+    let next;
+    if (toAnniv === 0) next = `Heute ist euer ${annivYear - TOGETHER.y}. Jahrestag! 💞`;
+    else if (days > 0 && days % 100 === 0) next = `Heute: ${days.toLocaleString('de-DE')} Tage zusammen! 🎉`;
+    else if (toAnniv <= 30) next = `Noch ${daysWord(toAnniv)} bis zum ${annivYear - TOGETHER.y}. Jahrestag 💞`;
+    else { const m100 = Math.ceil((days + 1) / 100) * 100; next = `Nächster Meilenstein: ${m100.toLocaleString('de-DE')} Tage ${inDays(m100 - days)}`; }
+    $('loveNext').textContent = next;
+  }
+  renderLove();
+  setInterval(renderLove, 1000);
+
+  // ---------- Stimmungsbarometer ----------
+  state.mood ||= {};
+  const MOODS = [null,
+    { label: 'Wütend', c: '#f29a9a', dog: 'Grrr… soll ich jemanden anbellen? 🐾' },
+    { label: 'Traurig', c: '#f8c9a0', dog: 'Komm her, ich kuschel dich! 🐶💕' },
+    { label: 'Geht so', c: '#f6df96', dog: 'Ein kleiner Spaziergang hilft vielleicht? 🐾' },
+    { label: 'Gut', c: '#c6e3a9', dog: 'Wuff! Schön! 😊' },
+    { label: 'Super', c: '#9fd8c0', dog: 'Wuff wuff! Ich freu mich mit dir! 🎉' }];
+  function faceURL(v, color) {
+    const c = document.createElement('canvas'); c.width = c.height = 12;
+    const g = c.getContext('2d'), k = '#4a3f55';
+    const px = (x, y, col) => { g.fillStyle = col; g.fillRect(x, y, 1, 1); };
+    for (let y = 0; y < 12; y++) for (let x = 0; x < 12; x++) {
+      const d = Math.hypot(x + 0.5 - 6, y + 0.5 - 6);
+      if (d <= 5.6) px(x, y, d > 4.7 ? k : color);
+    }
+    if (v === 1) [[3, 3], [4, 4], [8, 3], [7, 4], [4, 5], [7, 5]].forEach(([x, y]) => px(x, y, k));   // böse Augenbrauen
+    else [[4, 4], [4, 5], [7, 4], [7, 5]].forEach(([x, y]) => px(x, y, k));
+    ({ 1: [[4, 8], [5, 8], [6, 8], [7, 8], [3, 9], [8, 9]], 2: [[5, 7], [6, 7], [4, 8], [7, 8]], 3: [[4, 8], [5, 8], [6, 8], [7, 8]],
+      4: [[4, 7], [7, 7], [5, 8], [6, 8]], 5: [[3, 7], [8, 7], [4, 8], [5, 8], [6, 8], [7, 8]] })[v].forEach(([x, y]) => px(x, y, k));
+    if (v === 2) px(8, 6, '#7fb2ec');                       // Träne
+    if (v === 5) { px(2, 6, '#f292ad'); px(9, 6, '#f292ad'); }   // rosa Bäckchen
+    return c.toDataURL();
+  }
+  const FACES = MOODS.map((m, v) => (m ? faceURL(v, m.c) : null));
+  const moodImg = (k) => { const m = state.mood[k]; return m ? `<img class="mood-mini" src="${FACES[m.v]}" alt="Stimmung: ${MOODS[m.v].label}">` : ''; };
+  function renderMood() {
+    const tk = todayKey(), cur = state.mood[tk]?.v;
+    $('moodLabel').textContent = cur ? MOODS[cur].label : 'Wie geht’s dir?';
+    $('moodRow').innerHTML = MOODS.map((m, v) => (m ? `<button class="mood-btn" type="button" role="radio" aria-checked="${cur === v}" data-mood="${v}" aria-label="${m.label}"><img src="${FACES[v]}" alt=""></button>` : '')).join('');
+    const mon = startOfWeek(new Date());
+    $('moodWeek').innerHTML = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((n, i) => {
+      const k = key(addDays(mon, i)), m = state.mood[k];
+      return `<div class="mw ${k === tk ? 'today' : ''}">${m ? `<img src="${FACES[m.v]}" alt="${n}: ${MOODS[m.v].label}">` : '<span class="dot" aria-hidden="true"></span>'}${n}</div>`;
+    }).join('');
+  }
+  $('moodRow').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-mood]');
+    if (!b) return;
+    e.dogHandled = true;
+    const v = +b.dataset.mood, tk = todayKey();
+    if (state.mood[tk]?.v === v) delete state.mood[tk];
+    else { state.mood[tk] = { v, at: Date.now() }; window.janaDog?.happy(MOODS[v].dog); }
+    save(); renderMood(); render();
+  });
+  renderMood();
+  setInterval(renderMood, 10 * 60 * 1000);
+
+  // ---------- Einrichtungs-Assistent ----------
+  const FUR_CHOICES = [['golden', 'Golden', '#ecc173'], ['schoko', 'Schoko', '#a8714a'], ['schwarz', 'Schwarz', '#4a4250'], ['weiss', 'Weiß', '#f4efe9']];
+  const SETUP_TITLES = ['Willkommen! 👋', 'Deine Farbe 🎨', 'Dein Hund 🐶', 'Deine Gewohnheiten 🌱', 'Besondere Tage 🎂', 'Wetter 🌦️'];
+  let draft = null, step = 0;
+  const allChoices = () => {
+    const map = new Map();
+    for (const t of [...DEFAULT_TAGS, ...state.tags, ...(draft?.custom || [])]) if (!map.has(t.id)) map.set(t.id, t);
+    return [...map.values()];
+  };
+  function openSetup() {
+    const p = state.profile || {};
+    draft = {
+      name: p.name || '', palette: p.palette || 'rosa', fur: p.fur || 'golden', pet: p.pet || '',
+      habits: state.profile ? state.tags.map((t) => t.id) : ['kraft', 'spazieren', 'gemuese', 'wasser', 'lesen', 'schlafen', 'freunde', 'entspannen'],
+      custom: [], birthday: p.birthday || '', together: { date: p.together?.date || '', partner: p.together?.partner || '' }, city: p.city || '',
+    };
+    step = 0;
+    $('setupClose').hidden = !state.profile;
+    $('setupOverlay').hidden = false;
+    document.body.style.overflow = 'hidden';
+    renderSetup();
+  }
+  function closeSetup() {
+    $('setupOverlay').hidden = true;
+    document.body.style.overflow = '';
+    applyProfile();   // Farb-Vorschau zurück auf die gespeicherte Wahl
+  }
+  function renderSetup() {
+    $('setupTitle').textContent = SETUP_TITLES[step];
+    $('setupDots').innerHTML = SETUP_TITLES.map((_, i) => `<i class="${i === step ? 'on' : i < step ? 'done' : ''}"></i>`).join('');
+    $('setupBack').hidden = step === 0;
+    $('setupNext').textContent = step === SETUP_TITLES.length - 1 ? 'Los geht’s! 🎉' : 'Weiter →';
+    const b = $('setupBody');
+    if (step === 0) b.innerHTML = `<p>Schön, dass du da bist! In ein paar Schritten richtest du deinen eigenen Habit Tracker ein.</p>
+      <label class="su-label" for="suName">Wie heißt du?</label><input id="suName" class="su-input" placeholder="Dein Name" autocomplete="given-name" value="${esc(draft.name)}">
+      <p class="su-hint">Daraus wird der Titel deiner Seite, z. B. „${esc(genitive(draft.name || 'Alex'))} Woche“.</p><p class="su-err" id="suErr" hidden>Bitte gib einen Namen ein.</p>`;
+    if (step === 1) b.innerHTML = `<p>Welche Farbe gefällt dir? Die Seite zeigt sie sofort.</p><div class="su-swatches">${Object.entries(PALETTES).map(([k, p]) =>
+      `<button type="button" class="su-swatch" data-pal="${k}" aria-pressed="${draft.palette === k}" style="--sw:${p.a};--sw2:${p.a2}"><span></span>${p.name}</button>`).join('')}</div>`;
+    if (step === 2) b.innerHTML = `<p>Unten auf der Seite wohnt ein kleiner Pixel-Hund. Welche Fellfarbe soll er haben?</p><div class="su-swatches">${FUR_CHOICES.map(([k, n, c]) =>
+      `<button type="button" class="su-swatch" data-fur="${k}" aria-pressed="${draft.fur === k}" style="--sw:${c};--sw2:${c}"><span></span>${n}</button>`).join('')}</div>
+      <label class="su-label" for="suPet">Wie heißt dein Hund? (optional)</label><input id="suPet" class="su-input" placeholder="z. B. Bello" value="${esc(draft.pet)}">`;
+    if (step === 3) b.innerHTML = `<p>Was möchtest du regelmäßig machen? Tippe an, was passt. Diese Gewohnheiten kannst du dann jedem Tag zuordnen.</p>
+      <div class="su-chips">${allChoices().map((t) => `<button type="button" class="tag" style="--c: var(--c-${t.area})" data-hab="${t.id}" aria-pressed="${draft.habits.includes(t.id)}">${esc(t.name)}</button>`).join('')}</div>
+      <form class="su-add" id="suAdd"><input id="suNew" class="su-input" placeholder="Eigene Gewohnheit, z. B. Yoga" aria-label="Eigene Gewohnheit"><button class="pill" type="submit">+ Hinzufügen</button></form>`;
+    if (step === 4) b.innerHTML = `<label class="su-label" for="suBirth">Wann hast du Geburtstag? (optional)</label><input id="suBirth" class="su-input" type="date" value="${draft.birthday}">
+      <p class="su-hint">An deinem Geburtstag gibt es Konfetti, Kuchen und einen Partyhut für den Hund.</p>
+      <label class="su-label" for="suTog">Jahrestag mit deinem Schatz (optional)</label><input id="suTog" class="su-input" type="date" value="${draft.together.date}">
+      <input id="suPartner" class="su-input" placeholder="Name deines Schatzes" aria-label="Name deines Schatzes" value="${esc(draft.together.partner)}">
+      <p class="su-hint">Dann zählt eine kleine Karte, wie lange ihr schon zusammen seid.</p>`;
+    if (step === 5) b.innerHTML = `<label class="su-label" for="suCity">Wo wohnst du? (optional)</label><input id="suCity" class="su-input" placeholder="z. B. Hamburg" autocomplete="address-level2" value="${esc(draft.city)}">
+      <p class="su-hint">Dann zeigt der Himmel oben dein echtes Wetter, und der Hund verkriecht sich bei Regen in seine Hütte. Alles kannst du später unter ⚙️ ändern.</p>`;
+    b.querySelector('input')?.focus({ preventScroll: true });
+  }
+  function readStep() {
+    if (step === 0) draft.name = $('suName').value.trim();
+    if (step === 2) draft.pet = $('suPet').value.trim();
+    if (step === 4) { draft.birthday = $('suBirth').value; draft.together = { date: $('suTog').value, partner: $('suPartner').value.trim() }; }
+    if (step === 5) draft.city = $('suCity').value.trim();
+  }
+  $('setupBody').addEventListener('click', (e) => {
+    const sw = e.target.closest('[data-pal]'), fu = e.target.closest('[data-fur]'), hb = e.target.closest('[data-hab]');
+    if (!sw && !fu && !hb) return;
+    e.dogHandled = true;
+    if (sw) { draft.palette = sw.dataset.pal; applyProfile(draft.palette); renderSetup(); }
+    if (fu) {
+      draft.pet = $('suPet').value.trim(); draft.fur = fu.dataset.fur;
+      window.habitProfile = { ...(state.profile || {}), fur: draft.fur }; window.habitApplyFur?.();
+      renderSetup();
+    }
+    if (hb) {
+      const id = hb.dataset.hab;
+      draft.habits = draft.habits.includes(id) ? draft.habits.filter((x) => x !== id) : [...draft.habits, id];
+      hb.setAttribute('aria-pressed', draft.habits.includes(id));
+    }
+  });
+  $('setupBody').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const v = $('suNew').value.trim();
+    if (!v) return;
+    const ex = allChoices().find((t) => t.name.toLowerCase() === v.toLowerCase());
+    const id = ex ? ex.id : 't' + uid();
+    if (!ex) draft.custom.push({ id, name: v, area: 'eigen' });
+    if (!draft.habits.includes(id)) draft.habits.push(id);
+    renderSetup();
+    $('suNew').focus();
+  });
+  function finishSetup() {
+    const first = !state.profile;
+    const keep = allChoices().filter((t) => draft.habits.includes(t.id));
+    // Abgewählte Gewohnheiten: schon eingetragene Tage behalten den Namen als eigenen Eintrag
+    for (const t of state.tags.filter((x) => !draft.habits.includes(x.id)))
+      for (const w of Object.values(state.weeks)) for (const d of w.days) for (const it of d) if (it.tag === t.id) { it.text = t.name; delete it.tag; }
+    state.tags = keep.map((t) => ({ id: t.id, name: t.name, area: t.area }));
+    const { custom, habits, ...profile } = draft;
+    state.profile = profile;
+    save(); closeSetup(); render(); renderLove();
+    window.janaApp.renderSpecial(); window.janaWx?.refresh?.(); window.habitReloadWeather?.();
+    if (first) setTimeout(() => window.janaDog?.happy(`Wuff! Hallo ${profile.name}! ${profile.pet ? `Ich bin ${profile.pet}. ` : ''}🐾`), 500);
+  }
+  $('setupNext').addEventListener('click', (e) => {
+    e.dogHandled = true;
+    readStep();
+    if (step === 0 && !draft.name) { $('suErr').hidden = false; $('suName').focus(); return; }
+    if (step < SETUP_TITLES.length - 1) { step++; renderSetup(); } else finishSetup();
+  });
+  $('setupBack').addEventListener('click', (e) => { e.dogHandled = true; readStep(); step = Math.max(0, step - 1); renderSetup(); });
+  $('setupClose').addEventListener('click', (e) => { e.dogHandled = true; closeSetup(); });
+  $('setupBtn').addEventListener('click', openSetup);
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('setupOverlay').hidden && state.profile) closeSetup(); });
+  if (!GUEST && !state.profile) setTimeout(openSetup, 400);
+
+  // ---------- KW-Übersicht ----------
+  const shortDate = (d) => d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+  function weekStats(mk) {
+    const w = state.weeks[mk];
+    const [yy, mm, dd] = mk.split('-').map(Number), mon = new Date(yy, mm - 1, dd);
+    let planned = 0, done = 0;
+    const perDay = [], tagCount = {};
+    for (let i = 0; i < 7; i++) {
+      const items = w?.days?.[i] || [], dn = items.filter((it) => it.done);
+      planned += items.length; done += dn.length; perDay.push(dn.length);
+      for (const it of dn) {
+        const name = it.tag ? (state.tags.find((t) => t.id === it.tag)?.name || it.text) : it.text;
+        if (name) tagCount[name] = (tagCount[name] || 0) + 1;
+      }
+    }
+    const water = Array.from({ length: 7 }, (_, i) => waterOf(key(addDays(mon, i))));
+    return {
+      mon, planned, done, perDay, waterGoals: water.filter((v) => v >= GOAL).length, waterSum: water.reduce((a, b) => a + b, 0),
+      note: (w?.note || '').trim(), top: Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 3),
+      mood: (() => { const vs = Array.from({ length: 7 }, (_, i) => state.mood[key(addDays(mon, i))]?.v).filter(Boolean); return vs.length ? Math.round(vs.reduce((a, b) => a + b, 0) / vs.length) : 0; })(),
+    };
+  }
+  function renderOverview() {
+    const cur = key(startOfWeek(new Date()));
+    const keys = [...Object.keys(state.weeks).filter((k) => {
+      const w = state.weeks[k]; return w.days.some((d) => d.length) || (w.note || '').trim();
+    }), ...Object.keys(state.water).filter((k) => waterOf(k) > 0).map((k) => key(startOfWeek(new Date(k + 'T12:00:00')))), cur].sort();
+    const [fy, fm, fd] = keys[0].split('-').map(Number), [ly, lm, ld] = keys[keys.length - 1].split('-').map(Number);
+    const first = new Date(fy, fm - 1, fd), weeks = [];
+    for (let d = new Date(ly, lm - 1, ld); d >= first && weeks.length < 520; d = addDays(d, -7)) weeks.push(new Date(d));
+    let totalDone = 0, best = null;
+    const rows = weeks.map((mon) => {
+      const k = key(mon), s = weekStats(k), sun = addDays(mon, 6), kw = isoWeek(mon);
+      totalDone += s.done;
+      if (s.done && (!best || s.done > best.done)) best = { kw, year: mon.getFullYear(), done: s.done };
+      const tag = k === cur ? '<em>diese Woche</em>' : k > cur ? '<em>geplant</em>' : '';
+      const parts = [s.planned ? `✅\u00a0${s.done} von ${s.planned} erledigt` : 'Keine Gewohnheiten'];
+      if (s.waterGoals) parts.push(`💧\u00a0${s.waterGoals}×\u00a02,5\u00a0l`); else if (s.waterSum) parts.push(`💧\u00a0${fmtL(s.waterSum).replace(' ', '\u00a0')}`);
+      if (s.note) parts.push('📝 Notiz');
+      const maxD = Math.max(3, ...s.perDay);
+      const bars = s.perDay.map((n, i) => `<i style="height:${n ? Math.max(4, Math.round(n / maxD * 22)) : 2}px" title="${['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i]}: ${n} erledigt" class="${n ? 'on' : ''}"></i>`).join('');
+      return `<button class="kw-row ${k === cur ? 'cur' : ''}" type="button" data-week="${k}">
+        <span class="kw-badge">KW ${kw}<small>${mon.getFullYear()}</small></span>
+        <span class="kw-info"><b>${s.mood ? `<img class="mood-mini" src="${FACES[s.mood]}" alt="Stimmung im Schnitt: ${MOODS[s.mood].label}">` : ''}${shortDate(mon)} – ${shortDate(sun)} ${tag}</b><span>${parts.join(' · ')}</span>${s.top.length ? `<small>Meist: ${s.top.map(([n, c]) => `${esc(n)} ${c}×`).join(', ')}</small>` : ''}</span>
+        <span class="kw-days" aria-hidden="true">${bars}</span>
+      </button>`;
+    });
+    $('kwSum').textContent = `${weeks.length} ${weeks.length === 1 ? 'Woche' : 'Wochen'} · ${totalDone} Gewohnheiten erledigt` + (best ? ` · Beste Woche: KW ${best.kw}/${best.year} mit ${best.done} ✅` : '');
+    $('kwList').innerHTML = rows.join('');
+  }
+  let kwReturnFocus = null;
+  function openOverview() {
+    renderOverview();
+    kwReturnFocus = document.activeElement;
+    $('kwOverlay').hidden = false;
+    document.body.style.overflow = 'hidden';
+    $('kwClose').focus();
+  }
+  function closeOverview() {
+    $('kwOverlay').hidden = true;
+    document.body.style.overflow = '';
+    kwReturnFocus?.focus?.();
+  }
+  $('overviewBtn').addEventListener('click', openOverview);
+  $('kwClose').addEventListener('click', closeOverview);
+  $('kwOverlay').addEventListener('click', (e) => {
+    if (e.target === $('kwOverlay')) { closeOverview(); return; }
+    const row = e.target.closest('[data-week]');
+    if (!row) return;
+    const [y, m, d] = row.dataset.week.split('-').map(Number);
+    monday = new Date(y, m - 1, d); openDay = -1; render();
+    closeOverview();
+    $('days').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('kwOverlay').hidden) closeOverview(); });
+
+  // Einmaliges Zurücksetzen der Erfolge. Einträge bleiben, gezählt wird nur, was danach passiert.
+  window.janaApp = { getSpecial, easterSunday, renderSpecial: () => renderSpecial() };
+  const ACH_RESET_ID = 'reset-2026-11-06';
+  if (state.achResetId !== ACH_RESET_ID) {
+    state.ach = {}; state.flags = {}; state.achSince = Date.now();
+    state.waterBase = (state.water[todayKey()] || []).length;
+    state.achResetId = ACH_RESET_ID;
+    persist();
+  }
+
+  // Erfolge: auf- oder zugeklappt merken
+  try { $('achDetails').open = localStorage.getItem('habit-baukasten.achOpen') === '1'; } catch {}
+  $('achDetails').addEventListener('toggle', () => { try { localStorage.setItem('habit-baukasten.achOpen', $('achDetails').open ? '1' : '0'); } catch {} });
+
+  renderWater();
+  renderAch();
+  renderSpecial();
+  setInterval(() => { renderSpecial(); renderWater(); }, 10 * 60 * 1000);
+  setTimeout(checkAchievements, 1200);   // vorhandene Einträge nachträglich auswerten
+
+
+  render();
+})();
+</script>
+
+<script>
+(() => {
+  // Motivationssprüche
+  const QUOTES = [
+    'Kleine Schritte zählen auch.', 'Fortschritt, nicht Perfektion.', 'Du musst nicht alles schaffen, nur dranbleiben.',
+    'Heute ein bisschen besser als gestern reicht völlig.', 'Dein zukünftiges Ich sagt jetzt schon Danke.', 'Pausen gehören zum Plan.',
+    'Bewegung ist ein Geschenk an deinen Kopf.', 'Eine gute Woche fängt mit einem Häkchen an.', 'Dranbleiben schlägt Durchziehen.',
+    'Sei stolz auf jeden kleinen Haken.', 'Du bist auf einem richtig guten Weg, Jana.', 'Schlaf ist Training für den Kopf.',
+    'Ein Spaziergang ist nie verschwendet.', 'Freunde treffen ist auch Gesundheit.', 'Neugierig bleiben hält jung.',
+    'Du hast schon so viel geschafft.', 'Ein Tag ohne Häkchen ist kein Rückschritt.', 'Stark ist, wer dranbleibt.',
+    'Gönn dir heute etwas Gutes.', 'Atme durch. Du machst das gut.', 'Heute ist ein guter Tag für einen guten Tag.',
+    'Dein Körper merkt sich jeden guten Tag.', 'Langsam ist auch eine Geschwindigkeit.', 'Mach es dir leicht, dann bleibt es leicht.',
+    'Gewohnheiten sind kleine Versprechen an dich selbst.', 'Du darfst stolz auf dich sein.', 'Jeder Haken ist ein kleiner Sieg.',
+    'Gesund ist kein Ziel, sondern ein Weg, den du gerade gehst.',
+  ];
+  const q = document.getElementById('quote');
+  let last = -1;
+  try { last = +localStorage.getItem('habit-baukasten.quote'); } catch {}
+  function nextQuote() {
+    let i; do { i = Math.floor(Math.random() * QUOTES.length); } while (i === last);
+    last = i; q.textContent = window.P ? window.P(QUOTES[i]) : QUOTES[i];
+    try { localStorage.setItem('habit-baukasten.quote', i); } catch {}
+  }
+  q.addEventListener('click', nextQuote);
+  nextQuote();
+
+  // Hundegarten: Hütte, Napf, Ball und Labrador auf einer Pixel-Leinwand (1 Pixel = 3 Bildschirmpunkte)
+  const S = 3;
+  const yard = document.getElementById('yard'), cv = document.getElementById('yardCanvas'), bubble = document.getElementById('bubble');
+  const ctx = cv.getContext('2d');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const C = {
+    o: '#5b3d26', b: '#ecc173', l: '#f8e2b0', e: '#c99044', n: '#2a1a12', t: '#f292ad', c: '#f2a9c8', s: 'rgba(60,30,40,.15)',
+    w: '#efd2a8', wd: '#d9b07e', r: '#ee9bb7', d: '#3a2a33', hp: '#fde8f1',
+    p: '#f2a9c8', p2: '#f8c9dc', k: '#9a6235', ba: '#a9c8ec', hl: '#ffffff', rain: '#6fa6e6', snow: '#a9c4ea',
+  };
+  const fill = (x, y, w, h, c) => { ctx.fillStyle = C[c]; ctx.fillRect(x, y, w, h); };
+  const DOG_COL = { b: C.b, l: C.l, e: C.e }, WOLF_COL = { b: '#a3a8b6', l: '#dfe2e8', e: '#727889' };
+  const FURS = { golden: { ...DOG_COL }, schoko: { b: '#a8714a', l: '#d6a57c', e: '#7d5133' }, schwarz: { b: '#4a4250', l: '#7a7180', e: '#2f2934' }, weiss: { b: '#f4efe9', l: '#ffffff', e: '#ddd2c6' } };
+  window.habitApplyFur = () => { const f = FURS[window.habitProfile?.fur] || FURS.golden; Object.assign(C, f); Object.assign(DOG_COL, f); };
+  window.habitApplyFur();
+  C.wy = '#ffd84d';
+  function outlined(parts) {
+    for (const [x, y, w, h] of parts) { ctx.fillStyle = C.o; ctx.fillRect(x - 1, y - 1, w + 2, h + 2); }
+    for (const [x, y, w, h, c] of parts) fill(x, y, w, h, c);
+  }
+
+  let W = 130, houseX = 1, bowlX = 23;
+  let dogX = 40, dir = 1, frame = 0, stepAcc = 0;
+  let mode = 'walk', target = 60, until = 0, kicks = 0, food = 3, nextZzz = 0, lastT = 0;
+  const ball = { x: 90, vx: 0, hop: 0 };
+  const minDog = () => bowlX + 10, maxDog = () => W - 33;
+
+  function resize() {
+    const vw = document.documentElement.clientWidth;
+    W = Math.ceil(vw / S);
+    cv.width = W; cv.height = 24;
+    cv.style.width = (W * S) + 'px';
+    ctx.imageSmoothingEnabled = false;
+    dogX = Math.min(Math.max(dogX, houseX + 2), Math.max(houseX + 2, maxDog()));
+    ball.x = Math.min(Math.max(ball.x, bowlX + 12), W - 7);
+  }
+  addEventListener('resize', resize);
+  resize();
+  ball.x = Math.round(W * 0.7);
+  if (reduce) { mode = 'idle'; dogX = minDog(); dir = -1; }
+
+  // ---------- Zeichnen ----------
+  function drawHouse() {
+    const x0 = houseX, parts = [[x0 + 2, 12, 16, 11, 'w']];
+    for (let r = 0; r < 8; r++) parts.push([x0 + 9 - r, 4 + r, 2 + 2 * r, 1, 'r']);
+    parts.push([x0 + 1, 12, 18, 1, 'r']);
+    ctx.fillStyle = C.s; ctx.fillRect(x0 + 1, 23, 19, 1);
+    outlined(parts);
+    fill(x0 + 2, 15, 5, 1, 'wd'); fill(x0 + 13, 18, 5, 1, 'wd'); fill(x0 + 3, 20, 3, 1, 'wd');
+    fill(x0 + 7, 16, 6, 7, 'd'); fill(x0 + 8, 15, 4, 1, 'd');                    // Türöffnung
+    fill(x0 + 8, 7, 1, 1, 'hp'); fill(x0 + 10, 7, 1, 1, 'hp'); fill(x0 + 8, 8, 3, 1, 'hp'); fill(x0 + 9, 9, 1, 1, 'hp'); // Herz
+    if (mode === 'sleep') {                                                       // schlafender Kopf in der Tür
+      fill(x0 + 8, 18, 4, 4, 'b'); fill(x0 + 8, 18, 1, 3, 'e');
+      fill(x0 + 9, 19, 1, 1, 'n'); fill(x0 + 11, 19, 1, 1, 'n'); fill(x0 + 9, 21, 3, 1, 'l');
+    }
+  }
+  function drawBowl() {
+    const x = bowlX;
+    ctx.fillStyle = C.s; ctx.fillRect(x, 23, 9, 1);
+    outlined([[x + 1, 20, 7, 3, 'p'], [x, 19, 9, 1, 'p2']]);
+    if (food >= 1) fill(x + 2, 18, 2, 1, 'k');
+    if (food >= 2) fill(x + 5, 18, 2, 1, 'k');
+    if (food >= 3) fill(x + 3, 17, 3, 1, 'k');
+  }
+  function drawBall() {
+    const x = Math.round(ball.x), y = 18 - Math.round(ball.hop);
+    ctx.fillStyle = C.s; ctx.fillRect(x, 23, 5, 1);
+    outlined([[x + 1, y, 3, 5, 'ba'], [x, y + 1, 5, 3, 'ba']]);
+    fill(x, y + 2, 5, 1, 'c'); fill(x + 1, y + 1, 1, 1, 'hl');
+  }
+  function drawDog(t) {
+    const showWolf = mode === 'transform' ? Math.floor(t / 150) % 2 === 0 : wolf;
+    Object.assign(C, showWolf ? WOLF_COL : DOG_COL);
+    const pose = mode === 'happy' ? 'happy' : mode === 'eat' ? 'eat' : mode === 'howl' ? 'howl' : (mode === 'idle' || mode === 'transform') ? 'stand'
+      : (mode === 'play' || mode === 'goPlay') ? 'run' : 'walk';
+    const happy = pose === 'happy', moving = pose === 'walk' || pose === 'run', eat = pose === 'eat';
+    const f = frame % 4;
+    const jump = happy && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : 0;
+    const bob = moving && (f === 1 || f === 3) ? -1 : 0;
+    const Y = (v) => v - jump + bob;
+    const howling = pose === 'howl' && t < howlUntil;
+    const hd = eat ? (Math.floor(t / 220) % 2 ? 7 : 8) : howling ? -2 : 0, hx = eat ? 1 : 0;
+    const H = (v) => Y(v) + hd;
+    ctx.save();
+    if (dir < 0) { ctx.translate(Math.round(dogX) + 32, 0); ctx.scale(-1, 1); } else ctx.translate(Math.round(dogX), 0);
+    ctx.fillStyle = C.s; ctx.fillRect(8, 23, 16 - jump, 1);
+    const lift = (i) => moving && ((f < 2) === (i % 2 === 0)) ? 1 : 0;
+    const wag = Math.floor(t / (happy || pose === 'run' ? 70 : eat ? 180 : 260)) % 2;
+    const parts = [];
+    [9, 12, 18, 21].forEach((lx, i) => parts.push([lx, Y(17), 2, 5 - lift(i), 'b']));
+    if (wag) parts.push([6, Y(9), 2, 3, 'b'], [5, Y(7), 2, 2, 'b']);
+    else parts.push([5, Y(11), 3, 2, 'b'], [3, Y(10), 2, 2, 'b']);
+    parts.push([8, Y(11), 15, 7, 'b'], [20 + hx, H(5), 8, 8, 'b'], [26 + hx, H(9), 5, 4, 'l']);
+    outlined(parts);
+    fill(10, Y(15), 11, 2, 'l');                       // Bauch
+    if (showWolf) outlined([[21 + hx, H(3), 2, 2, 'e'], [22 + hx, H(2), 1, 1, 'e']]);   // spitze Wolfsohren
+    else fill(21 + hx, H(6), 3, 6, 'e');               // Schlappohr
+    fill(20, Y(10), 2, 4, 'c');                        // rosa Halsband
+    if (happy) { fill(24, Y(8), 1, 1, 'n'); fill(25, Y(7), 1, 1, 'n'); fill(26, Y(8), 1, 1, 'n'); }
+    else if (eat) fill(24 + hx, H(8), 2, 1, 'n');
+    else fill(25, H(7), 1, 2, showWolf ? 'wy' : 'n');
+    fill(30 + hx, H(9), 1, 2, 'n');                    // Nase
+    if (howling) fill(27 + hx, H(12), 4, 1, 'n');      // Maul offen beim Heulen
+    const bark = happy && Math.floor(t / 140) % 2 === 0;
+    if (bark) { fill(27, Y(12), 4, 1, 'n'); fill(27, Y(13), 2, 2, 't'); }
+    else if (happy || pose === 'run' || (hot() && !eat)) fill(27 + hx, H(13), 2, 1, 't');
+    drawHat(H, hx);
+    ctx.restore();
+    Object.assign(C, DOG_COL);
+  }
+
+  // ---------- Sprechblase ----------
+  let hideTimer;
+  function say(text, centerArt, ms = 1700) {
+    bubble.textContent = window.P ? window.P(text) : text;
+    const bw = bubble.offsetWidth, vw = document.documentElement.clientWidth, center = centerArt * S;
+    const left = Math.min(Math.max(8, center - bw / 2), vw - bw - 8);
+    bubble.style.left = left + 'px';
+    bubble.style.setProperty('--arrow', (center - left) + 'px');
+    bubble.classList.add('show');
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => bubble.classList.remove('show'), ms);
+  }
+
+  // ---------- Besondere Tage: Hut und Deko ----------
+  const SC = { hy: '#ffd36e', hp1: '#cdb7ef', hp2: '#f2a9c8', sr: '#e2574c', sw: '#ffffff', bw: '#ffffff', bp: '#f6b3c8',
+    tg: '#6fbf7c', tgd: '#4f9e5e', ck: '#f8c9dc', cf: '#ffffff', pk: '#f29a4a', pkd: '#d97a2e', e1: '#a9c8ec', e2: '#f4a7b9', e3: '#c6e3a9', e4: '#f6df96' };
+  const sfill = (x, y, w, h, c) => { ctx.fillStyle = SC[c] || C[c]; ctx.fillRect(x, y, w, h); };
+  function soutlined(parts) {
+    for (const [x, y, w, h] of parts) { ctx.fillStyle = C.o; ctx.fillRect(x - 1, y - 1, w + 2, h + 2); }
+    for (const [x, y, w, h, c] of parts) sfill(x, y, w, h, c);
+  }
+  function drawHat(H, hx) {
+    const sp = window.janaSpecial;
+    if (!sp?.hat) return;
+    if (sp.hat === 'party') soutlined([[22 + hx, H(4), 5, 1, 'hp2'], [22 + hx, H(3), 4, 1, 'hp1'], [23 + hx, H(2), 3, 1, 'hp2'], [23 + hx, H(1), 2, 1, 'hp1'], [24 + hx, H(0), 1, 1, 'hy']]);
+    else if (sp.hat === 'santa') soutlined([[21 + hx, H(3), 6, 1, 'sr'], [21 + hx, H(2), 5, 1, 'sr'], [21 + hx, H(1), 3, 1, 'sr'], [20 + hx, H(4), 8, 1, 'sw'], [19 + hx, H(1), 2, 2, 'sw']]);
+    else if (sp.hat === 'bunny') {
+      soutlined([[21 + hx, H(0), 2, 5, 'bw'], [25 + hx, H(0), 2, 5, 'bw']]);
+      sfill(22 + hx, H(1), 1, 3, 'bp'); sfill(26 + hx, H(1), 1, 3, 'bp');
+    }
+  }
+  function drawDecor(t) {
+    const sp = window.janaSpecial;
+    if (!sp) return;
+    const x = bowlX + 12;
+    if (sp.lights) {                                   // Lichterkette am Dach
+      const cols = ['#ff6b6b', '#ffd36e', '#7fd18b', '#7fb2ec'];
+      for (let r = 1; r < 8; r += 2) {
+        const ci = (r + Math.floor(t / 500)) % 4;
+        ctx.fillStyle = cols[ci]; ctx.fillRect(houseX + 9 - r - 1, 4 + r, 1, 1);
+        ctx.fillStyle = cols[(ci + 2) % 4]; ctx.fillRect(houseX + 10 + r + 1, 4 + r, 1, 1);
+      }
+    }
+    if (sp.decor === 'tree') {
+      soutlined([[x + 3, 21, 3, 2, 'wd'], [x, 17, 9, 4, 'tg'], [x + 1, 14, 7, 3, 'tg'], [x + 2, 11, 5, 3, 'tg'], [x + 3, 9, 3, 2, 'tg']]);
+      sfill(x + 4, 7, 1, 2, 'hy');
+      const blink = Math.floor(t / 600) % 2;
+      [[x + 2, 19, 'sr'], [x + 6, 18, 'hy'], [x + 3, 15, blink ? 'e1' : 'sr'], [x + 5, 12, 'e2'], [x + 4, 17, blink ? 'hy' : 'e1']].forEach(([bx, by, c]) => sfill(bx, by, 1, 1, c));
+    } else if (sp.decor === 'cake') {
+      soutlined([[x, 18, 9, 4, 'ck'], [x, 17, 9, 1, 'cf']]);
+      sfill(x + 1, 19, 7, 1, 'hp2');
+      [x + 2, x + 6].forEach((cx, i) => { sfill(cx, 14, 1, 3, 'cf'); sfill(cx, 13, 1, 1, Math.floor(t / 200 + i) % 2 ? 'hy' : 'pk'); });
+    } else if (sp.decor === 'pumpkin') {
+      soutlined([[x, 18, 7, 5, 'pk']]);
+      sfill(x + 3, 16, 1, 2, 'tg'); sfill(x + 2, 18, 1, 5, 'pkd'); sfill(x + 4, 18, 1, 5, 'pkd');
+      const eye = (window.janaWeather?.isDay === false) ? 'hy' : 'n';
+      sfill(x + 1, 19, 1, 1, eye); sfill(x + 5, 19, 1, 1, eye); sfill(x + 2, 21, 3, 1, eye);
+    } else if (sp.decor === 'eggs') {
+      [[x, 'e1'], [x + 22, 'e2'], [W - 14, 'e3'], [x + 40, 'e4']].forEach(([ex, c], i) => {
+        if (ex > W - 6) return;
+        soutlined([[ex, 20, 3, 3, c], [ex + 1, 19, 1, 1, c]]);
+        sfill(ex, 21, 3, 1, i % 2 ? 'cf' : 'hp1');
+      });
+    }
+  }
+
+  // ---------- Verhalten ----------
+  const rand = (a, b) => a + Math.random() * (b - a);
+  // Wetter und Tageszeit (vom Wetter-Skript in window.janaWeather abgelegt)
+  const wxNow = () => window.janaWeather || {};
+  const wet = () => ['rain', 'drizzle', 'thunder'].includes(wxNow().kind);
+  const snowy = () => wxNow().kind === 'snow';
+  const hot = () => Number.isFinite(wxNow().temp) && wxNow().temp >= 25;
+  const cold = () => Number.isFinite(wxNow().temp) && wxNow().temp <= 3;
+  const hourNow = () => window.JANA_HOUR ?? new Date().getHours();
+  const lateNight = () => { const h = hourNow(); return h >= 22 || h < 6; };
+  const night = () => wxNow().isDay === false || lateNight();
+  const morning = () => { const h = hourNow(); return h >= 6 && h < 10 && !night(); };
+  const spd = () => (hot() || night() ? 10 : morning() ? 18 : 15);
+  let shelterSaid = false, greetedMorning = false;
+  let wolf = false, howlUntil = 0, nextHowl = 0;
+  let forcedWolfUntil = 0, forcedMsg = false;
+  const wolfTime = () => performance.now() < forcedWolfUntil || (window.janaMoon?.().name === 'Vollmond' && night());
+  addEventListener('jana:forcewolf', () => { forcedWolfUntil = performance.now() + 45000; forcedMsg = true; });
+  function mood() {
+    const pn = window.habitProfile?.pet;
+    if (pn && Math.random() < 0.2) return `Ich bin ${pn}! 🐾`;
+    const sp = window.janaSpecial;
+    if (sp?.bark && Math.random() < 0.5) return sp.bark;
+    if (hot()) return pick(['Puh, ist das warm! 🥵', 'Hechel hechel…']);
+    if (cold()) return pick(['Brr, kalt! 🥶', 'Kalte Pfoten…']);
+    if (snowy()) return pick(['Schnee! ❄️', 'Kalt, aber schön!']);
+    if (morning() && !greetedMorning) { greetedMorning = true; return 'Guten Morgen, Jana! 🐾'; }
+    if (night()) return pick(['*gähn*', 'Bald ist Schlafenszeit…']);
+    return null;
+  }
+  function sleepTalk() {
+    const k = wxNow().kind;
+    const pool = k === 'thunder' ? ['Huch, Gewitter! 😰', 'Ich bleib lieber drin…', 'Zzz…']
+      : (k === 'rain' || k === 'drizzle') ? ['Plitsch platsch… 🌧️', 'Ich bleib im Trockenen.', 'Zzz…']
+      : k === 'snow' ? ['Brr, Schnee! ❄️', 'Zzz…']
+      : night() ? ['Zzz…', 'Zzz… 🌙', '*schnarch*'] : ['Zzz…'];
+    return pick(pool);
+  }
+  function decide(t) {
+    if (reduce) { mode = 'idle'; until = t + 1e9; return; }
+    if (wolf) {
+      if (Math.random() < 0.65) { mode = 'howl'; until = t + rand(4000, 7000); nextHowl = t + 400; }
+      else { mode = 'walk'; target = rand(minDog(), maxDog()); }
+      return;
+    }
+    if (wet() || lateNight()) { mode = 'goSleep'; target = houseX + 3; return; }
+    let pSleep = 0.1, pIdle = 0.17, pEat = 0.17, pPlay = 0.18;
+    if (night()) { pSleep = 0.45; pIdle = 0.2; pPlay = 0.06; }
+    if (snowy() || cold()) pSleep = Math.max(pSleep, 0.4);
+    if (hot()) { pIdle = 0.3; pEat = 0.22; pPlay = 0.06; }
+    if (morning()) pPlay = 0.3;
+    const r = Math.random();
+    let acc = pSleep;
+    if (r < acc) { mode = 'goSleep'; target = houseX + 3; return; }
+    acc += pIdle;
+    if (r < acc) {
+      mode = 'idle'; until = t + rand(1500, hot() ? 5000 : 3200);
+      const m = mood(); if (m && Math.random() < 0.6) say(m, dogX + 16, 1700);
+      return;
+    }
+    acc += pEat;
+    if (r < acc && food > 0) { mode = 'goEat'; target = bowlX + 2; return; }
+    acc += pPlay;
+    if (r < acc) { mode = 'goPlay'; kicks = 2 + Math.floor(Math.random() * 2); return; }
+    mode = 'walk'; target = rand(minDog(), maxDog());
+  }
+  const ballApproach = () => ball.x > dogX + 16 ? ball.x - 30 : ball.x + 3;
+  function moveTo(goal, speed, dt) {
+    const dx = goal - dogX;
+    if (Math.abs(dx) < 0.6) { dogX = goal; return true; }
+    dir = Math.sign(dx);
+    const step = Math.min(Math.abs(dx), speed * dt);
+    dogX += dir * step;
+    stepAcc += step; if (stepAcc > 1.6) { stepAcc = 0; frame++; }
+    return false;
+  }
+
+  function update(t, dt) {
+    // Ball rollt aus
+    if (Math.abs(ball.vx) > 0.5) {
+      ball.x += ball.vx * dt;
+      ball.vx *= Math.max(0, 1 - 1.4 * dt);
+      ball.hop = Math.min(3, Math.abs(ball.vx) / 14) * Math.abs(Math.sin(t / 90));
+      if (ball.x < bowlX + 12) { ball.x = bowlX + 12; ball.vx = Math.abs(ball.vx); }
+      if (ball.x > W - 7) { ball.x = W - 7; ball.vx = -Math.abs(ball.vx); }
+    } else { ball.vx = 0; ball.hop = 0; }
+
+    // Vollmond-Nacht: Verwandlung in den Wolf und morgens zurück
+    const wantWolf = wolfTime();
+    if (wantWolf !== wolf && mode !== 'transform' && mode !== 'happy') {
+      if (mode === 'sleep') { dogX = houseX + 3; dir = 1; }
+      mode = 'transform'; until = t + 1800;
+      say(wantWolf ? (forcedMsg ? 'Huch… was passiert mit mir?! 🌕' : 'Oh nein… Vollmond! 🌕') : 'Wuff? Was war denn los?', dogX + 16, 1800);
+      forcedMsg = false;
+    }
+    // Bei Regen oder spät nachts sofort in die Hütte (der Wolf bleibt draußen)
+    if ((wet() || lateNight()) && !wolf && !['goSleep', 'sleep', 'happy', 'transform'].includes(mode)) {
+      mode = 'goSleep';
+      if (wet() && !shelterSaid) { say(wxNow().kind === 'thunder' ? 'Gewitter! Schnell in die Hütte! 😰' : 'Brr, Regen! Ab in die Hütte! 🌧️', dogX + 16, 1900); shelterSaid = true; }
+    }
+    switch (mode) {
+      case 'walk': if (moveTo(Math.min(Math.max(target, houseX + 2), maxDog()), spd(), dt)) decide(t); break;
+      case 'idle': if (t > until) decide(t); break;
+      case 'goEat': if (moveTo(bowlX + 2, spd(), dt)) { dir = -1; mode = 'eat'; until = t + 3600; say(hot() ? 'Schlabber schlabber! 💧' : 'Mampf mampf!', bowlX + 4, 1400); } break;
+      case 'eat': if (t > until) { food = Math.max(0, food - 1); mode = 'walk'; target = rand(minDog(), maxDog()); } break;
+      case 'goSleep': if (moveTo(houseX + 3, wet() ? 26 : spd(), dt)) { mode = 'sleep'; until = t + (night() ? 15000 : 7000); nextZzz = t + 900; } break;
+      case 'sleep':
+        if (t > nextZzz) { say(sleepTalk(), houseX + 10, 1600); nextZzz = t + 3400; }
+        if (t > until) {
+          if (wet() || lateNight()) { until = t + 8000; break; }   // bleibt drin, solange es regnet oder Nacht ist
+          food = 3; dogX = houseX + 3; dir = 1; mode = 'walk'; target = rand(minDog(), maxDog()); shelterSaid = false;
+        }
+        break;
+      case 'goPlay': if (moveTo(Math.min(Math.max(ballApproach(), houseX + 2), maxDog()), 26, dt) || Math.abs(ballApproach() - dogX) < 1.5) kick(t); break;
+      case 'play':
+        if (Math.abs(ball.vx) < 4) { if (kicks > 0) mode = 'goPlay'; else { mode = 'idle'; until = t + 1800; say('Wuff!', dogX + 16, 1200); } }
+        else moveTo(Math.min(Math.max(ballApproach(), houseX + 2), maxDog()), 26, dt);
+        break;
+      case 'happy': if (t > until) decide(t); break;
+      case 'transform': if (t > until) { wolf = wolfTime(); if (wolf) dispatchEvent(new Event('jana:wolf')); decide(t); } break;
+      case 'howl':
+        dir = 1;
+        if (t > nextHowl) { howlUntil = t + 1800; nextHowl = t + 3800; say(pick(['Auuuuuu! 🌕', 'Auuuu-uuuu! 🐺', 'Ahuuuuu! 🌕']), dogX + 16, 1800); howlSound(); }
+        if (t > until && t > howlUntil) decide(t);
+        break;
+    }
+  }
+  // Regen oder Schnee im Garten
+  function drawPrecip(t) {
+    const k = wxNow().kind;
+    if (reduce || !['rain', 'drizzle', 'thunder', 'snow'].includes(k)) return;
+    const n = Math.round(W / (k === 'drizzle' ? 10 : 6));
+    for (let i = 0; i < n; i++) {
+      const x = (i * 37 + Math.floor(i / 3)) % W;
+      if (k === 'snow') fill(x + Math.round(Math.sin(t / 500 + i)), Math.floor((t / 160 + i * 5.3) % 26) - 2, 1, 1, 'snow');
+      else fill(x, Math.floor((t / 45 + i * 7.1) % 28) - 4, 1, 2, 'rain');
+    }
+  }
+  function kick() {
+    kicks--;
+    // Richtung: vom Hund weg; an der Wand umdrehen
+    let d = ball.x > dogX + 16 ? 1 : -1;
+    if (d > 0 && ball.x > W - 25) d = -1;
+    if (d < 0 && ball.x < bowlX + 30) d = 1;
+    ball.vx = d * rand(45, 70);
+    mode = 'play';
+  }
+
+  function loop(t) {
+    const dt = Math.min(0.05, (t - (lastT || t)) / 1000); lastT = t;
+    if (!reduce) update(t, dt);
+    else if (mode === 'happy' && t > until) mode = 'idle';
+    ctx.clearRect(0, 0, W, 24);
+    drawHouse();
+    drawBowl();
+    drawDecor(t);
+    if (mode !== 'sleep') drawDog(t);
+    drawBall();
+    drawPrecip(t);
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Freude, Bellen, Ton ----------
+  const BARKS = ['Wuff!', 'Wuff wuff!', 'Wuff! 🐾', 'Wuff? Wuff!'];
+  const PRAISE = ['Wuff! Super gemacht!', 'Wuff! Stolz auf dich!', 'Wuff wuff! 🎉', 'Wuff! Weiter so, Jana!', 'Wuff! Geschafft! 🐾'];
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  function happy(msg) {
+    const now = performance.now();
+    if (mode === 'transform') { say(msg || pick(PRAISE), dogX + 16); return; }   // Verwandlung nicht unterbrechen
+    if (mode === 'sleep') { dogX = houseX + 3; dir = 1; }
+    mode = 'happy'; until = now + 1500;
+    const text = msg || pick(PRAISE);
+    say(text, dogX + 16);
+    bark(Math.min(2, Math.max(1, (text.match(/wuff/gi) || []).length)));
+  }
+
+  const SOUND_KEY = 'habit-baukasten.sound';
+  let soundOn = true, actx = null;
+  try { soundOn = localStorage.getItem(SOUND_KEY) !== 'off'; } catch {}
+  const soundBtn = document.getElementById('sound');
+  const showSound = () => { soundBtn.textContent = soundOn ? '🔊 Ton an' : '🔈 Ton aus'; soundBtn.setAttribute('aria-pressed', soundOn); };
+  soundBtn.addEventListener('click', () => {
+    soundOn = !soundOn; showSound();
+    try { localStorage.setItem(SOUND_KEY, soundOn ? 'on' : 'off'); } catch {}
+  });
+  showSound();
+
+  function woof(t0) {
+    const base = 430 + Math.random() * 90;
+    const o = actx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(base * 0.8, t0);
+    o.frequency.linearRampToValueAtTime(base * 1.25, t0 + 0.03);
+    o.frequency.exponentialRampToValueAtTime(base * 0.45, t0 + 0.16);
+    const f = actx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1100; f.Q.value = 1.2;
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.6, t0 + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.19);
+    const len = Math.floor(actx.sampleRate * 0.12), buf = actx.createBuffer(1, len, actx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const n = actx.createBufferSource(); n.buffer = buf;
+    const nf = actx.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 1500; nf.Q.value = 0.8;
+    const ng = actx.createGain(); ng.gain.value = 0.3;
+    o.connect(f); f.connect(g); n.connect(nf); nf.connect(ng); ng.connect(g); g.connect(actx.destination);
+    o.start(t0); o.stop(t0 + 0.21); n.start(t0); n.stop(t0 + 0.13);
+  }
+  // Heulen bei Vollmond (nur wenn der Ton an ist und schon einmal getippt wurde)
+  function howlSound() {
+    if (!soundOn || !actx) return;
+    try {
+      if (actx.state === 'suspended') actx.resume();
+      const t0 = actx.currentTime + 0.02, o = actx.createOscillator(), g = actx.createGain(), lfo = actx.createOscillator(), lg = actx.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(330, t0); o.frequency.linearRampToValueAtTime(620, t0 + 0.5);
+      o.frequency.linearRampToValueAtTime(560, t0 + 1.3); o.frequency.linearRampToValueAtTime(380, t0 + 1.8);
+      lfo.frequency.value = 5.5; lg.gain.value = 9; lfo.connect(lg); lg.connect(o.frequency);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.35, t0 + 0.25);
+      g.gain.setValueAtTime(0.35, t0 + 1.3); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.85);
+      o.connect(g); g.connect(actx.destination); o.start(t0); lfo.start(t0); o.stop(t0 + 1.9); lfo.stop(t0 + 1.9);
+    } catch {}
+  }
+  function bark(times) {
+    if (!soundOn) return;
+    try {
+      actx ||= new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === 'suspended') actx.resume();
+      const now = actx.currentTime + 0.01;
+      for (let i = 0; i < times; i++) woof(now + i * 0.24);
+    } catch {}
+  }
+
+  window.janaDog = { happy };
+
+  document.addEventListener('click', (e) => {
+    if (e.dogHandled) return;
+    const r = yard.getBoundingClientRect();
+    const onDog = mode !== 'sleep' && e.clientY >= r.top && e.clientY <= r.bottom && e.clientX >= dogX * S && e.clientX <= (dogX + 32) * S;
+    const onHouse = e.clientY >= r.top && e.clientY <= r.bottom && e.clientX >= houseX * S && e.clientX <= (houseX + 20) * S;
+    if (onDog) dispatchEvent(new Event('jana:dogpat'));
+    const sp = window.janaSpecial;
+    if (onDog || onHouse || e.target.closest('button')) happy(wolf ? pick(['Auuu! 🐺', 'Grrr… Wuff! 🌕', 'Wuff… äh, Auuu!']) : sp?.bark && Math.random() < 0.5 ? sp.bark : pick(BARKS));
+  });
+
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>
+(() => {
+  // ---------- Heute: Begrüßung, Datum, Ort, Wetter (über /api/weather) und Mondphase ----------
+  const $ = (id) => document.getElementById(id);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const WX_KEY = 'habit-baukasten.weather', GEO_KEY = 'habit-baukasten.geo';
+  const FRESH = 60 * 60 * 1000;   // Wetter höchstens einmal pro Stunde neu laden (spart Server-Aufrufe)
+
+  // Mondphase (synodischer Monat ab Neumond am 6.1.2000, 18:14 UTC)
+  const SYN = 29.530588853;
+  function moon(date = new Date()) {
+    const age = window.JANA_MOONAGE != null ? window.JANA_MOONAGE : (((date - Date.UTC(2000, 0, 6, 18, 14)) / 864e5) % SYN + SYN) % SYN;
+    const p = age / SYN;
+    const illum = (1 - Math.cos(2 * Math.PI * p)) / 2;
+    const names = [[1.85, 'Neumond'], [5.54, 'Zunehmende Sichel'], [9.23, 'Erstes Viertel'], [12.92, 'Zunehmender Mond'],
+      [16.61, 'Vollmond'], [20.3, 'Abnehmender Mond'], [23.99, 'Letztes Viertel'], [27.68, 'Abnehmende Sichel'], [99, 'Neumond']];
+    const name = names.find(([a]) => age < a)[1];
+    const toFull = (SYN / 2 - age + SYN) % SYN, toNew = SYN - age;
+    return { age, p, illum, name, toFull, toNew };
+  }
+
+  window.janaMoon = moon;
+
+  // Wettercodes (WMO) → Text und Bildart
+  function describe(code, isDay) {
+    const T = {
+      0: isDay ? 'Sonnig' : 'Klar', 1: isDay ? 'Heiter' : 'Überwiegend klar', 2: 'Teilweise bewölkt', 3: 'Bedeckt',
+      45: 'Nebel', 48: 'Nebel mit Reif', 51: 'Leichter Nieselregen', 53: 'Nieselregen', 55: 'Starker Nieselregen',
+      56: 'Gefrierender Nieselregen', 57: 'Gefrierender Nieselregen', 61: 'Leichter Regen', 63: 'Regen', 65: 'Starker Regen',
+      66: 'Gefrierender Regen', 67: 'Gefrierender Regen', 71: 'Leichter Schneefall', 73: 'Schneefall', 75: 'Starker Schneefall',
+      77: 'Schneegriesel', 80: 'Regenschauer', 81: 'Regenschauer', 82: 'Heftige Regenschauer', 85: 'Schneeschauer',
+      86: 'Starke Schneeschauer', 95: 'Gewitter', 96: 'Gewitter mit Hagel', 99: 'Gewitter mit Hagel',
+    };
+    const kind = code === 0 ? 'clear' : code <= 2 ? 'partly' : code === 3 ? 'cloudy' : code <= 48 ? 'fog'
+      : code <= 57 ? 'drizzle' : code <= 67 || (code >= 80 && code <= 82) ? 'rain'
+      : code <= 77 || code === 85 || code === 86 ? 'snow' : code >= 95 ? 'thunder' : 'cloudy';
+    return { text: T[code] ?? 'Wetter', kind };
+  }
+
+  // ---------- Pixel-Zeichnungen ----------
+  const P = {
+    o: '#4a3f55', sun: '#ffd36e', sunCore: '#ffe9a8', ray: '#f6b94a',
+    moonLit: '#fdf3c4', moonDark: '#6b6280', crater: '#eedc9a', star: '#fff6c9',
+    cloud: '#ffffff', cloudShade: '#e4dcec', grey: '#d9d2e3', greyShade: '#b9afc8', dark: '#9d93ad', darkShade: '#82789a',
+    drop: '#5f9be0', flake: '#ffffff', flakeEdge: '#8fb3e6', bolt: '#ffd84d', fog: '#cfc6db',
+  };
+  const dot = (g, x, y, c) => { g.fillStyle = c; g.fillRect(x, y, 1, 1); };
+  function disk(g, cx, cy, r, c) {
+    for (let y = Math.floor(cy - r - 1); y <= cy + r + 1; y++)
+      for (let x = Math.floor(cx - r - 1); x <= cx + r + 1; x++)
+        if ((x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2 <= r * r) dot(g, x, y, c);
+  }
+  function drawSun(g, cx, cy, r, t) {
+    const long = !reduce && Math.floor(t / 600) % 2 === 0;
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4, len = (i % 2 === 0) === long ? 3 : 2;
+      for (let k = 1; k <= len; k++) dot(g, Math.round(cx - 0.5 + Math.cos(a) * (r + 1 + k)), Math.round(cy - 0.5 + Math.sin(a) * (r + 1 + k)), P.ray);
+    }
+    disk(g, cx, cy, r + 1, P.o); disk(g, cx, cy, r, P.sun); disk(g, cx - 1, cy - 1, r * 0.45, P.sunCore);
+  }
+  function drawMoon(g, cx, cy, r, m) {
+    disk(g, cx, cy, r + 1, P.o);
+    const waxing = m.p < 0.5, k = Math.cos(2 * Math.PI * m.p);
+    for (let y = Math.floor(cy - r); y <= cy + r; y++)
+      for (let x = Math.floor(cx - r); x <= cx + r; x++) {
+        const nx = (x + 0.5 - cx) / r, ny = (y + 0.5 - cy) / r;
+        if (nx * nx + ny * ny > 1) continue;
+        const w = Math.sqrt(1 - ny * ny), xt = k * w;
+        const lit = waxing ? nx > xt : nx < -xt;
+        dot(g, x, y, lit ? P.moonLit : P.moonDark);
+      }
+    // Krater nur auf der hellen Seite sichtbar
+    for (const [dx, dy] of [[0.3, -0.3], [-0.35, 0.25], [0.15, 0.45]]) {
+      const x = Math.round(cx - 0.5 + dx * r), y = Math.round(cy - 0.5 + dy * r);
+      const nx = (x + 0.5 - cx) / r, ny = (y + 0.5 - cy) / r, w = Math.sqrt(Math.max(0, 1 - ny * ny));
+      if (r >= 5 && (waxing ? nx > k * w : nx < -k * w)) dot(g, x, y, P.crater);
+    }
+  }
+  function drawCloud(g, cx, cy, fill, shade) {
+    const blobs = [[cx - 4, cy + 1, 3.2], [cx, cy - 1, 4.3], [cx + 4, cy + 1, 3.4]];
+    for (const [x, y, r] of blobs) disk(g, x, y, r + 1, P.o);
+    g.fillStyle = P.o; g.fillRect(Math.round(cx - 8), Math.round(cy + 1), 16, 4);
+    for (const [x, y, r] of blobs) disk(g, x, y, r, fill);
+    g.fillStyle = fill; g.fillRect(Math.round(cx - 7), Math.round(cy + 1), 14, 3);
+    g.fillStyle = shade; g.fillRect(Math.round(cx - 7), Math.round(cy + 3), 14, 1);
+  }
+  function drawStars(g, t) {
+    [[3, 4], [20, 3], [21, 18], [4, 19], [16, 6]].forEach(([x, y], i) => {
+      if (reduce || Math.floor(t / 700 + i) % 3 !== 0) dot(g, x, y, P.star);
+    });
+  }
+  function scene(g, kind, isDay, m, t) {
+    g.clearRect(0, 0, 24, 24);
+    const drift = reduce ? 0 : Math.round(Math.sin(t / 1500));
+    const drops = (n, speed, c, len) => {
+      for (let i = 0; i < n; i++) {
+        const x = 6 + (i * 5) % 13, y = 16 + ((reduce ? i * 2 : t / speed + i * 2.3) % 7);
+        g.fillStyle = c; g.fillRect(x, Math.floor(y), 1, len);
+      }
+    };
+    switch (kind) {
+      case 'clear':
+        if (isDay) drawSun(g, 12, 12, 5, t); else { drawStars(g, t); drawMoon(g, 12, 12, 7, m); }
+        break;
+      case 'partly':
+        if (isDay) drawSun(g, 9, 9, 4, t); else { drawStars(g, t); drawMoon(g, 9, 9, 5, m); }
+        drawCloud(g, 13 + drift, 15, P.cloud, P.cloudShade);
+        break;
+      case 'cloudy':
+        drawCloud(g, 9, 10, P.grey, P.greyShade);
+        drawCloud(g, 14 + drift, 14, P.cloud, P.cloudShade);
+        break;
+      case 'fog':
+        drawCloud(g, 12 + drift, 9, P.grey, P.greyShade);
+        [16, 18, 20].forEach((y, i) => { g.fillStyle = P.fog; g.fillRect(4 + (reduce ? 0 : Math.round(Math.sin(t / 800 + i) * 2)) + i, y, 14, 1); });
+        break;
+      case 'drizzle':
+        drawCloud(g, 12 + drift, 9, P.grey, P.greyShade); drops(4, 160, P.drop, 1);
+        break;
+      case 'rain':
+        drawCloud(g, 12 + drift, 9, P.grey, P.greyShade); drops(6, 90, P.drop, 2);
+        break;
+      case 'snow':
+        drawCloud(g, 12 + drift, 9, P.cloud, P.cloudShade);
+        for (let i = 0; i < 5; i++) {
+          const y = 16 + ((reduce ? i * 2 : t / 260 + i * 2.6) % 7), x = 6 + (i * 5) % 13 + (reduce ? 0 : Math.round(Math.sin(t / 400 + i)));
+          const fy = Math.floor(y);
+          dot(g, x, fy, P.flake); dot(g, x - 1, fy, P.flakeEdge); dot(g, x + 1, fy, P.flakeEdge); dot(g, x, fy - 1, P.flakeEdge); dot(g, x, fy + 1, P.flakeEdge);
+        }
+        break;
+      case 'thunder':
+        drawCloud(g, 12 + drift, 8, P.dark, P.darkShade); drops(4, 90, P.drop, 2);
+        if (reduce || t % 2400 < 350) {
+          g.fillStyle = P.bolt;
+          [[12, 13], [11, 14], [11, 15], [12, 15], [13, 15], [12, 16], [12, 17], [11, 18], [11, 19]].forEach(([x, y]) => g.fillRect(x, y, 1, 1));
+        }
+        break;
+    }
+  }
+
+  // ---------- Anzeige ----------
+  const mCanvas = $('moonIcon'), mg = mCanvas.getContext('2d');
+  let state = { kind: null, isDay: null };
+
+  function greeting(d = new Date()) {
+    if (window.janaSpecial?.greet) return window.janaSpecial.greet;
+    const h = window.JANA_HOUR ?? d.getHours();
+    return h >= 5 && h < 11 ? 'Guten Morgen, Jana!' : h < 17 && h >= 11 ? 'Hallo Jana, schönen Tag!' : h >= 17 && h < 22 ? 'Guten Abend, Jana!' : 'Gute Nacht, Jana!';
+  }
+  const hm = (iso) => (iso || '').slice(11, 16);
+  const deg = (n) => Number.isFinite(n) ? Math.round(n) + '°' : '–';
+
+  function renderStatic() {
+    const now = new Date();
+    $('greet').textContent = window.P ? window.P(greeting(now)) : greeting(now);
+    const date = now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const c = state.data;
+    $('dateLine').textContent = c?.city ? `${date} · ${c.city}${c.source === 'approx' ? ' (ungefähr)' : ''}` : date;
+    const m = moon(now);
+    mg.clearRect(0, 0, 16, 16); drawMoon(mg, 8, 8, 6, m);
+    let extra = '';
+    if (m.name === 'Vollmond') extra = ' · Heute ist Vollmond 🌕 · Achtung, Werwolf-Gefahr! 🐺';
+    else if (m.name === 'Neumond') extra = ' · Heute ist Neumond';
+    else if (m.p < 0.5) extra = ` · Vollmond in ${Math.max(1, Math.round(m.toFull))} ${Math.round(m.toFull) === 1 ? 'Tag' : 'Tagen'}`;
+    else extra = ` · Neumond in ${Math.max(1, Math.round(m.toNew))} ${Math.round(m.toNew) === 1 ? 'Tag' : 'Tagen'}`;
+    $('moonLine').textContent = `${m.name} · ${Math.round(m.illum * 100)} % beleuchtet${extra}`;
+  }
+
+  function renderWeather(data) {
+    state.data = data;
+    const cur = data.current || {};
+    const { text, kind } = describe(cur.code, cur.isDay);
+    state.kind = kind; state.isDay = !!cur.isDay;
+    window.janaWeather = { kind, isDay: !!cur.isDay, temp: cur.temp, code: cur.code };
+    // nächster Sonnenauf- bzw. -untergang nach der Ortszeit der Wetterdaten
+    const now = data.time || '';
+    const nextRise = (data.sunrise || []).find((s) => s > now), nextSet = (data.sunset || []).find((s) => s > now);
+    const sun = cur.isDay ? (nextSet ? ` · Sonnenuntergang ${hm(nextSet)}` : '') : (nextRise ? ` · Sonnenaufgang ${hm(nextRise)}` : '');
+    $('wxLine').innerHTML = `<strong>${deg(cur.temp)}</strong> ${text} · gefühlt ${deg(cur.feels)} · ↑${deg(data.today?.max)} ↓${deg(data.today?.min)}${sun}`;
+    $('locBtn').hidden = data.source === 'precise';
+    renderStatic();
+  }
+
+  window.janaWx = { show: (data) => renderWeather(data), refresh: () => renderStatic() };
+  window.habitReloadWeather = () => { try { localStorage.removeItem(WX_KEY); } catch {} state.data = null; load(true); };
+
+  function fallbackScene() {
+    const h = new Date().getHours();
+    state.kind = 'clear'; state.isDay = h >= 7 && h < 18;
+    if (!window.janaWeather) window.janaWeather = { kind: 'clear', isDay: state.isDay };
+  }
+
+  // ---------- Standort & Abruf ----------
+  let geoMode = 'approx';
+  try { geoMode = localStorage.getItem(GEO_KEY) || 'approx'; } catch {}
+  const position = () => new Promise((res, rej) => {
+    if (!navigator.geolocation) return rej(new Error('kein GPS'));
+    navigator.geolocation.getCurrentPosition(res, rej, { timeout: 9000, maximumAge: 10 * 60 * 1000, enableHighAccuracy: false });
+  });
+
+  // Wetter direkt bei Open-Meteo (kostenlos, ohne Anmeldung); Ort aus dem Profil oder per Standort
+  async function directWeather(qs) {
+    const prof = window.habitProfile || {};
+    let lat, lon, city = prof.city || null;
+    const m = qs.match(/lat=([-\d.]+)&lon=([-\d.]+)/);
+    if (m) { lat = +m[1]; lon = +m[2]; }
+    else if (prof.city) {
+      const g = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(prof.city)}&count=1&language=de`).then((r) => r.json());
+      const hit = g.results?.[0];
+      if (!hit) throw new Error('Ort unbekannt');
+      lat = hit.latitude; lon = hit.longitude; city = hit.name;
+    } else throw new Error('kein Ort');
+    const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}&current=temperature_2m,apparent_temperature,weather_code,is_day,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&forecast_days=2`)
+      .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    const c = w.current || {}, d = w.daily || {};
+    return { source: m ? 'precise' : 'city', city, time: c.time,
+      current: { temp: c.temperature_2m, feels: c.apparent_temperature, code: c.weather_code, isDay: c.is_day === 1, wind: c.wind_speed_10m },
+      today: { max: d.temperature_2m_max?.[0], min: d.temperature_2m_min?.[0] }, sunrise: d.sunrise || [], sunset: d.sunset || [] };
+  }
+  async function load(force = false) {
+    if (window.JANA_DEMO) return;   // Gast-Vorschau steuert das Wetter selbst
+    if (window.JANA_PREVIEW) { $('wxLine').textContent = 'Echtes Wetter gibt es nur auf der Live-Seite.'; return; }
+    try {
+      const cached = JSON.parse(localStorage.getItem(WX_KEY) || 'null');
+      if (cached?.data) renderWeather(cached.data);
+      if (!force && cached && Date.now() - cached.at < FRESH && cached.mode === geoMode) return;
+    } catch {}
+    let qs = '';
+    if (geoMode === 'precise') {
+      try { const p = await position(); qs = `?lat=${p.coords.latitude.toFixed(3)}&lon=${p.coords.longitude.toFixed(3)}`; }
+      catch { /* Standort gerade nicht verfügbar: ungefährer Ort */ }
+    }
+    try {
+      const data = await directWeather(qs);
+      renderWeather(data);
+      try { localStorage.setItem(WX_KEY, JSON.stringify({ at: Date.now(), mode: geoMode, data })); } catch {}
+    } catch {
+      if (!state.data) { $('wxLine').textContent = window.habitProfile?.city ? 'Wetter gerade nicht verfügbar. Ich versuche es gleich noch einmal.' : 'Trag unter ⚙️ deinen Wohnort ein, dann siehst du hier dein Wetter.'; fallbackScene(); }
+    }
+  }
+
+  $('locBtn').addEventListener('click', async () => {
+    const btn = $('locBtn');
+    btn.textContent = '📍 Standort wird abgefragt…';
+    try {
+      await position();
+      geoMode = 'precise';
+      try { localStorage.setItem(GEO_KEY, 'precise'); } catch {}
+      await load(true);
+      btn.textContent = '📍 Genauen Standort verwenden';
+    } catch {
+      btn.textContent = '📍 Standort nicht erlaubt, ich nutze den ungefähren Ort';
+      setTimeout(() => { btn.textContent = '📍 Genauen Standort verwenden'; }, 4000);
+    }
+  });
+
+  // Himmel oben: Wetter in der rechten Ecke, Vögel am Tag, Sterne am Abend
+  const sky = $('skyCanvas'), sg = sky.getContext('2d');
+  let SW = 130, stars = [];
+  function sizeSky() {
+    SW = Math.ceil(document.documentElement.clientWidth / 3);
+    sky.width = SW; sky.height = 24; sky.style.width = (SW * 3) + 'px';
+    stars = Array.from({ length: Math.round(SW / 9) }, () => [Math.floor(Math.random() * Math.max(1, SW - 30)), 1 + Math.floor(Math.random() * 15), Math.random() * 10]);
+  }
+  addEventListener('resize', sizeSky);
+  sizeSky();
+  const birds = [];
+  let nextFlock = performance.now() + 3000, lastSky = 0;
+  function spawnFlock(t) {
+    const dir = Math.random() < 0.5 ? 1 : -1, n = 1 + Math.floor(Math.random() * 3);
+    const y0 = 3 + Math.random() * 9, speed = 16 + Math.random() * 10;
+    const bat = !state.isDay && window.janaSpecial?.sky === 'bats';
+    for (let i = 0; i < n; i++) birds.push({ x: dir > 0 ? -8 - i * 9 : SW + 2 + i * 9, y: y0 + (i % 2) * 3 + Math.random() * 2, v: speed * dir * (bat ? 1.3 : 1), ph: Math.random() * 6, bat });
+  }
+  function drawBird(x, y, up, c, bat) {
+    if (bat) {
+      const pts = up ? [[0, 0], [6, 0], [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [3, 2]] : [[2, 1], [3, 1], [4, 1], [1, 2], [3, 2], [5, 2], [0, 3], [6, 3]];
+      sg.fillStyle = c; for (const [dx, dy] of pts) sg.fillRect(Math.round(x) + dx, Math.round(y) + dy, 1, 1);
+      return;
+    }
+    const pts = up ? [[0, 0], [6, 0], [1, 1], [5, 1], [2, 2], [4, 2], [3, 3]] : [[3, 1], [1, 2], [2, 2], [4, 2], [5, 2], [0, 3], [6, 3]];
+    sg.fillStyle = c;
+    for (const [dx, dy] of pts) sg.fillRect(Math.round(x) + dx, Math.round(y) + dy, 1, 1);
+  }
+  function drawSky(t) {
+    const dt = Math.min(0.2, Math.max(0, (t - lastSky) / 1000)); lastSky = t;
+    const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+    sg.clearRect(0, 0, SW, 24);
+    if (!state.isDay) {
+      sg.fillStyle = dark ? P.star : '#c9b3ec';
+      for (const [x, y, ph] of stars) if (reduce || Math.floor(t / 700 + ph) % 4) sg.fillRect(x, y, 1, 1);
+    }
+    sg.save(); sg.translate(SW - 26, 0); scene(sg, state.kind, state.isDay, moon(), t); sg.restore();
+    const batNight = window.janaSpecial?.sky === 'bats' && !state.isDay;
+    if (!reduce && (state.isDay || batNight) && state.kind !== 'thunder' && t > nextFlock) { spawnFlock(t); nextFlock = t + 9000 + Math.random() * 16000; }
+    const bc = dark ? '#cfc6db' : '#6b5f7a';
+    for (const b of birds) { b.x += b.v * dt; drawBird(b.x, b.y + Math.sin(t / 300 + b.ph), Math.floor(t / (b.bat ? 120 : 170) + b.ph) % 2 === 0, b.bat ? (dark ? '#9d93ad' : '#3a2f45') : bc, b.bat); }
+    drawSkySpecial(t, dark);
+    for (let i = birds.length - 1; i >= 0; i--) if (birds[i].x < -20 || birds[i].x > SW + 20) birds.splice(i, 1);
+  }
+
+  // Easter Egg: den Mond dreimal schnell antippen → Werwolf
+  let moonTaps = [];
+  function moonTap() {
+    const now = Date.now();
+    moonTaps = moonTaps.filter((x) => now - x < 1500);
+    moonTaps.push(now);
+    mCanvas.classList.remove('poke'); void mCanvas.offsetWidth; mCanvas.classList.add('poke');
+    if (moonTaps.length >= 3) { moonTaps = []; dispatchEvent(new Event('jana:forcewolf')); }
+  }
+  mCanvas.addEventListener('click', moonTap);
+  document.addEventListener('click', (e) => {
+    // Mond am Himmel: nur abends sichtbar (klar oder teilweise bewölkt)
+    if (state.isDay || !['clear', 'partly'].includes(state.kind)) return;
+    const r = sky.getBoundingClientRect(), x0 = r.left + (SW - 26) * 3;
+    if (e.clientX >= x0 && e.clientY >= r.top && e.clientY <= r.bottom) moonTap();
+  });
+
+  // Himmel an besonderen Tagen: Konfetti, Herzen, Feuerwerk
+  const bursts = [];
+  let nextBurst = 0;
+  function drawSkySpecial(t, dark) {
+    const sky = window.janaSpecial?.sky;
+    if (!sky || reduce) return;
+    const cols = ['#f2a9c8', '#cdb7ef', '#ffd36e', '#a6dcc2', '#a9c8ec', '#f29a4a'];
+    if (sky === 'confetti') {
+      for (let i = 0; i < Math.round(SW / 4); i++) {
+        const x = (i * 29) % SW + Math.round(Math.sin(t / 400 + i) * 2), y = Math.floor((t / 90 + i * 3.7) % 28) - 2;
+        sg.fillStyle = cols[i % cols.length]; sg.fillRect(x, y, (i + Math.floor(t / 300)) % 3 === 0 ? 2 : 1, 1);
+      }
+    } else if (sky === 'hearts') {
+      for (let i = 0; i < 6; i++) {
+        const x = (i * 41) % Math.max(10, SW - 32) + Math.round(Math.sin(t / 600 + i) * 2), y = 24 - Math.floor((t / 130 + i * 4.3) % 30);
+        sg.fillStyle = i % 2 ? '#f2a9c8' : '#ef8f95';
+        [[0, 0], [2, 0], [0, 1], [1, 1], [2, 1], [1, 2]].forEach(([dx, dy]) => sg.fillRect(x + dx, y + dy, 1, 1));
+      }
+    } else if (sky === 'fireworks' && (!state.isDay || new Date().getHours() >= 17)) {
+      if (t > nextBurst) {
+        bursts.push({ x: 6 + Math.random() * Math.max(10, SW - 40), y: 5 + Math.random() * 8, born: t, c: cols[Math.floor(Math.random() * cols.length)] });
+        nextBurst = t + 900 + Math.random() * 1600;
+      }
+      for (let i = bursts.length - 1; i >= 0; i--) {
+        const b = bursts[i], age = (t - b.born) / 1000;
+        if (age > 1.1) { bursts.splice(i, 1); continue; }
+        const r = Math.min(7, age * 11);
+        sg.fillStyle = age < 0.15 ? '#ffffff' : b.c;
+        for (let k = 0; k < 12; k++) {
+          const a = k * Math.PI / 6;
+          if (age > 0.75 && (k + Math.floor(t / 80)) % 2) continue;   // Funkeln beim Verglühen
+          sg.fillRect(Math.round(b.x + Math.cos(a) * r), Math.round(b.y + Math.sin(a) * r), 1, 1);
+        }
+      }
+    }
+  }
+
+  // Animation: wenige Bilder pro Sekunde reichen für Pixel-Wetter
+  let lastDraw = 0;
+  function tick(t) {
+    if (t - lastDraw > 110 && state.kind) { lastDraw = t; drawSky(t); }
+    if (!reduce) requestAnimationFrame(tick);
+  }
+
+  fallbackScene();
+  renderStatic();
+  load();
+  const still = () => drawSky(0);
+  if (reduce) { still(); setInterval(still, 60000); }
+  else requestAnimationFrame(tick);
+  setInterval(() => load(), FRESH);
+  setInterval(renderStatic, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { renderStatic(); load(); } });
+})();
+</script>
+<script>
+(() => {
+  // ---------- Test-Vorschau (nur im Claude-Artifact, nicht auf der Live-Seite): zeigt alle Funktionen im Wechsel ----------
+  if (window.JANA_PREVIEW) {   // Schalter Demo an/aus, nur in der Vorschau
+    const t = document.createElement('button');
+    t.type = 'button'; t.className = 'pill'; t.id = 'demoToggle';
+    t.textContent = window.JANA_GUEST ? '🧪 Demo: an' : '🧪 Demo: aus';
+    t.setAttribute('aria-pressed', window.JANA_GUEST ? 'true' : 'false');
+    t.title = window.JANA_GUEST ? 'Ausschalten: leere Seite, Einträge werden in diesem Browser gespeichert' : 'Einschalten: Beispieldaten und automatische Tour';
+    t.addEventListener('click', (e) => {
+      e.dogHandled = true;
+      try { localStorage.setItem('habit-baukasten.previewMode', window.JANA_GUEST ? 'echt' : 'demo'); } catch {}
+      location.reload();
+    });
+    document.querySelector('header .nav').append(t);
+  }
+  if (!window.JANA_GUEST) return;
+  window.JANA_DEMO = true;
+  const $ = (id) => document.getElementById(id);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const behavior = reduce ? 'auto' : 'smooth';
+  const app = window.janaApp, wxApi = window.janaWx;
+  const Y = new Date().getFullYear();
+  const wx = (code, isDay, temp) => ({ source: 'precise', city: 'Hamburg', region: 'Hamburg', time: '',
+    current: { temp, feels: temp - 2, code, isDay }, today: { max: temp + 3, min: temp - 4 }, sunrise: [], sunset: [] });
+  const toTop = () => scrollTo({ top: 0, behavior });
+  const toEl = (id) => $(id)?.scrollIntoView({ behavior, block: 'center' });
+  const later = (ms, fn) => { timers.push(setTimeout(fn, ms)); };
+  let timers = [];
+
+  const SCENES = [
+    { label: '☀️ Sonniger Tag: der Hund spielt, Vögel fliegen', hour: 11, wx: wx(0, true, 23), moon: 20 },
+    { label: '😊 Stimmung eintragen', hour: 10, wx: wx(1, true, 18), run: () => { toEl('moodCard'); later(1300, () => document.querySelector('[data-mood="2"]')?.click()); later(4200, () => document.querySelector('[data-mood="5"]')?.click()); } },
+    { label: '💧 Wasser trinken mit der Pixel-Flasche', hour: 10, wx: wx(1, true, 18), run: () => { toEl('waterCard'); later(1500, () => $('addGlass').click()); later(3500, () => $('addHalf').click()); } },
+    { label: '✅ Gewohnheit abhaken: der Hund lobt', hour: 9, wx: wx(1, true, 17), run: () => { toEl('days'); later(1600, () => document.querySelector('.item:not(.done) .toggle')?.click()); } },
+    { label: '🌧️ Regen: ab in die Hütte!', hour: 15, wx: wx(63, true, 9) },
+    { label: '❄️ Schnee rieselt', hour: 12, wx: wx(73, true, -2) },
+    { label: '⛈️ Gewitter', hour: 16, wx: wx(95, true, 14) },
+    { label: '🥵 Hitze: der Hund hechelt', hour: 14, wx: wx(0, true, 31) },
+    { label: '🌙 Sternenklare Nacht: Schlafenszeit', hour: 23, wx: wx(0, false, 6), moon: 8 },
+    { label: '🐺 Vollmond: der Hund wird zum Werwolf', hour: 21, wx: wx(0, false, 4), moon: 14.8, ms: 11000 },
+    { label: '🎂 Geburtstag am 25. August', hour: 14, wx: wx(0, true, 26), special: () => app.getSpecial(new Date(Y, 7, 25, 12)) },
+    { label: '💕 Jahrestag am 18. September', hour: 13, wx: wx(1, true, 19), special: () => app.getSpecial(new Date(Math.max(Y, 2026), 8, 18, 12)) },
+    { label: '🐣 Ostern', hour: 11, wx: wx(1, true, 15), special: () => { const e = app.easterSunday(Y); return app.getSpecial(new Date(e.getFullYear(), e.getMonth(), e.getDate(), 12)); } },
+    { label: '🎃 Halloween', hour: 20, wx: wx(0, false, 9), moon: 22, special: () => app.getSpecial(new Date(Y, 9, 31, 20)) },
+    { label: '🎄 Weihnachten', hour: 18, wx: wx(71, false, 0), moon: 3, special: () => app.getSpecial(new Date(Y, 11, 24, 18)) },
+    { label: '🎆 Silvester-Feuerwerk', hour: 22, wx: wx(0, false, 1), moon: 25, special: () => app.getSpecial(new Date(Y, 11, 31, 22)) },
+    { label: '💖 Valentinstag', hour: 12, wx: wx(2, true, 6), special: () => app.getSpecial(new Date(Y, 1, 14, 12)) },
+    { label: '📅 KW-Übersicht aller Wochen', hour: 18, wx: wx(2, true, 12), ms: 9000, run: () => { later(900, () => $('overviewBtn').click()); later(7600, () => { if (!$('kwOverlay').hidden) $('kwClose').click(); }); } },
+    { label: '🏆 Erfolge zum Aufklappen', hour: 19, wx: wx(2, false, 10), run: () => { toEl('achCard'); later(1000, () => { $('achDetails').open = true; }); }, after: () => { $('achDetails').open = false; } },
+    { label: '📝 Langfristige To-dos', hour: 17, wx: wx(1, true, 14), run: () => toEl('todos') },
+  ];
+
+  let i = -1, paused = false, timer = null, prev = null;
+  function show(n) {
+    timers.forEach(clearTimeout); timers = [];
+    prev?.after?.();
+    i = (n + SCENES.length) % SCENES.length;
+    const sc = SCENES[i]; prev = sc;
+    window.JANA_HOUR = sc.hour;
+    window.JANA_MOONAGE = sc.moon ?? 20;
+    window.JANA_DEMO_SPECIAL = sc.special ? sc.special() : null;
+    app.renderSpecial();
+    wxApi.show(sc.wx);
+    if (!sc.run) toTop();
+    sc.run?.();
+    $('demoLabel').textContent = sc.label;
+    $('demoStep').textContent = `${i + 1}/${SCENES.length}`;
+    schedule();
+  }
+  function schedule() {
+    clearTimeout(timer);
+    if (!paused) timer = setTimeout(() => show(i + 1), SCENES[i].ms || 8000);
+  }
+  $('demoBar').hidden = false;
+  if (window.JANA_PREVIEW) {   // Test-Vorschau in Claude: kein Server, kein Login
+    $('demoBar').querySelector('.demo-out')?.remove();
+    $('demoBar').querySelector('.demo-tag').textContent = '🧪 Test-Vorschau';
+  }
+  $('demoPause').addEventListener('click', (e) => {
+    e.dogHandled = true;
+    paused = !paused;
+    $('demoPause').textContent = paused ? '▶︎' : '⏸';
+    $('demoPause').setAttribute('aria-label', paused ? 'Vorschau fortsetzen' : 'Vorschau anhalten');
+    schedule();
+  });
+  $('demoNext').addEventListener('click', (e) => { e.dogHandled = true; show(i + 1); });
+  $('demoPrev').addEventListener('click', (e) => { e.dogHandled = true; show(i - 1); });
+  setTimeout(() => show(0), 600);
+})();
+</script>
+</body>
+</html>
