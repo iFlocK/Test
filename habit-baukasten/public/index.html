@@ -810,10 +810,8 @@
   try { hbUser = localStorage.getItem(SES_KEY); } catch {}
   if (!hbUser || (!accounts[hbUser] && hbUser !== 'admin')) hbUser = null;
   window.HB_ADMIN = hbUser === 'admin' && !window.JANA_GUEST;
-  const CFG = window.HB_CONFIG || {};   // Janas Seite: { single, noGender, serverWeather, preset, changelog }
-  window.HB_USER = window.JANA_GUEST || CFG.single ? null : hbUser;
-  window.HB_LOCKED = !window.JANA_GUEST && !CFG.single && !hbUser;
-  if (CFG.single) window.HB_ADMIN = false;
+  window.HB_USER = window.JANA_GUEST ? null : hbUser;
+  window.HB_LOCKED = !window.JANA_GUEST && !hbUser;
   const KEY = 'habit-baukasten.v2' + (window.HB_LOCKED ? ':__gesperrt' : window.HB_USER ? ':' + window.HB_USER : '');
   const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
   const AREAS = { bew: 'Bewegung', ern: 'Ernährung', schlaf: 'Schlaf', gehirn: 'Gehirn', sozial: 'Soziales', psyche: 'Erholung', allg: 'Gesundheit', eigen: 'Eigenes' };
@@ -905,8 +903,6 @@
     };
   }
   if (GUEST) state = demoState();
-  if (CFG.preset && GUEST) state.profile = { ...state.profile, ...CFG.preset };
-  if (CFG.preset && !GUEST && !state.profile) state.profile = { ...CFG.preset, animal: state.pet?.animal || CFG.preset.animal || 'dog', fur: state.pet?.fur || CFG.preset.fur || 'golden' };   // bestehende Daten übernehmen
 
   // ---------- Profil (Vorlage): Name, Farbe, Hund, besondere Tage ----------
   const PALETTES = {
@@ -1466,7 +1462,7 @@
   const ANIMALS = [['dog', 'Hund', '🐶'], ['cat', 'Katze', '🐱'], ['rabbit', 'Kaninchen', '🐰']];
   const STEP_TITLES = { welcome: 'Willkommen! 👋', gender: 'Über dich 🙂', color: 'Deine Farbe 🎨', pet: 'Dein Haustier 🐾', habits: 'Deine Gewohnheiten 🌱', uni: 'Uni 🎓', cycle: 'Zyklus 🌸', club: 'Lieblingsverein ⚽', days: 'Besondere Tage 🎂', weather: 'Wetter 🌦️' };
   const STEP_ORDER = ['welcome', 'gender', 'color', 'pet', 'habits', 'uni', 'cycle', 'club', 'days', 'weather'];
-  const steps = () => STEP_ORDER.filter((k) => (k !== 'cycle' || draft?.gender === 'w') && !(k === 'gender' && CFG.noGender));
+  const steps = () => STEP_ORDER.filter((k) => k !== 'cycle' || draft?.gender === 'w');
   const cur = () => steps()[step];
   const TAB_LABELS = { welcome: '👋 Name', gender: '🙂 Über dich', color: '🎨 Farbe', pet: '🐾 Haustier', habits: '🌱 Gewohnheiten', uni: '🎓 Uni', cycle: '🌸 Zyklus', club: '⚽ Verein', days: '🎂 Besondere Tage', weather: '🌦️ Wetter' };
   let draft = null, step = 0;
@@ -2426,7 +2422,7 @@
 
   // ---------- Versionsnummer und Patch Notes ----------
   // Bei jedem Upload: Version erhöhen und oben einen neuen Eintrag ergänzen.
-  const CHANGELOG = CFG.changelog || [
+  const CHANGELOG = [
     { v: '0.2.0', title: 'Tabs und Live-Spielplan', notes: [
       ['⚙️', 'Einstellungen mit Tabs', 'Alle Bereiche der Einstellungen stehen oben als Tabs. Ein Tipp, und du bist da.'],
       ['⚽', 'Spielplan automatisch', 'Bundesliga, DFB-Pokal und Champions League kommen von selbst, während eines Spiels sogar mit Spielstand.'],
@@ -2517,7 +2513,7 @@
   if (!GUEST) {
     let seen = null, ok = true;
     try { seen = localStorage.getItem(SEEN_KEY); } catch { ok = false; }
-    if (ok && !seen && !CFG.single) { try { localStorage.setItem(SEEN_KEY, APP_VERSION); } catch {} }   // neue Konten: Begrüßung kommt nach der Einrichtung
+    if (ok && !seen) { try { localStorage.setItem(SEEN_KEY, APP_VERSION); } catch {} }   // neue Konten: Begrüßung kommt nach der Einrichtung
     else if (ok && seen !== APP_VERSION && !window.HB_LOCKED) setTimeout(() => openNews(seen), 700);
   }
 
@@ -3638,10 +3634,6 @@
       const hit = g.results?.[0];
       if (!hit) throw new Error('Ort unbekannt');
       lat = hit.latitude; lon = hit.longitude; city = hit.name;
-    } else if (window.HB_CONFIG?.serverWeather) {
-      const r = await fetch('/api/weather' + qs, { credentials: 'same-origin', cache: 'no-store' });
-      if (!r.ok) throw new Error(r.status);
-      return r.json();
     } else throw new Error('kein Ort');
     const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}&current=temperature_2m,apparent_temperature,weather_code,is_day,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&forecast_days=2`)
       .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });

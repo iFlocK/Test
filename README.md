@@ -54,8 +54,8 @@ nachts 3× auf die Hütte (Hund singt). Jede gibt einen geheimen Erfolg.
 
 **Seit Version 0.10.0 wird Janas Seite aus der allgemeinen Version gebaut** (`habit-baukasten/public/index.html`):
 `python3 janas-woche/tools/build-from-template.py` erzeugt `janas-woche/public/index.html` mit Janas festem Profil
-(ohne Mann/Frau-Frage, ohne eigene Konten, Wetter ohne Ort über `/api/weather`), ihren Speicher-Schlüsseln `janas-woche.*`
-und ihren eigenen Patch Notes (Version und Texte stehen im Skript). Änderungen also in der allgemeinen Version machen und danach bauen.
+(ohne Mann/Frau-Frage, ohne eigene Konten, ohne Sparziele, Wetter ohne Ort über `/api/weather`), ihren Speicher-Schlüsseln `janas-woche.*`
+und ihren eigenen Patch Notes. Alle Jana-Anpassungen stehen nur im Skript, die öffentliche Version enthält davon nichts. Änderungen also in der allgemeinen Version machen und danach bauen.
 
 ## Änderungen testen, ohne Netlify-Guthaben zu verbrauchen
 1. Änderungen in `janas-woche/public/index.html` machen.

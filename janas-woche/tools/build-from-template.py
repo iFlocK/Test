@@ -25,7 +25,6 @@ CONFIG = {
             ['🎨', 'Farben', 'Such dir eine von fünf Pastellfarben für die ganze Seite aus.'],
             ['🌸', 'Zyklus-Tracker', 'Wenn du möchtest: Periode eintragen, aktuelle Zyklusphase sehen und eine Schätzung für die nächste Periode. Bleibt nur auf deinem Handy.'],
             ['⚽', 'Lieblingsverein', 'Wähle einen Verein und sieh den Countdown zum nächsten Spiel, mit Bundesliga, DFB-Pokal und Champions League.'],
-            ['🐷', 'Sparziele', 'Spar auf etwas hin und sieh zu, wie sich das Pixel-Sparschwein füllt.'],
             ['🗂️', 'Ein- und ausklappen', 'Tippe auf eine Überschrift, um einen Bereich zuzuklappen. Die Seite merkt sich das.'],
         ]},
         {'v': '0.9.0', 'title': 'Das große Herbst-Update', 'notes': [
@@ -39,7 +38,49 @@ CONFIG = {
     ],
 }
 
-s = src.replace('habit-baukasten.', 'janas-woche.')
+# Code-Änderungen nur für Janas Seite (die öffentliche Version bleibt unverändert)
+JANA_PATCHES = [
+ [
+  "  window.HB_USER = window.JANA_GUEST ? null : hbUser;\n  window.HB_LOCKED = !window.JANA_GUEST && !hbUser;",
+  "  const CFG = window.HB_CONFIG || {};   // Janas Seite: { single, noGender, serverWeather, preset, changelog }\n  window.HB_USER = window.JANA_GUEST || CFG.single ? null : hbUser;\n  window.HB_LOCKED = !window.JANA_GUEST && !CFG.single && !hbUser;\n  if (CFG.single) window.HB_ADMIN = false;"
+ ],
+ [
+  "  if (GUEST) state = demoState();",
+  "  if (GUEST) state = demoState();\n  if (CFG.preset && GUEST) state.profile = { ...state.profile, ...CFG.preset };\n  if (CFG.preset && !GUEST && !state.profile) state.profile = { ...CFG.preset, animal: state.pet?.animal || CFG.preset.animal || 'dog', fur: state.pet?.fur || CFG.preset.fur || 'golden' };   // bestehende Daten übernehmen"
+ ],
+ [
+  "  const steps = () => STEP_ORDER.filter((k) => k !== 'cycle' || draft?.gender === 'w');",
+  "  const steps = () => STEP_ORDER.filter((k) => (k !== 'cycle' || draft?.gender === 'w') && !(k === 'gender' && CFG.noGender));"
+ ],
+ [
+  "  const CHANGELOG = [",
+  "  const CHANGELOG = CFG.changelog || ["
+ ],
+ [
+  "    if (ok && !seen) { try { localStorage.setItem(SEEN_KEY, APP_VERSION); } catch {} }   // neue Konten: Begrüßung kommt nach der Einrichtung",
+  "    if (ok && !seen && !CFG.single) { try { localStorage.setItem(SEEN_KEY, APP_VERSION); } catch {} }   // neue Konten: Begrüßung kommt nach der Einrichtung"
+ ],
+ [
+  "    } else throw new Error('kein Ort');",
+  "    } else if (window.HB_CONFIG?.serverWeather) {\n      const r = await fetch('/api/weather' + qs, { credentials: 'same-origin', cache: 'no-store' });\n      if (!r.ok) throw new Error(r.status);\n      return r.json();\n    } else throw new Error('kein Ort');"
+ ]
+]
+# Sparziele gibt es bei Jana nicht
+JANA_PATCHES += [
+    ['  <section class="card savings" id="saveCard">', '  <section class="card savings" id="saveCard" hidden>'],
+    ["    ['save10', '🐷', 'Sparschwein', '10-mal etwas aufs Sparziel gelegt', (s) => s.deposits >= 10],\n", ''],
+    ["    ['savegoal', '🦊', 'Sparfuchs', 'Das erste Sparziel erreicht', (s) => s.savedGoals >= 1],\n", ''],
+]
+
+s = src
+for a, rep in JANA_PATCHES:
+    assert s.count(a) == 1, ('Stelle nicht gefunden', a[:80])
+    s = s.replace(a, rep)
+# Tour-Szene zu den Sparzielen entfernen
+import re as _re
+s, n = _re.subn(r"    \{ label: '🐷 Sparziele[^\n]*\n", '', s)
+assert n == 1
+s = s.replace('habit-baukasten.', 'janas-woche.')
 for a, b in [('<title>Mein Wochenplaner</title>', '<title>Janas Woche</title>'),
              ('<meta name="apple-mobile-web-app-title" content="Wochenplaner">', '<meta name="apple-mobile-web-app-title" content="Janas Woche">'),
              ('<h1 id="pageTitle">Mein Wochenplaner</h1>', '<h1 id="pageTitle">Janas Woche</h1>')]:
