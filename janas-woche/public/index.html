@@ -218,6 +218,25 @@
   .demo-step { color: var(--muted); font-size: .75rem; font-variant-numeric: tabular-nums; margin-right: 2px; }
   .demo-out { color: var(--muted); font-size: .78rem; margin-left: 4px; }
 
+  /* Farbpaletten (fest im Stylesheet, umgeschaltet per data-palette) */
+  :root[data-palette="rosa"] { --accent:#f2a9c8;--accent-2:#cdb7ef;--on-accent:#4a2340;--accent-ink:#b8557f;--soft:#fbeaf2;--accent-soft:#fbeaf2;--today:#fff4f9;--bg:#fdf6fa; }
+  @media (prefers-color-scheme: dark) { :root[data-palette="rosa"]:not([data-theme="light"]) { --accent:#f2a9c8;--accent-2:#cdb7ef;--on-accent:#4a2340;--accent-ink:#f0b3cf;--soft:#362c3d;--accent-soft:#362c3d;--today:#33293a;--bg:#1f1a24; } }
+  :root[data-palette="rosa"][data-theme="dark"] { --accent:#f2a9c8;--accent-2:#cdb7ef;--on-accent:#4a2340;--accent-ink:#f0b3cf;--soft:#362c3d;--accent-soft:#362c3d;--today:#33293a;--bg:#1f1a24; }
+  :root[data-palette="lavendel"] { --accent:#c9b3ec;--accent-2:#a9c8ec;--on-accent:#2f2146;--accent-ink:#7a58b8;--soft:#f1ebfb;--accent-soft:#f1ebfb;--today:#f6f1fd;--bg:#f9f6fd; }
+  @media (prefers-color-scheme: dark) { :root[data-palette="lavendel"]:not([data-theme="light"]) { --accent:#c9b3ec;--accent-2:#a9c8ec;--on-accent:#2f2146;--accent-ink:#cbb6f0;--soft:#302a3f;--accent-soft:#302a3f;--today:#2d2838;--bg:#1f1a24; } }
+  :root[data-palette="lavendel"][data-theme="dark"] { --accent:#c9b3ec;--accent-2:#a9c8ec;--on-accent:#2f2146;--accent-ink:#cbb6f0;--soft:#302a3f;--accent-soft:#302a3f;--today:#2d2838;--bg:#1f1a24; }
+  :root[data-palette="mint"] { --accent:#9fd8c0;--accent-2:#a9c8ec;--on-accent:#123a2c;--accent-ink:#2f8a68;--soft:#e7f6ef;--accent-soft:#e7f6ef;--today:#f0faf5;--bg:#f5fbf8; }
+  @media (prefers-color-scheme: dark) { :root[data-palette="mint"]:not([data-theme="light"]) { --accent:#9fd8c0;--accent-2:#a9c8ec;--on-accent:#123a2c;--accent-ink:#9fdcc3;--soft:#25352f;--accent-soft:#25352f;--today:#26322d;--bg:#1f1a24; } }
+  :root[data-palette="mint"][data-theme="dark"] { --accent:#9fd8c0;--accent-2:#a9c8ec;--on-accent:#123a2c;--accent-ink:#9fdcc3;--soft:#25352f;--accent-soft:#25352f;--today:#26322d;--bg:#1f1a24; }
+  :root[data-palette="pfirsich"] { --accent:#f8c9a0;--accent-2:#f4a7b9;--on-accent:#45260f;--accent-ink:#b8642a;--soft:#fdf0e4;--accent-soft:#fdf0e4;--today:#fff6ee;--bg:#fdf8f3; }
+  @media (prefers-color-scheme: dark) { :root[data-palette="pfirsich"]:not([data-theme="light"]) { --accent:#f8c9a0;--accent-2:#f4a7b9;--on-accent:#45260f;--accent-ink:#f6c49c;--soft:#3a2e27;--accent-soft:#3a2e27;--today:#352a24;--bg:#1f1a24; } }
+  :root[data-palette="pfirsich"][data-theme="dark"] { --accent:#f8c9a0;--accent-2:#f4a7b9;--on-accent:#45260f;--accent-ink:#f6c49c;--soft:#3a2e27;--accent-soft:#3a2e27;--today:#352a24;--bg:#1f1a24; }
+  :root[data-palette="himmel"] { --accent:#a9c8ec;--accent-2:#cdb7ef;--on-accent:#142a45;--accent-ink:#3f6fa8;--soft:#eaf2fb;--accent-soft:#eaf2fb;--today:#f2f7fd;--bg:#f6f9fd; }
+  @media (prefers-color-scheme: dark) { :root[data-palette="himmel"]:not([data-theme="light"]) { --accent:#a9c8ec;--accent-2:#cdb7ef;--on-accent:#142a45;--accent-ink:#a9c8ec;--soft:#283140;--accent-soft:#283140;--today:#272e3a;--bg:#1f1a24; } }
+  :root[data-palette="himmel"][data-theme="dark"] { --accent:#a9c8ec;--accent-2:#cdb7ef;--on-accent:#142a45;--accent-ink:#a9c8ec;--soft:#283140;--accent-soft:#283140;--today:#272e3a;--bg:#1f1a24; }
+  .su-emoji { width: 40px; height: 40px; display: grid; place-items: center; font-size: 1.8rem; }
+  [data-sw="none"] span { display: none; }
+
   /* 🎓 Uni */
   .timer { display: grid; gap: 6px; justify-items: start; }
   .timer-time { font-family: var(--font-display); font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
@@ -262,6 +281,54 @@
   .progress > div { height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .3s; }
   @media (prefers-reduced-motion: reduce) { .progress > div { transition: none; } }
 
+  /* 🌸 Zyklus */
+  .cy-body { display: grid; gap: 12px; margin-top: 12px; }
+  .cy-now { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; }
+  .cy-icon { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 1.4rem; }
+  .cy-now b { display: block; font-size: 1rem; }
+  .cy-now small { color: var(--muted); font-size: .84rem; line-height: 1.4; }
+  .cy-strip { display: flex; flex-wrap: wrap; gap: 2px; }
+  .cy-strip i { width: 9px; height: 16px; border-radius: 3px; opacity: .85; }
+  .cy-strip i.now { outline: 2px solid var(--text); outline-offset: 1px; opacity: 1; }
+  .cy-next { margin: 0; font-size: .86rem; line-height: 1.5; }
+  .cy-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .cy-other { display: flex; gap: 6px; align-items: center; font-size: .8rem; color: var(--muted); }
+  .cy-other input, .cy-len input { font: inherit; font-size: .85rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 4px 8px; }
+  .cy-len input { width: 4.5em; }
+  .cy-sym { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .cy-hist { list-style: none; margin: 4px 0 0; padding: 0; display: grid; }
+  .cy-hist li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 5px 0; border-top: 1px solid var(--border); font-size: .86rem; }
+  .cy-hist small { color: var(--muted); }
+  .cy-len { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: .85rem; }
+  .cy-note { margin: 0; color: var(--muted); font-size: .78rem; line-height: 1.4; }
+  .pmark { font-size: .7rem; margin-right: 3px; vertical-align: 1px; }
+  .pmark.soon { opacity: .35; }
+
+  /* 🐷 Sparziele */
+  .piggy-mini { width: 27px; height: 21px; image-rendering: pixelated; }
+  .save-body { display: grid; gap: 12px; margin-top: 12px; }
+  .save-list { display: grid; gap: 10px; }
+  .goal { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; padding: 10px; border-radius: 14px; background: var(--soft); }
+  .goal.reached { opacity: .85; }
+  .piggy { width: 54px; height: 42px; image-rendering: pixelated; }
+  .goal-main { display: grid; gap: 4px; min-width: 0; }
+  .goal-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .goal-top b { font-size: 1rem; overflow-wrap: anywhere; }
+  .goal-amount { font-size: .88rem; font-variant-numeric: tabular-nums; }
+  .goal-amount strong { font-family: var(--font-display); font-size: 1.15rem; }
+  .save-bar { margin: 2px 0; height: 8px; }
+  .save-bar > div { background: linear-gradient(90deg, #f6c94a, #f2a9c8); }
+  .goal-hint, .goal-last { color: var(--muted); font-size: .78rem; }
+  .goal-last span { font-weight: 700; color: #3f9a73; font-variant-numeric: tabular-nums; }
+  .goal-last span.neg { color: #c2453a; }
+  .goal-form { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .goal-form .pill { padding: 3px 10px; font-size: .8rem; }
+  .goal-form input, .save-new input { font: inherit; font-size: .88rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 5px 9px; min-width: 0; }
+  .goal-form input { width: 6.5em; }
+  .save-new { display: grid; gap: 6px; border-top: 1px dashed var(--border); padding-top: 12px; }
+  .save-new input[name="target"] { width: 9em; }
+  .save-new .pill { justify-self: start; }
+
   /* 📖 Gelesene Bücher */
   .book-mini { display: flex; gap: 2px; align-items: flex-end; height: 18px; }
   .book-mini i { width: 4px; height: 16px; border-radius: 1px; border: 1px solid rgba(60, 40, 60, .25); }
@@ -285,6 +352,31 @@
   .book-stars { display: flex; }
   .book-stars button { font-size: 1rem; padding: 0 1px; }
   @media (max-width: 420px) { .book { grid-template-columns: auto minmax(0, 1fr) auto; } .book-stars { grid-column: 2; } }
+
+  /* Einrichtungs-Assistent */
+  .setup p { margin: 0 0 10px; }
+  .setup-dots { display: flex; gap: 6px; margin: 0 0 14px; }
+  .setup-dots i { width: 22px; height: 6px; border-radius: 3px; background: var(--border); }
+  .setup-dots i.on { background: var(--accent); }
+  .setup-dots i.done { background: var(--accent-2); }
+  .setup-dots.tabs { flex-wrap: wrap; gap: 6px; }
+  .su-tab { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: 4px 10px; font: inherit; font-size: .78rem; font-weight: 800; }
+  .su-tab.done { border-color: var(--accent-2); }
+  .su-tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .su-input { font: inherit; width: 100%; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+  .su-label { display: block; font-weight: 800; font-size: .85rem; margin: 6px 0 4px; }
+  .su-hint { color: var(--muted); font-size: .82rem; }
+  .su-err { color: var(--accent-ink); font-weight: 700; font-size: .85rem; }
+  .su-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .su-swatch { display: grid; justify-items: center; gap: 6px; padding: 10px 6px; border-radius: 14px; border: 2px solid var(--border); background: var(--card); color: var(--text); font-weight: 700; font-size: .85rem; }
+  .su-swatch span { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--sw) 50%, var(--sw2) 50%); border: 2px solid rgba(60, 40, 60, .12); }
+  .su-swatch[aria-pressed="true"] { border-color: var(--accent); background: var(--soft); }
+  .su-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .su-add { display: flex; gap: 6px; align-items: center; }
+  .su-add .su-input { margin: 0; flex: 1; min-width: 0; }
+  .setup-nav { display: flex; gap: 8px; margin-top: 16px; }
+  .su-demo { border: none; background: none; padding: 4px 0; color: var(--accent-ink); font: inherit; font-weight: 800; font-size: .88rem; text-decoration: underline; cursor: pointer; }
+  .setup-nav #setupNext { margin-left: auto; }
 
   .uni-discord { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
   .uni-discord a.pill { text-decoration: none; background: #5865f2; color: #fff; border-color: #5865f2; }
@@ -311,27 +403,6 @@
   .card.collapsed > .c-head h2 { margin-bottom: 0; }
   @media (prefers-reduced-motion: reduce) { .c-toggle { transition: none; } }
 
-  /* Einstellungen */
-  #setOverlay { z-index: 18; place-items: start center; background: rgba(40, 25, 45, .3);
-    padding-top: calc(88px + env(safe-area-inset-top, 0px)); padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
-  .settings { max-width: 440px; display: grid; gap: 10px; }
-  .settings h3 { font-size: 1rem; margin-top: 4px; }
-  .set-row { display: flex; flex-wrap: wrap; gap: 8px; }
-  .set-opt { display: grid; justify-items: center; gap: 2px; min-width: 84px; padding: 8px 10px; border-radius: 14px; border: 2px solid var(--border); background: var(--card); font-weight: 800; font-size: .85rem; }
-  .set-opt[aria-pressed="true"] { border-color: var(--accent); background: var(--soft); }
-  .set-emoji { font-size: 1.6rem; line-height: 1.1; }
-  .set-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(60, 40, 60, .3); }
-  .set-hint { margin: 0; color: var(--muted); font-size: .82rem; }
-  .settings .pill.primary { justify-self: center; padding: 8px 22px; }
-  .set-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
-  .set-tab { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: 4px 11px; font: inherit; font-size: .8rem; font-weight: 800; }
-  .set-tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-  .set-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-  .set-list label { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); font-weight: 700; cursor: pointer; }
-  .set-list input { width: 18px; height: 18px; accent-color: var(--accent-ink); }
-  .set-btns { display: flex; flex-wrap: wrap; gap: 6px; }
-  .set-ver { margin: 0; font-weight: 800; }
-
   /* Patch Notes */
   .news { max-width: 460px; display: grid; gap: 10px; position: relative; z-index: 1; }
   #newsOverlay { background: rgba(30, 18, 40, .62); place-items: end center; }
@@ -349,6 +420,45 @@
   .news-old h3 { font-size: .95rem; margin: 10px 0 6px; }
   .news .pill.primary { justify-self: center; padding: 8px 22px; }
   .version { display: block; margin: 0 auto; border: none; background: none; color: var(--muted); font-size: .78rem; font-weight: 700; text-decoration: underline dotted; cursor: pointer; }
+
+  /* ⚽ Lieblingsverein */
+  .fuss { display: grid; gap: 4px; min-width: 230px; }
+  .fuss h2 { font-size: 1rem; display: flex; align-items: center; gap: 6px; }
+  .club-badge { display: inline-block; width: 14px; height: 16px; border-radius: 3px 3px 7px 7px; border: 1px solid rgba(40, 30, 40, .35); flex: none; }
+  .fuss-next b { display: block; font-size: .95rem; }
+  .fuss-next small, .fuss-last, .fuss-src { display: block; font-size: .78rem; color: var(--muted); margin: 0; }
+  .fuss-count { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent-ink); line-height: 1.2; }
+  .fuss-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: .82rem; }
+  .fuss-list li { display: flex; gap: 6px; align-items: baseline; }
+  .fuss-list small { color: var(--muted); margin-left: auto; white-space: nowrap; }
+  .fuss-list .todo-del { padding: 0 4px; font-size: .9rem; }
+  .fuss-add summary { cursor: pointer; font-size: .8rem; font-weight: 800; color: var(--muted); }
+  .fuss-add form { margin-top: 6px; }
+  .fuss-add input[name="opp"] { flex: 1 1 140px; }
+  .su-club { font-size: .78rem; gap: 4px; }
+  .su-club .club-badge { width: 20px; height: 22px; }
+
+  /* 🛠️ Admin */
+  .admin { max-width: 560px; display: grid; gap: 10px; }
+  .admin-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .admin-list li { display: grid; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 10px 12px; }
+  .admin-list b { display: block; }
+  .admin-list small { color: var(--muted); font-size: .8rem; }
+  .admin-act { display: flex; flex-wrap: wrap; gap: 6px; }
+  .admin-act .pill { font-size: .82rem; padding: 4px 12px; }
+  .admin-act .pill.armed { border-color: #c2453a; color: #c2453a; }
+  .admin-reset { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+  .admin-reset .su-input { margin: 0; flex: 1 1 180px; }
+
+  /* 👤 Anmelden */
+  #authOverlay { z-index: 100; background: var(--bg); }
+  .auth-sheet { max-width: 380px; display: grid; gap: 10px; }
+  .auth-tabs { display: flex; gap: 6px; }
+  .auth-tabs button { flex: 1; border: 2px solid var(--border); background: var(--card); border-radius: 12px; padding: 7px; font-weight: 800; }
+  .auth-tabs button[aria-selected="true"] { border-color: var(--accent); background: var(--soft); }
+  .auth-form { display: grid; }
+  .auth-form .pill.primary { justify-self: stretch; padding: 9px; margin-top: 6px; }
+  .auth-note { margin: 0; color: var(--muted); font-size: .8rem; }
 
   /* KW-Übersicht */
   .overlay { position: fixed; inset: 0; z-index: 40; background: rgba(40, 25, 45, .35); display: grid; place-items: center;
@@ -424,6 +534,7 @@
 </head>
 <body>
 
+<script>window.HB_CONFIG = {"single": true, "noGender": true, "serverWeather": true, "preset": {"name": "Jana", "gender": "w", "palette": "rosa", "animal": "dog", "fur": "golden", "pet": "", "uni": true, "cycle": false, "club": "", "clubName": "", "clubShort": "", "birthday": "2000-08-25", "together": {"date": "2025-09-18", "partner": ""}, "city": ""}, "changelog": [{"v": "0.10.0", "title": "Deine eigenen Einstellungen", "notes": [["⚙️", "Einstellungen mit Tabs", "Oben unter ⚙️ Einstellungen findest du alles als Tabs: Name, Farbe, Haustier, Gewohnheiten, Uni, Zyklus, Verein, besondere Tage und Wetter."], ["🐾", "Katze oder Kaninchen", "Statt des Hundes kannst du auch eine Katze oder ein Kaninchen haben, jeweils mit eigenem Häuschen und eigener Fellfarbe."], ["🎨", "Farben", "Such dir eine von fünf Pastellfarben für die ganze Seite aus."], ["🌸", "Zyklus-Tracker", "Wenn du möchtest: Periode eintragen, aktuelle Zyklusphase sehen und eine Schätzung für die nächste Periode. Bleibt nur auf deinem Handy."], ["⚽", "Lieblingsverein", "Wähle einen Verein und sieh den Countdown zum nächsten Spiel, mit Bundesliga, DFB-Pokal und Champions League."], ["🐷", "Sparziele", "Spar auf etwas hin und sieh zu, wie sich das Pixel-Sparschwein füllt."], ["🗂️", "Ein- und ausklappen", "Tippe auf eine Überschrift, um einen Bereich zuzuklappen. Die Seite merkt sich das."]]}, {"v": "0.9.0", "title": "Das große Herbst-Update", "notes": [["🎓", "Uni-Bereich", "Lern-Timer, Fächer mit Lernzeit, Abgaben und Deadlines und Lernziele für jede Woche. Beim Lernen ist der Hund ganz leise."], ["💬", "Discord-Lerngruppe", "Speichere den Einladungslink im Uni-Bereich und öffne deine Gruppe mit einem Tipp."], ["📖", "Gelesene Bücher", "Dein eigenes Bücherregal mit Titel, Autor:in und Sternen."], ["😊", "Stimmungsbarometer", "Trag jeden Tag ein, wie es dir geht. Der Hund reagiert darauf."], ["🔊", "Ton immer an", "Der Ton-Knopf ist weg: Der Hund bellt jetzt immer, sobald du einmal auf die Seite getippt hast."], ["🤫", "Geheimnisse", "Im Garten und am Himmel verstecken sich viele neue Überraschungen. Mehr wird nicht verraten!"]]}]};</script>
 <script>
 (() => {
   // Farb- und Größenangaben aus data-style per CSSOM setzen: funktioniert auch dort, wo style-Attribute gesperrt sind
@@ -451,20 +562,32 @@
       <button class="pill primary" id="today">Heute</button>
       <button class="pill" id="next" aria-label="Nächste Woche">Woche →</button>
       <button class="pill" id="overviewBtn" type="button">📅 KW-Übersicht</button>
-      <button class="pill" id="setBtn" type="button">⚙️ Einstellungen</button>
+      <button class="pill" id="setupBtn" type="button">⚙️ Einstellungen</button>
     </div>
   </header>
 
   <div class="top-cards">
   <section class="card today" id="todayCard" aria-live="polite">
     <div class="today-text">
-      <h2 id="greet">Hallo Jana!</h2>
+      <h2 id="greet">Hallo!</h2>
       <div class="special" id="specialLine" hidden></div>
       <div class="today-date" id="dateLine"></div>
       <div class="today-wx" id="wxLine">Wetter wird geladen…</div>
       <div class="today-moon"><canvas id="moonIcon" width="16" height="16" aria-hidden="true"></canvas><span id="moonLine"></span></div>
       <button class="loc-btn" id="locBtn" type="button" hidden>📍 Genauen Standort verwenden</button>
     </div>
+  </section>
+
+  <section class="card fuss" id="fussCard" hidden>
+    <div class="mood-head"><h2><span class="club-badge" id="fussBadge" aria-hidden="true"></span><span id="fussTitle">Verein</span></h2><span class="muted c-sum" id="fussSum"></span></div>
+    <div class="fuss-next" id="fussNext"></div>
+    <div class="fuss-count" id="fussCount"></div>
+    <p class="fuss-last" id="fussLast"></p>
+    <ul class="fuss-list" id="fussList"></ul>
+    <details class="fuss-add"><summary>➕ Spiel selbst eintragen</summary>
+      <form id="fussForm" class="uni-form"><select name="comp" aria-label="Wettbewerb"><option>Bundesliga</option><option>Champions League</option><option>DFB-Pokal</option><option>Sonstiges</option></select><input name="opp" placeholder="Gegner" aria-label="Gegner" autocomplete="off" required><input name="when" type="datetime-local" aria-label="Anstoß" required><select name="home" aria-label="Heim oder Auswärts"><option value="1">Heim</option><option value="0">Auswärts</option></select><button class="pill" type="submit">+</button></form>
+    </details>
+    <p class="fuss-src" id="fussSrc"></p>
   </section>
 
   <section class="card water" id="waterCard">
@@ -480,7 +603,7 @@
       <div class="water-week" id="waterWeek" aria-label="Wasser diese Woche"></div>
     </div>
   </section>
-  <section class="card timer" id="timerCard">
+  <section class="card timer" id="timerCard" hidden>
     <div class="mood-head"><h2>Lern-Timer</h2><span class="muted" id="timerPhase">Bereit</span></div>
     <div class="timer-time" id="timerTime" aria-live="off">25:00</div>
     <div class="timer-dots" id="timerDots" aria-hidden="true"></div>
@@ -492,8 +615,8 @@
     <div class="mood-row" id="moodRow" role="radiogroup" aria-label="Stimmung heute"></div>
     <div class="mood-week" id="moodWeek" aria-label="Stimmung diese Woche"></div>
   </section>
-  <section class="card love" id="loveCard">
-    <div class="love-head"><span class="heart" aria-hidden="true">💕</span> Zusammen seit 18. September 2025</div>
+  <section class="card love" id="loveCard" hidden>
+    <div class="love-head"><span class="heart" aria-hidden="true">💕</span> <span id="loveHead"></span></div>
     <div class="love-big" id="loveYmd"></div>
     <div class="love-live" id="loveLive"></div>
     <div class="love-next" id="loveNext"></div>
@@ -502,7 +625,7 @@
 
   <section class="days" id="days"></section>
 
-  <section class="card uni" id="uniCard">
+  <section class="card uni" id="uniCard" hidden>
     <div class="todos-head"><h2>🎓 Uni</h2><span class="muted c-sum" id="uniSum"></span></div>
     <div class="uni-discord" id="discordRow"></div>
     <div class="uni-grid">
@@ -546,6 +669,43 @@
     </details>
   </section>
 
+  <section class="card cycle" id="cycleCard" hidden>
+    <details id="cycleDetails">
+      <summary class="ach-summary"><h2>🌸 Zyklus</h2><span class="muted" id="cycleSum"></span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="cy-body">
+        <div id="cyPhase"></div>
+        <div class="cy-strip" id="cyStrip" aria-hidden="true"></div>
+        <p class="cy-next" id="cyNext"></p>
+        <div class="cy-actions">
+          <button class="pill primary" id="cyStartBtn" type="button">🩸 Periode hat heute begonnen</button>
+          <label class="cy-other"><span>anderes Datum:</span><input type="date" id="cyStartOther" aria-label="Periode hat an einem anderen Tag begonnen"></label>
+          <button class="pill primary" id="cyEndBtn" type="button" hidden>✓ Periode beendet</button>
+        </div>
+        <div><span class="book-label">Wie fühlst du dich heute?</span><div class="cy-sym" id="cySym"></div></div>
+        <div><span class="book-label">Verlauf</span><ul class="cy-hist" id="cyHist"></ul></div>
+        <label class="cy-len"><span class="book-label">Zykluslänge (bis genug Einträge da sind)</span><input type="number" id="cyLen" min="18" max="45" inputmode="numeric"> Tage</label>
+        <p class="cy-note">🔒 Deine Zyklusdaten bleiben nur auf diesem Gerät. Alle Angaben sind Schätzungen aus deinen Einträgen, kein Ersatz für ärztlichen Rat und nicht zur Verhütung geeignet.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="card savings" id="saveCard">
+    <details id="saveDetails">
+      <summary class="ach-summary"><h2>🐷 Sparziele</h2><img class="piggy-mini" id="saveMini" alt=""><span class="muted" id="saveCount"></span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="save-body">
+        <div class="save-list" id="saveList"></div>
+        <details id="saveDoneWrap" hidden><summary>Erreicht (<span id="saveDoneCount">0</span>)</summary><div class="save-list" id="saveDone"></div></details>
+        <form class="save-new" id="saveNew">
+          <span class="book-label">Neues Sparziel</span>
+          <input name="name" placeholder="Wofür sparst du? z. B. iPhone" aria-label="Wofür sparst du?" autocomplete="off">
+          <div class="book-row"><input name="target" inputmode="decimal" placeholder="Zielbetrag €" aria-label="Zielbetrag in Euro" autocomplete="off">
+            <label class="book-label" for="saveDate">bis (optional)</label><input name="date" id="saveDate" type="date"></div>
+          <button class="pill primary" type="submit">+ Sparziel anlegen</button>
+        </form>
+      </div>
+    </details>
+  </section>
+
   <div class="two">
     <section class="card manage" id="manageCard">
       <h2>Meine Gewohnheiten</h2>
@@ -582,11 +742,12 @@
   <button class="version" id="versionBtn" type="button"></button>
 </main>
 
-<div class="overlay" id="setOverlay" hidden>
-  <div class="sheet settings" role="dialog" aria-modal="true" aria-labelledby="setTitle">
-    <div class="sheet-head"><h2 id="setTitle">⚙️ Einstellungen</h2><button class="pill" id="setClose" type="button" aria-label="Einstellungen schließen">✕</button></div>
-    <div id="setBody"></div>
-    <button class="pill primary" id="setOk" type="button">Fertig</button>
+<div class="overlay" id="setupOverlay" hidden>
+  <div class="sheet setup" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+    <div class="sheet-head"><h2 id="setupTitle">Willkommen!</h2><button class="pill" id="setupClose" type="button" aria-label="Einstellungen schließen" hidden>✕</button></div>
+    <div class="setup-dots" id="setupDots" aria-hidden="true"></div>
+    <div id="setupBody"></div>
+    <div class="setup-nav"><button class="pill" id="setupBack" type="button">← Zurück</button><button class="pill primary" id="setupNext" type="button">Weiter →</button></div>
   </div>
 </div>
 <div class="overlay" id="newsOverlay" hidden>
@@ -595,6 +756,26 @@
     <div class="sheet-head"><h2 id="newsTitle">Was ist neu? ✨</h2><button class="pill" id="newsClose" type="button" aria-label="Schließen">✕</button></div>
     <div id="newsBody"></div>
     <button class="pill primary" id="newsOk" type="button">Los geht’s! 🐾</button>
+  </div>
+</div>
+<div class="overlay" id="authOverlay" hidden>
+  <div class="sheet auth-sheet" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <h2 id="authTitle">👋 Mein Wochenplaner</h2>
+    <div class="auth-tabs" role="tablist" aria-label="Anmelden oder registrieren"><button type="button" role="tab" data-auth="login">Anmelden</button><button type="button" role="tab" data-auth="create">Konto erstellen</button></div>
+    <form id="authForm" class="auth-form" novalidate>
+      <label class="su-label" for="authUser">Benutzername</label><input id="authUser" class="su-input" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+      <label class="su-label" for="authPass">Passwort</label><input id="authPass" class="su-input" type="password">
+      <div id="authRepeat"><label class="su-label" for="authPass2">Passwort wiederholen</label><input id="authPass2" class="su-input" type="password" autocomplete="new-password"></div>
+      <p class="su-err" id="authErr" hidden></p>
+      <button class="pill primary" type="submit" id="authSubmit">Anmelden</button>
+    </form>
+    <p class="auth-note">🔒 Dein Konto und deine Einträge werden nur auf diesem Gerät gespeichert.</p>
+  </div>
+</div>
+<div class="overlay" id="adminOverlay" hidden>
+  <div class="sheet admin" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+    <div class="sheet-head"><h2 id="adminTitle">🛠️ Konten verwalten</h2><button class="pill" id="adminClose" type="button" aria-label="Schließen">✕</button></div>
+    <div id="adminBody"></div>
   </div>
 </div>
 <div class="overlay" id="kwOverlay" hidden>
@@ -621,7 +802,20 @@
 
 <script>
 (() => {
-  const KEY = 'janas-woche.v2';
+  // ---------- 👤 Konten (nur auf diesem Gerät) ----------
+  const ACC_KEY = 'janas-woche.accounts', SES_KEY = 'janas-woche.session';
+  let accounts = {};
+  try { accounts = JSON.parse(localStorage.getItem(ACC_KEY)) || {}; } catch {}
+  const ADMIN = { salt: '086g7oOAik+Jud/z+S3R3Q==', hash: 'egzPCX4o29zZEH7EVzwG1jYJQyitJy46ZxS9a/FIwPg=' };   // Benutzer „admin“, Passwort nur als PBKDF2-Hash
+  let hbUser = null;
+  try { hbUser = localStorage.getItem(SES_KEY); } catch {}
+  if (!hbUser || (!accounts[hbUser] && hbUser !== 'admin')) hbUser = null;
+  window.HB_ADMIN = hbUser === 'admin' && !window.JANA_GUEST;
+  const CFG = window.HB_CONFIG || {};   // Janas Seite: { single, noGender, serverWeather, preset, changelog }
+  window.HB_USER = window.JANA_GUEST || CFG.single ? null : hbUser;
+  window.HB_LOCKED = !window.JANA_GUEST && !CFG.single && !hbUser;
+  if (CFG.single) window.HB_ADMIN = false;
+  const KEY = 'janas-woche.v2' + (window.HB_LOCKED ? ':__gesperrt' : window.HB_USER ? ':' + window.HB_USER : '');
   const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
   const AREAS = { bew: 'Bewegung', ern: 'Ernährung', schlaf: 'Schlaf', gehirn: 'Gehirn', sozial: 'Soziales', psyche: 'Erholung', allg: 'Gesundheit', eigen: 'Eigenes' };
   const DEFAULT_TAGS = [
@@ -640,20 +834,7 @@
 
   let state = { tags: DEFAULT_TAGS, weeks: {} };
   try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.tags) state = s; } catch {}
-  // Haustier (Hund, Katze oder Kaninchen) mit Fellfarbe
-  state.pet ||= { animal: 'dog', fur: 'golden' };
-  window.janaPet = state.pet;
-  const PET_WORDS = {
-    cat: [[/Wuff/g, 'Miau'], [/wuff/g, 'miau'], [/Grrr/g, 'Fauch'], [/Den Labrador/g, 'Die Katze'], [/Hundeflüsterin/g, 'Katzenflüsterin'], [/Der Hund/g, 'Die Katze'], [/der Hund/g, 'die Katze'],
-      [/den Hund/g, 'die Katze'], [/dem Hund/g, 'der Katze'], [/Den Hund/g, 'Die Katze'], [/Labrador/g, 'Katze'], [/Hütte/g, 'Katzenhaus'], [/Hechel hechel/g, 'Schnurr…'],
-      [/Werwolf/g, 'Werkatze'], [/als Wolf/g, 'als Werkatze'], [/zum Wolf/g, 'zur Werkatze'], [/🐺/g, '🐈‍⬛'], [/🐶/g, '🐱']],
-    rabbit: [[/Wuff/g, 'Hopp'], [/wuff/g, 'hopp'], [/Grrr/g, '*klopf klopf*'], [/Den Labrador/g, 'Das Kaninchen'], [/Hundeflüsterin/g, 'Kaninchenflüsterin'], [/Der Hund/g, 'Das Kaninchen'],
-      [/der Hund/g, 'das Kaninchen'], [/den Hund/g, 'das Kaninchen'], [/dem Hund/g, 'dem Kaninchen'], [/Den Hund/g, 'Das Kaninchen'], [/Labrador/g, 'Kaninchen'], [/Hütte/g, 'Stall'],
-      [/Hechel hechel/g, '*mümmel mümmel*'], [/Werwolf-Gefahr/g, 'Mondhasen-Zeit'], [/Werwolf gesichtet/g, 'Mondhase gesichtet'], [/zum Werwolf/g, 'zum Mondhasen'], [/als Wolf/g, 'als Mondhase'],
-      [/Werwolf/g, 'Mondhase'], [/🐺/g, '🐇'], [/🐶/g, '🐰']],
-  };
-  window.P = (t) => { let out = String(t); for (const [re, w] of PET_WORDS[window.janaPet?.animal] || []) out = out.replace(re, w); return out; };
-  const persist = () => { if (GUEST) return; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
+  const persist = () => { if (GUEST || window.HB_LOCKED) return; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
   const save = () => { persist(); checkAchievements(); };
 
   const startOfWeek = (d) => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
@@ -684,6 +865,22 @@
       ],
       water, ach: { first: key(new Date()), five: key(new Date()), sip: key(new Date()), water: key(last), todo1: key(new Date()) }, flags: {},
       achResetId: 'reset-2026-11-06', achSince: 0,
+      cycle: {
+        periods: [-67, -39, -11].map((ago, i) => ({ id: 'cy' + i, start: key(addDays(new Date(), ago)), end: key(addDays(new Date(), ago + 4 + (i % 2))) })),
+        settings: { cycleLen: 28, periodLen: 5 }, symptoms: { [key(new Date())]: ['Viel Energie', 'Gute Laune'] },
+      },
+      savings: [
+        { id: 'sv1', name: 'iPhone', target: 1199, date: key(addDays(new Date(), 200)), done: false, createdAt: 1,
+          entries: [150, 100, 50, 70, 50].map((amount, i) => ({ id: 'e1' + i, amount, at: addDays(new Date(), -40 + i * 9).getTime() })) },
+        { id: 'sv2', name: 'Urlaub am Meer', target: 800, date: '', done: false, createdAt: 2,
+          entries: [300, 200, 150].map((amount, i) => ({ id: 'e2' + i, amount, at: addDays(new Date(), -20 + i * 8).getTime() })) },
+        { id: 'sv3', name: 'Kopfhörer', target: 120, date: '', done: true, doneAt: addDays(new Date(), -30).getTime(), createdAt: 0,
+          entries: [{ id: 'e30', amount: 120, at: addDays(new Date(), -30).getTime() }] },
+      ],
+      books: [
+        ['Der kleine Prinz', 'Antoine de Saint-Exupéry', 5, 40], ['Atomic Habits', 'James Clear', 4, 30], ['Die Mitternachtsbibliothek', 'Matt Haig', 5, 18],
+        ['Das Café am Rande der Welt', 'John Strelecky', 3, 9], ['Eine kurze Geschichte der Menschheit', 'Yuval Noah Harari', 4, 2],
+      ].map(([title, author, stars, ago], i) => ({ id: 'b' + i, title, author, stars, date: key(addDays(new Date(), -ago)), at: Date.now(), color: ['#f4a7b9', '#a9c8ec', '#a6dcc2', '#f8cfa0', '#cdb4e8'][i] })),
       uni: {
         subjects: [{ id: 's1', name: 'Statistik', color: 'gehirn' }, { id: 's2', name: 'Anatomie', color: 'sozial' }, { id: 's3', name: 'Englisch', color: 'ern' }],
         sessions: [0, 1, 1, 2, 3, 3, 4, 8, 9, 10].map((dd, i) => ({ id: 'ss' + i, subject: ['s1', 's2', 's3'][i % 3], minutes: i % 4 ? 25 : 50, at: addDays(new Date(), -dd).getTime(), full: true })),
@@ -697,14 +894,55 @@
           { id: 'g3', text: 'Vokabeln Unit 7', subject: 's3', done: false }, { id: 'g4', text: 'Altklausur 2024 rechnen', subject: 's1', done: false }] },
         timer: { phase: 'idle', round: 1 },
       },
-      books: [
-        ['Der kleine Prinz', 'Antoine de Saint-Exupéry', 5, 40], ['Atomic Habits', 'James Clear', 4, 30], ['Die Mitternachtsbibliothek', 'Matt Haig', 5, 18],
-        ['Das Café am Rande der Welt', 'John Strelecky', 3, 9], ['Eine kurze Geschichte der Menschheit', 'Yuval Noah Harari', 4, 2],
-      ].map(([title, author, stars, ago], i) => ({ id: 'b' + i, title, author, stars, date: key(addDays(new Date(), -ago)), at: Date.now(), color: ['#f4a7b9', '#a9c8ec', '#a6dcc2', '#f8cfa0', '#cdb4e8'][i] })),
+      football: { manual: [
+        { id: 'm1', comp: 'Bundesliga', opp: 'FC Bayern München', isHome: true, when: `${key(addDays(new Date(), 2))}T18:30` },
+        { id: 'm2', comp: 'Champions League', opp: 'Real Madrid', isHome: false, when: `${key(addDays(new Date(), 5))}T21:00` },
+        { id: 'm3', comp: 'Bundesliga', opp: 'VfB Stuttgart', isHome: false, when: `${key(addDays(new Date(), 9))}T15:30` },
+        { id: 'm4', comp: 'DFB-Pokal', opp: 'Hamburger SV', isHome: true, when: `${key(addDays(new Date(), 12))}T20:45` },
+        { id: 'm0', comp: 'Bundesliga', opp: 'SC Freiburg', isHome: false, when: `${key(addDays(new Date(), -5))}T15:30`, score: '2:1' },
+      ] },
+      profile: { name: 'Alex', gender: 'w', club: 'bvb', uni: true, cycle: true, palette: 'lavendel', animal: 'dog', fur: 'golden', pet: 'Bello', birthday: '1998-08-25', together: { date: '2025-09-18', partner: 'Sam' }, city: 'Hamburg' },
       mood: Object.fromEntries([5, 4, 3, 4, 2, 5, 4, 3, 5, 4, 1, 4, 5].map((v, i) => [key(addDays(new Date(), -i - 1)), { v, at: Date.now() }])),
     };
   }
   if (GUEST) state = demoState();
+  if (CFG.preset && GUEST) state.profile = { ...state.profile, ...CFG.preset };
+  if (CFG.preset && !GUEST && !state.profile) state.profile = { ...CFG.preset, animal: state.pet?.animal || CFG.preset.animal || 'dog', fur: state.pet?.fur || CFG.preset.fur || 'golden' };   // bestehende Daten übernehmen
+
+  // ---------- Profil (Vorlage): Name, Farbe, Hund, besondere Tage ----------
+  const PALETTES = {
+    rosa: { name: 'Rosa', a: '#f2a9c8', a2: '#cdb7ef', ink: '#b8557f', inkD: '#f0b3cf', on: '#4a2340', soft: '#fbeaf2', softD: '#362c3d', today: '#fff4f9', todayD: '#33293a', bg: '#fdf6fa' },
+    lavendel: { name: 'Lavendel', a: '#c9b3ec', a2: '#a9c8ec', ink: '#7a58b8', inkD: '#cbb6f0', on: '#2f2146', soft: '#f1ebfb', softD: '#302a3f', today: '#f6f1fd', todayD: '#2d2838', bg: '#f9f6fd' },
+    mint: { name: 'Mint', a: '#9fd8c0', a2: '#a9c8ec', ink: '#2f8a68', inkD: '#9fdcc3', on: '#123a2c', soft: '#e7f6ef', softD: '#25352f', today: '#f0faf5', todayD: '#26322d', bg: '#f5fbf8' },
+    pfirsich: { name: 'Pfirsich', a: '#f8c9a0', a2: '#f4a7b9', ink: '#b8642a', inkD: '#f6c49c', on: '#45260f', soft: '#fdf0e4', softD: '#3a2e27', today: '#fff6ee', todayD: '#352a24', bg: '#fdf8f3' },
+    himmel: { name: 'Himmelblau', a: '#a9c8ec', a2: '#cdb7ef', ink: '#3f6fa8', inkD: '#a9c8ec', on: '#142a45', soft: '#eaf2fb', softD: '#283140', today: '#f2f7fd', todayD: '#272e3a', bg: '#f6f9fd' },
+  };
+  const genitive = (n) => (/[sßxz]$/i.test(n) ? n + '’' : n + 's');
+  function applyProfile(paletteOverride) {
+    const p = state.profile || {};
+    window.habitProfile = p;
+    document.documentElement.dataset.palette = PALETTES[paletteOverride || p.palette] ? (paletteOverride || p.palette) : 'rosa';
+    const title = p.name ? `${genitive(p.name)} Woche` : 'Mein Wochenplaner';
+    $('pageTitle').textContent = title;
+    document.title = title;
+    window.habitApplyFur?.();
+  }
+  // Texte mit „Jana“ werden mit dem eigenen Namen angezeigt
+  const PET_WORDS = {
+    cat: [[/Wuff/g, 'Miau'], [/wuff/g, 'miau'], [/Grrr/g, 'Fauch'], [/Der Hund/g, 'Die Katze'], [/der Hund/g, 'die Katze'], [/den Hund/g, 'die Katze'],
+      [/dem Hund/g, 'der Katze'], [/Den Hund/g, 'Die Katze'], [/Labrador/g, 'Katze'], [/Hütte/g, 'Katzenhaus'], [/Hechel hechel/g, 'Schnurr…'],
+      [/Werwolf/g, 'Werkatze'], [/als Wolf/g, 'als Werkatze'], [/zum Wolf/g, 'zur Werkatze'], [/🐺/g, '🐈‍⬛']],
+    rabbit: [[/Wuff/g, 'Hopp'], [/wuff/g, 'hopp'], [/Grrr/g, '*klopf klopf*'], [/Der Hund/g, 'Das Kaninchen'], [/der Hund/g, 'das Kaninchen'], [/den Hund/g, 'das Kaninchen'],
+      [/dem Hund/g, 'dem Kaninchen'], [/Den Hund/g, 'Das Kaninchen'], [/Labrador/g, 'Kaninchen'], [/Hütte/g, 'Stall'], [/Hechel hechel/g, '*mümmel mümmel*'],
+      [/Werwolf-Gefahr/g, 'Mondhasen-Zeit'], [/Werwolf gesichtet/g, 'Mondhase gesichtet'], [/zum Werwolf/g, 'zum Mondhasen'], [/als Wolf/g, 'als Mondhasen'], [/Werwolf/g, 'Mondhase'], [/🐺/g, '🐇']],
+  };
+  window.P = (t) => {
+    const n = state.profile?.name || 'du';
+    let out = String(t).replace(/Janas/g, genitive(n)).replace(/Jana/g, n);
+    for (const [re, w] of PET_WORDS[state.profile?.animal] || []) out = out.replace(re, w);
+    return out;
+  };
+  applyProfile();
   function isoWeek(d) {
     const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
     t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
@@ -730,7 +968,7 @@
       const d = addDays(monday, i), items = w.days[i], isToday = key(d) === todayKey, open = openDay === i;
       const used = new Set(items.map(it => it.tag).filter(Boolean));
       return `<article class="card day ${isToday ? 'today' : ''}" data-day="${i}">
-        <div class="day-head"><h3>${name}${isToday ? '<span class="badge">heute</span>' : ''}</h3><span class="date">${moodImg(key(d))}${fmt(d, { day: 'numeric', month: 'short' })}</span></div>
+        <div class="day-head"><h3>${name}${isToday ? '<span class="badge">heute</span>' : ''}</h3><span class="date">${periodMark(key(d))}${moodImg(key(d))}${fmt(d, { day: 'numeric', month: 'short' })}</span></div>
         <ul class="items">${items.length ? items.map(it => `
           <li class="item ${it.done ? 'done' : ''}" data-style="--c: var(--c-${areaOf(it)})">
             <button class="toggle" data-toggle="${it.id}" aria-pressed="${!!it.done}" title="Erledigt umschalten">${esc(labelOf(it))}</button>
@@ -869,15 +1107,17 @@
     const month = Math.floor((h + l - 7 * m + 114) / 31), day = ((h + l - 7 * m + 114) % 31) + 1;
     return new Date(y, month - 1, day);
   }
-  const BIRTH = { month: 8, day: 25, year: 2000 };
+  const birthOf = () => { const b = state.profile?.birthday; if (!b) return null; const [yy, mm, dd] = b.split('-').map(Number); return { year: yy, month: mm, day: dd }; };
   const daysWord = (n) => `${n} ${n === 1 ? 'Tag' : 'Tage'}`;
   function getSpecial(now = new Date()) {
+    const BIRTH = birthOf() || { month: 0, day: 0, year: 0 };
+    const T = state.profile?.together?.date ? state.profile.together.date.split('-').map(Number) : null;
     const y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
     const today = new Date(y, m - 1, d);
     if (m === BIRTH.month && d === BIRTH.day) return { id: 'birthday', greet: `Alles Gute zum ${y - BIRTH.year}. Geburtstag, Jana! 🎂`,
       line: 'Heute ist dein Tag! Der Hund hat extra einen Kuchen gebacken.', hat: 'party', decor: 'cake', sky: 'confetti', bark: 'Happy Birthday, Jana! 🎉' };
-    if (m === 9 && d === 18 && y > 2025) return { id: 'anniversary', greet: 'Alles Liebe zum Jahrestag, Jana! 💕',
-      line: `Heute seid ihr ${y - 2025} ${y - 2025 === 1 ? 'Jahr' : 'Jahre'} zusammen! 💞`, sky: 'hearts', bark: 'Wuff! Alles Liebe zum Jahrestag! 💕' };
+    if (T && m === T[1] && d === T[2] && y > T[0]) return { id: 'anniversary', greet: 'Alles Liebe zum Jahrestag, Jana! 💕',
+      line: `Heute seid ihr ${y - T[0]} ${y - T[0] === 1 ? 'Jahr' : 'Jahre'} zusammen! 💞`, sky: 'hearts', bark: 'Wuff! Alles Liebe zum Jahrestag! 💕' };
     if (m === 12 && d >= 24 && d <= 26) return { id: 'christmas', greet: 'Frohe Weihnachten, Jana! 🎄',
       line: d === 24 ? 'Heute ist Heiligabend. ✨' : `${d - 24}. Weihnachtsfeiertag – lass es dir gut gehen.`, hat: 'santa', decor: 'tree', lights: true, bark: 'Wuff! Frohe Weihnachten! 🎄' };
     if (m === 12 && d === 31) return { id: 'nye', greet: 'Guten Rutsch, Jana! 🎆', line: `Morgen beginnt ${y + 1}. Heute Abend gibt es Feuerwerk!`, hat: 'party', sky: 'fireworks', bark: 'Wuff! Guten Rutsch! 🎆' };
@@ -983,7 +1223,7 @@
     ['hundred', '🌳', 'Gewohnheits-Profi', '100 Gewohnheiten abgehakt', (s) => s.done >= 100],
     ['streak3', '🔥', 'Drei am Stück', '3 Tage hintereinander etwas abgehakt', (s) => s.best >= 3],
     ['streak7', '⭐', 'Eine ganze Woche', '7 Tage hintereinander etwas abgehakt', (s) => s.best >= 7],
-    ['streak30', '🏆', 'Monats-Heldin', '30 Tage hintereinander etwas abgehakt', (s) => s.best >= 30],
+    ['streak30', '🏆', 'Monats-Marathon', '30 Tage hintereinander etwas abgehakt', (s) => s.best >= 30],
     ['fullweek', '📅', 'Wochen-Runde', 'An allen 7 Tagen einer Woche etwas abgehakt', (s) => s.fullWeek],
     ['perfect', '💯', 'Perfekter Tag', 'Mindestens 3 Gewohnheiten an einem Tag, alle erledigt', (s) => s.perfectDay],
     ['sport', '💪', 'Sportskanone', '10× Bewegung abgehakt', (s) => s.bew >= 10],
@@ -992,11 +1232,11 @@
     ['water', '🐳', 'Wassernixe', '2,5 Liter an einem Tag getrunken', (s) => s.waterGoal >= 1],
     ['water7', '🌊', 'Wasser-Woche', '7 Tage hintereinander 2,5 Liter', (s) => s.wBest >= 7],
     ['todo1', '📝', 'Erledigt!', 'Das erste langfristige To-do abgehakt', (s) => s.todosDone >= 1],
-    ['todo10', '🎯', 'Macherin', '10 langfristige To-dos erledigt', (s) => s.todosDone >= 10],
+    ['todo10', '🎯', 'Macher-Modus', '10 langfristige To-dos erledigt', (s) => s.todosDone >= 10],
     ['custom', '✨', 'Ganz meins', 'Eine eigene Gewohnheit angelegt', (s) => s.custom],
     ['early', '🐦', 'Früher Vogel', 'Vor 8 Uhr morgens etwas abgehakt', () => !!state.flags.early],
     ['owl', '🦉', 'Nachteule', 'Nach 22 Uhr etwas abgehakt', () => !!state.flags.owl],
-    ['dog', '🐶', 'Hundeflüsterin', 'Den Labrador 20-mal angetippt', () => (state.flags.dogPats || 0) >= 20],
+    ['dog', '🐶', 'Bester Freund', 'Den Hund 20-mal angetippt', () => (state.flags.dogPats || 0) >= 20],
     ['birthday', '🎂', 'Geburtstagskind', 'Am Geburtstag vorbeigeschaut', () => !!state.flags.birthday],
     ['xmas', '🎄', 'Weihnachtself', 'An Weihnachten vorbeigeschaut', () => !!state.flags.christmas],
     ['easter', '🐣', 'Osterhase', 'An Ostern vorbeigeschaut', () => !!state.flags.easter],
@@ -1019,6 +1259,8 @@
     ['love', '💌', 'Liebesbotschaft', 'Ein Geheimnis mit Herz entdeckt', () => !!state.flags.love],
     ['feed', '🥣', 'Futterfee', 'Ein leckeres Geheimnis entdeckt', () => !!state.flags.feed],
     ['choir', '🎵', 'Nachtkonzert', 'Ein musikalisches Geheimnis entdeckt', () => !!state.flags.choir],
+    ['save10', '🐷', 'Sparschwein', '10-mal etwas aufs Sparziel gelegt', (s) => s.deposits >= 10],
+    ['savegoal', '🦊', 'Sparfuchs', 'Das erste Sparziel erreicht', (s) => s.savedGoals >= 1],
   ];
   function runLength(dates) {
     let best = 0, run = 0, prev = null;
@@ -1066,6 +1308,8 @@
       focusRounds: (state.uni?.sessions || []).filter((x) => x.full && x.at >= since).length,
       deadlinesDone: (state.uni?.deadlines || []).filter((x) => x.done && (x.doneAt || 0) >= since).length,
       books: (state.books || []).filter((b) => (b.at || 0) >= since).length,
+      deposits: (state.savings || []).reduce((a, g) => a + g.entries.filter((x) => x.amount > 0 && x.at >= since).length, 0),
+      savedGoals: (state.savings || []).filter((g) => g.done && (g.doneAt || 0) >= since).length,
       custom: state.tags.some((t) => t.id.startsWith('t') && created(t) >= since),
     };
   }
@@ -1138,10 +1382,14 @@
     if (sp && ['birthday', 'christmas', 'easter', 'nye', 'newyear', 'anniversary', 'fri13'].includes(sp.id) && !state.flags[sp.id]) { state.flags[sp.id] = true; save(); }
   }
   // ---------- Zusammen seit 18.09.2025 ----------
-  const TOGETHER = { y: 2025, m: 9, d: 18 };
+  const TOG = () => { const t = state.profile?.together; if (!t?.date) return null; const [y, m, d] = t.date.split('-').map(Number); return { y, m, d, partner: t.partner }; };
   const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
   const inDays = (n) => (n === 1 ? 'morgen' : `in ${n} Tagen`);
   function renderLove() {
+    const TOGETHER = TOG();
+    $('loveCard').hidden = !TOGETHER;
+    if (!TOGETHER) return;
+    $('loveHead').textContent = `${TOGETHER.partner ? `Du & ${TOGETHER.partner} · zusammen seit ` : 'Zusammen seit '}${new Date(TOGETHER.y, TOGETHER.m - 1, TOGETHER.d).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}`;
     const now = new Date();
     let y = now.getFullYear() - TOGETHER.y, mo = now.getMonth() + 1 - TOGETHER.m, d = now.getDate() - TOGETHER.d;
     if (d < 0) { mo--; d += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
@@ -1214,6 +1462,212 @@
   renderMood();
   setInterval(renderMood, 10 * 60 * 1000);
 
+  // ---------- Einrichtungs-Assistent ----------
+  const FUR_CHOICES = [['golden', 'Golden', '#ecc173'], ['schoko', 'Schoko', '#a8714a'], ['schwarz', 'Schwarz', '#4a4250'], ['weiss', 'Weiß', '#f4efe9']];
+  const ANIMALS = [['dog', 'Hund', '🐶'], ['cat', 'Katze', '🐱'], ['rabbit', 'Kaninchen', '🐰']];
+  const STEP_TITLES = { welcome: 'Willkommen! 👋', gender: 'Über dich 🙂', color: 'Deine Farbe 🎨', pet: 'Dein Haustier 🐾', habits: 'Deine Gewohnheiten 🌱', uni: 'Uni 🎓', cycle: 'Zyklus 🌸', club: 'Lieblingsverein ⚽', days: 'Besondere Tage 🎂', weather: 'Wetter 🌦️' };
+  const STEP_ORDER = ['welcome', 'gender', 'color', 'pet', 'habits', 'uni', 'cycle', 'club', 'days', 'weather'];
+  const steps = () => STEP_ORDER.filter((k) => (k !== 'cycle' || draft?.gender === 'w') && !(k === 'gender' && CFG.noGender));
+  const cur = () => steps()[step];
+  const TAB_LABELS = { welcome: '👋 Name', gender: '🙂 Über dich', color: '🎨 Farbe', pet: '🐾 Haustier', habits: '🌱 Gewohnheiten', uni: '🎓 Uni', cycle: '🌸 Zyklus', club: '⚽ Verein', days: '🎂 Besondere Tage', weather: '🌦️ Wetter' };
+  let draft = null, step = 0;
+  const allChoices = () => {
+    const map = new Map();
+    for (const t of [...DEFAULT_TAGS, ...state.tags, ...(draft?.custom || [])]) if (!map.has(t.id)) map.set(t.id, t);
+    return [...map.values()];
+  };
+  function openSetup() {
+    const p = state.profile || {};
+    draft = {
+      gender: p.gender || '', club: p.club || '', clubName: p.clubName || '', clubShort: p.clubShort || '',
+      name: p.name || (window.HB_USER ? window.HB_USER[0].toUpperCase() + window.HB_USER.slice(1) : ''), palette: p.palette || 'rosa', animal: p.animal || 'dog', fur: p.fur || 'golden', pet: p.pet || '',
+      habits: state.profile ? state.tags.map((t) => t.id) : ['kraft', 'spazieren', 'gemuese', 'wasser', 'lesen', 'schlafen', 'freunde', 'entspannen'],
+      custom: [], cycle: !!p.cycle, cycleStart: '', cycleLen: state.cycle?.settings?.cycleLen || 28, uni: !!p.uni, subjects: (state.uni?.subjects || []).map((x) => ({ ...x })), birthday: p.birthday || '', together: { date: p.together?.date || '', partner: p.together?.partner || '' }, city: p.city || '',
+    };
+    step = 0;
+    $('setupClose').hidden = !state.profile;
+    $('setupOverlay').hidden = false;
+    document.body.style.overflow = 'hidden';
+    renderSetup();
+  }
+  function closeSetup() {
+    $('setupOverlay').hidden = true;
+    document.body.style.overflow = '';
+    applyProfile();   // Farb-Vorschau zurück auf die gespeicherte Wahl
+  }
+  function renderSetup() {
+    $('setupTitle').textContent = STEP_TITLES[cur()];
+    const editing = !!state.profile;   // Einstellungen: Bereiche als Tabs, direkt anwählbar
+    const dots = $('setupDots');
+    dots.classList.add('tabs');
+    dots.removeAttribute('aria-hidden'); dots.setAttribute('role', 'tablist'); dots.setAttribute('aria-label', editing ? 'Bereiche der Einstellungen' : 'Schritte der Einrichtung');
+    dots.innerHTML = steps().map((k, i) => `<button type="button" class="su-tab${!editing && i < step ? ' done' : ''}" role="tab" data-tab="${i}" aria-selected="${i === step}">${TAB_LABELS[k]}</button>`).join('');
+    $('setupBack').hidden = editing || cur() === 'welcome';
+    $('setupNext').textContent = editing ? '✓ Speichern' : step === steps().length - 1 ? 'Los geht’s! 🎉' : 'Weiter →';
+    const b = $('setupBody');
+    if (cur() === 'welcome') b.innerHTML = `<p>${editing ? 'Wähle oben einen Bereich und ändere, was du möchtest. Mit „Speichern“ übernimmst du alles.' : 'Schön, dass du da bist! In ein paar Schritten richtest du deinen eigenen Wochenplaner ein.'}</p>
+      <label class="su-label" for="suName">Wie heißt du?</label><input id="suName" class="su-input" placeholder="Dein Name" autocomplete="given-name" value="${esc(draft.name)}">
+      <p class="su-hint">Daraus wird der Titel deiner Seite, z. B. „${esc(genitive(draft.name || 'Alex'))} Woche“.</p><p class="su-err" id="suErr" hidden>Bitte gib einen Namen ein.</p>${window.JANA_PREVIEW ? '<button type="button" class="su-demo" id="suDemo">🧪 Lieber erst die Demo ansehen</button>' : ''}`;
+    if (cur() === 'gender') b.innerHTML = `<p>Damit wir dir die passenden Funktionen anbieten können: Bist du eine Frau oder ein Mann?</p>
+      <div class="su-swatches"><button type="button" class="su-swatch" data-gender="w" aria-pressed="${draft.gender === 'w'}"><span class="su-emoji">👩</span>Frau</button>
+      <button type="button" class="su-swatch" data-gender="m" aria-pressed="${draft.gender === 'm'}"><span class="su-emoji">👨</span>Mann</button></div>
+      <p class="su-hint">Als Frau kannst du gleich noch einen Zyklus-Tracker einschalten. Ändern kannst du das jederzeit in den Einstellungen.</p><p class="su-err" id="suErr" hidden>Bitte wähle eine Antwort.</p>`;
+    if (cur() === 'club') b.innerHTML = `<p>Hast du einen Lieblingsverein? Dann siehst du oben einen Countdown zum nächsten Spiel, in der Bundesliga, im DFB-Pokal und in der Champions League.</p>
+      <div class="su-swatches">${(window.habitClubChoices?.() || []).map((c) => `<button type="button" class="su-swatch su-club" data-club="${esc(c.key)}" data-short="${esc(c.short)}" aria-pressed="${draft.club === c.key}"><span class="club-badge" data-style="background:linear-gradient(135deg, ${c.c1} 50%, ${c.c2} 50%)"></span>${esc(c.short)}</button>`).join('')}
+      <button type="button" class="su-swatch su-club" data-club="other" aria-pressed="${draft.club === 'other'}"><span class="su-emoji">✏️</span>Anderer Verein</button>
+      <button type="button" class="su-swatch su-club" data-club="" aria-pressed="${!draft.club}"><span class="su-emoji">🙅</span>Kein Verein</button></div>
+      ${draft.club === 'other' ? `<label class="su-label" for="suClub">Wie heißt dein Verein?</label><input id="suClub" class="su-input" placeholder="z. B. Hertha BSC" value="${esc(draft.clubName)}">` : ''}`;
+    if (cur() === 'color') b.innerHTML = `<p>Welche Farbe gefällt dir? Die Seite zeigt sie sofort.</p><div class="su-swatches">${Object.entries(PALETTES).map(([k, p]) =>
+      `<button type="button" class="su-swatch" data-pal="${k}" aria-pressed="${draft.palette === k}" data-style="--sw:${p.a};--sw2:${p.a2}"><span></span>${p.name}</button>`).join('')}</div>`;
+    if (cur() === 'pet') b.innerHTML = `<p>Unten auf der Seite wohnt ein kleines Pixel-Haustier mit eigenem Häuschen. Wer soll es sein?</p>
+      <div class="su-swatches">${ANIMALS.map(([k, n, e]) => `<button type="button" class="su-swatch" data-animal="${k}" aria-pressed="${draft.animal === k}"><span class="su-emoji">${e}</span>${n}</button>`).join('')}</div>
+      <p>Welche Fellfarbe?</p><div class="su-swatches">${FUR_CHOICES.map(([k, n, c]) =>
+      `<button type="button" class="su-swatch" data-fur="${k}" aria-pressed="${draft.fur === k}" data-style="--sw:${c};--sw2:${c}"><span></span>${n}</button>`).join('')}</div>
+      <label class="su-label" for="suPet">Wie heißt es? (optional)</label><input id="suPet" class="su-input" placeholder="${{ dog: 'z. B. Bello', cat: 'z. B. Minka', rabbit: 'z. B. Hoppel' }[draft.animal]}" value="${esc(draft.pet)}">`;
+    if (cur() === 'habits') b.innerHTML = `<p>Was möchtest du regelmäßig machen? Tippe an, was passt. Diese Gewohnheiten kannst du dann jedem Tag zuordnen.</p>
+      <div class="su-chips">${allChoices().map((t) => `<button type="button" class="tag" data-style="--c: var(--c-${t.area})" data-hab="${t.id}" aria-pressed="${draft.habits.includes(t.id)}">${esc(t.name)}</button>`).join('')}</div>
+      <form class="su-add" id="suAdd"><input id="suNew" class="su-input" placeholder="Eigene Gewohnheit, z. B. Yoga" aria-label="Eigene Gewohnheit"><button class="pill" type="submit">+ Hinzufügen</button></form>`;
+    if (cur() === 'uni') b.innerHTML = `<p>Studierst du? Dann bekommst du einen Lern-Timer, Fächer mit Lernzeit, Abgaben und Lernziele pro Woche.</p>
+      <div class="su-swatches"><button type="button" class="su-swatch" data-uni="1" aria-pressed="${draft.uni}"><span class="su-emoji">🎓</span>Ja, ich studiere</button>
+      <button type="button" class="su-swatch" data-uni="0" aria-pressed="${!draft.uni}"><span class="su-emoji">🙅</span>Brauche ich nicht</button></div>
+      ${draft.uni ? `<label class="su-label" for="suSubj">Deine Fächer (optional, auch später möglich)</label>
+      <div class="su-chips">${draft.subjects.map((x) => `<span class="tag" data-style="--c: var(--c-${x.color})">${esc(x.name)}<button type="button" class="su-x" data-rmsubj="${x.id}" aria-label="${esc(x.name)} entfernen">×</button></span>`).join('') || '<span class="su-hint">Noch keine Fächer.</span>'}</div>
+      <form class="su-add" id="suSubjForm"><input id="suSubj" class="su-input" placeholder="z. B. Statistik" aria-label="Neues Fach"><button class="pill" type="submit">+ Fach</button></form>` : ''}`;
+    if (cur() === 'cycle') b.innerHTML = `<p>Möchtest du deinen Zyklus mittracken? Du siehst dann, in welcher Zyklusphase du gerade bist, und wann die nächste Periode ungefähr kommt.</p>
+      <div class="su-swatches"><button type="button" class="su-swatch" data-cyc="1" aria-pressed="${draft.cycle}"><span class="su-emoji">🌸</span>Ja, gern</button>
+      <button type="button" class="su-swatch" data-cyc="0" aria-pressed="${!draft.cycle}"><span class="su-emoji">🙅</span>Brauche ich nicht</button></div>
+      ${draft.cycle ? `<label class="su-label" for="suCyStart">Wann hat deine letzte Periode begonnen? (optional)</label><input id="suCyStart" class="su-input" type="date" value="${draft.cycleStart}">
+      <label class="su-label" for="suCyLen">Wie lang ist dein Zyklus ungefähr?</label><input id="suCyLen" class="su-input" type="number" min="18" max="45" inputmode="numeric" value="${draft.cycleLen}">
+      <p class="su-hint">🔒 Bleibt nur auf deinem Gerät. Alles sind Schätzungen, nicht zur Verhütung geeignet.</p>` : ''}`;
+    if (cur() === 'days') b.innerHTML = `<label class="su-label" for="suBirth">Wann hast du Geburtstag? (optional)</label><input id="suBirth" class="su-input" type="date" value="${draft.birthday}">
+      <p class="su-hint">An deinem Geburtstag gibt es Konfetti, Kuchen und einen Partyhut für dein Haustier.</p>
+      <label class="su-label" for="suTog">Jahrestag mit deinem Schatz (optional)</label><input id="suTog" class="su-input" type="date" value="${draft.together.date}">
+      <input id="suPartner" class="su-input" placeholder="Name deines Schatzes" aria-label="Name deines Schatzes" value="${esc(draft.together.partner)}">
+      <p class="su-hint">Dann zählt eine kleine Karte, wie lange ihr schon zusammen seid.</p>`;
+    if (cur() === 'weather') b.innerHTML = `<label class="su-label" for="suCity">Wo wohnst du? (optional)</label><input id="suCity" class="su-input" placeholder="z. B. Hamburg" autocomplete="address-level2" value="${esc(draft.city)}">
+      <p class="su-hint">Dann zeigt der Himmel oben dein echtes Wetter, und dein Haustier verkriecht sich bei Regen in sein Häuschen. Alles kannst du später unter ⚙️ ändern.</p>`;
+    b.querySelector('input')?.focus({ preventScroll: true });
+  }
+  function readStep() {
+    if (cur() === 'welcome') draft.name = $('suName').value.trim();
+    if (cur() === 'club' && $('suClub')) draft.clubName = $('suClub').value.trim();
+    if (cur() === 'pet') draft.pet = $('suPet').value.trim();
+    if (cur() === 'cycle' && draft.cycle) { draft.cycleStart = $('suCyStart').value; draft.cycleLen = parseInt($('suCyLen').value, 10) || 28; }
+    if (cur() === 'days') { draft.birthday = $('suBirth').value; draft.together = { date: $('suTog').value, partner: $('suPartner').value.trim() }; }
+    if (cur() === 'weather') draft.city = $('suCity').value.trim();
+  }
+  $('setupBody').addEventListener('click', (e) => {
+    if (e.target.closest('#suDemo')) {   // nur in der Test-Vorschau
+      e.dogHandled = true;
+      try { localStorage.setItem('janas-woche.previewMode', 'demo'); } catch {}
+      location.reload();
+      return;
+    }
+    const cyb = e.target.closest('[data-cyc]');
+    if (cyb) { e.dogHandled = true; if (draft.cycle && $('suCyStart')) { draft.cycleStart = $('suCyStart').value; draft.cycleLen = parseInt($('suCyLen').value, 10) || 28; } draft.cycle = cyb.dataset.cyc === '1'; renderSetup(); return; }
+    const gd = e.target.closest('[data-gender]'), cl = e.target.closest('[data-club]');
+    if (gd || cl) {
+      e.dogHandled = true;
+      if (gd) { draft.gender = gd.dataset.gender; if (draft.gender === 'm') draft.cycle = false; }
+      if (cl) { if ($('suClub')) draft.clubName = $('suClub').value.trim(); draft.club = cl.dataset.club; draft.clubShort = cl.dataset.short || ''; }
+      renderSetup();
+      if (cl && draft.club === 'other') $('suClub')?.focus();
+      return;
+    }
+    const un = e.target.closest('[data-uni]'), rs = e.target.closest('[data-rmsubj]');
+    if (un || rs) {
+      e.dogHandled = true;
+      if (un) draft.uni = un.dataset.uni === '1';
+      if (rs) draft.subjects = draft.subjects.filter((x) => x.id !== rs.dataset.rmsubj);
+      renderSetup();
+      return;
+    }
+    const sw = e.target.closest('[data-pal]'), fu = e.target.closest('[data-fur]'), hb = e.target.closest('[data-hab]'), an = e.target.closest('[data-animal]');
+    if (!sw && !fu && !hb && !an) return;
+    e.dogHandled = true;
+    if (sw) { draft.palette = sw.dataset.pal; applyProfile(draft.palette); renderSetup(); }
+    if (fu || an) {
+      draft.pet = $('suPet').value.trim();
+      if (fu) draft.fur = fu.dataset.fur;
+      if (an) draft.animal = an.dataset.animal;
+      window.habitProfile = { ...(state.profile || {}), fur: draft.fur, animal: draft.animal }; window.habitApplyFur?.();
+      renderSetup();
+    }
+    if (hb) {
+      const id = hb.dataset.hab;
+      draft.habits = draft.habits.includes(id) ? draft.habits.filter((x) => x !== id) : [...draft.habits, id];
+      hb.setAttribute('aria-pressed', draft.habits.includes(id));
+    }
+  });
+  $('setupBody').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (e.target.id === 'suSubjForm') {
+      const v = $('suSubj').value.trim();
+      if (v) draft.subjects.push({ id: 's' + uid(), name: v, color: SUBJ_COLORS[draft.subjects.length % SUBJ_COLORS.length][0] });
+      renderSetup(); $('suSubj')?.focus();
+      return;
+    }
+    const v = $('suNew').value.trim();
+    if (!v) return;
+    const ex = allChoices().find((t) => t.name.toLowerCase() === v.toLowerCase());
+    const id = ex ? ex.id : 't' + uid();
+    if (!ex) draft.custom.push({ id, name: v, area: 'eigen' });
+    if (!draft.habits.includes(id)) draft.habits.push(id);
+    renderSetup();
+    $('suNew').focus();
+  });
+  function finishSetup() {
+    const first = !state.profile;
+    const keep = allChoices().filter((t) => draft.habits.includes(t.id));
+    // Abgewählte Gewohnheiten: schon eingetragene Tage behalten den Namen als eigenen Eintrag
+    for (const t of state.tags.filter((x) => !draft.habits.includes(x.id)))
+      for (const w of Object.values(state.weeks)) for (const d of w.days) for (const it of d) if (it.tag === t.id) { it.text = t.name; delete it.tag; }
+    state.tags = keep.map((t) => ({ id: t.id, name: t.name, area: t.area }));
+    const { custom, habits, subjects, cycleStart, cycleLen, ...profile } = draft;
+    state.uni.subjects = subjects;
+    if (profile.cycle) {
+      state.cycle.settings.cycleLen = Math.min(45, Math.max(18, cycleLen || 28));
+      if (cycleStart && cycleStart <= todayKey() && !state.cycle.periods.some((x) => x.start === cycleStart)) state.cycle.periods.push({ id: uid(), start: cycleStart, end: '' });
+    }
+    if (profile.gender === 'm') profile.cycle = false;
+    if (profile.club !== 'other') profile.clubName = '';
+    if (!profile.club?.startsWith('ol:')) profile.clubShort = '';
+    state.profile = profile;
+    save(); closeSetup(); render(); renderLove(); renderUni(); window.renderCycle?.(); window.renderFuss?.(true);
+    window.janaApp.renderSpecial(); window.janaWx?.refresh?.(); window.habitReloadWeather?.();
+    if (first) setTimeout(() => window.habitWelcome?.(), 900);
+    if (first) setTimeout(() => window.janaDog?.happy(`Wuff! Hallo ${profile.name}! ${profile.pet ? `Ich bin ${profile.pet}. ` : ''}🐾`), 500);
+    window.habitProfile = state.profile;
+  }
+  $('setupNext').addEventListener('click', (e) => {
+    e.dogHandled = true;
+    readStep();
+    if (!stepOk()) return;
+    if (state.profile || step >= steps().length - 1) {
+      if (!draft.name || !draft.gender) { step = steps().indexOf(!draft.name ? 'welcome' : 'gender'); renderSetup(); $('suErr').hidden = false; return; }   // per Tab übersprungen
+      finishSetup();
+    } else { step++; renderSetup(); }
+  });
+  function stepOk() {
+    if (cur() === 'welcome' && !draft.name) { $('suErr').hidden = false; $('suName').focus(); return false; }
+    if (cur() === 'gender' && !draft.gender) { $('suErr').hidden = false; return false; }
+    return true;
+  }
+  $('setupDots').addEventListener('click', (e) => {
+    const t = e.target.closest('[data-tab]');
+    if (!t) return;
+    e.dogHandled = true;
+    readStep();
+    if (!stepOk()) return;
+    step = Math.min(+t.dataset.tab, steps().length - 1); renderSetup();
+    $('setupBody').scrollTop = 0;
+  });
+  $('setupBack').addEventListener('click', (e) => { e.dogHandled = true; readStep(); step = Math.max(0, step - 1); renderSetup(); });
+  $('setupClose').addEventListener('click', (e) => { e.dogHandled = true; closeSetup(); });
+  $('setupBtn').addEventListener('click', openSetup);
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('setupOverlay').hidden && state.profile) closeSetup(); });
+  if (!GUEST && !window.HB_LOCKED && !window.HB_ADMIN && !state.profile) setTimeout(openSetup, 400);
+
   // ---------- 🎓 Uni: Lern-Timer, Fächer & Lernzeit, Abgaben, Lernziele ----------
   state.uni ||= { subjects: [], sessions: [], deadlines: [], goals: {}, timer: { phase: 'idle', round: 0 } };
   const U = state.uni;
@@ -1222,7 +1676,7 @@
   const subjOf = (id) => U.subjects.find((x) => x.id === id);
   const subjName = (id) => subjOf(id)?.name || 'Ohne Fach';
   const fmtMin = (m) => { m = Math.round(m); const h = Math.floor(m / 60); return h ? `${h} h ${String(m % 60).padStart(2, '0')} min` : `${m} min`; };
-  const uniOn = () => true;
+  const uniOn = () => !!state.profile?.uni;
   const subjOptions = (sel, withNone) => (withNone ? `<option value="">Ohne Fach</option>` : '') + U.subjects.map((x) => `<option value="${x.id}" ${x.id === sel ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
   const weekMinutes = (mon) => {
     const from = mon.getTime(), to = addDays(mon, 7).getTime(), per = {};
@@ -1410,7 +1864,6 @@
   renderDiscord();
 
   window.renderUni = renderUni;
-  renderUni();
 
   // ---------- 📖 Gelesene Bücher ----------
   state.books ||= [];
@@ -1468,6 +1921,403 @@
   renderStarPick();
   renderBooks();
 
+  // ---------- 🐷 Sparziele ----------
+  state.savings ||= [];
+  const eur = (v) => v.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: v % 1 ? 2 : 0 });
+  const parseEur = (t) => { const n = parseFloat(String(t).replace(/\s|€/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.')); return Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN; };
+  const savedOf = (g) => g.entries.reduce((a, x) => a + x.amount, 0);
+  const piggyCache = {};
+  function piggyURL(frac) {   // Pixel-Sparschwein, das sich von unten mit Münzen füllt
+    const k = Math.round(Math.max(0, Math.min(1, frac)) * 8);
+    if (piggyCache[k]) return piggyCache[k];
+    const c = document.createElement('canvas'); c.width = 18; c.height = 14;
+    const g = c.getContext('2d'), px = (x, y, col) => { g.fillStyle = col; g.fillRect(x, y, 1, 1); };
+    const inBody = (x, y) => ((x + 0.5 - 8.5) / 6.6) ** 2 + ((y + 0.5 - 7) / 4.8) ** 2 <= 1;
+    const level = 11.5 - (k / 8) * 8.5;
+    for (let y = 0; y < 14; y++) for (let x = 0; x < 18; x++) {
+      if (!inBody(x, y)) continue;
+      const edge = !inBody(x - 1, y) || !inBody(x + 1, y) || !inBody(x, y - 1) || !inBody(x, y + 1);
+      px(x, y, edge ? '#4a3f55' : y >= level ? ((x + y) % 3 ? '#f6c94a' : '#ffe08a') : '#f8c9dc');
+    }
+    [[15, 6], [15, 7], [16, 6], [16, 7]].forEach(([x, y]) => px(x, y, '#f292ad')); px(17, 6, '#4a3f55'); px(17, 7, '#4a3f55');   // Rüssel
+    px(16, 6, '#4a3f55');
+    [[11, 1], [12, 1], [11, 2]].forEach(([x, y]) => px(x, y, '#4a3f55')); px(12, 2, '#f292ad');                                  // Ohr
+    [[4, 11], [4, 12], [6, 11], [6, 12], [10, 11], [10, 12], [12, 11], [12, 12]].forEach(([x, y]) => px(x, y, '#4a3f55'));     // Beine
+    [[1, 5], [0, 6], [1, 7]].forEach(([x, y]) => px(x, y, '#4a3f55'));                                                          // Ringelschwanz
+    [[7, 2], [8, 2], [9, 2]].forEach(([x, y]) => px(x, y, '#2a1a12'));                                                          // Münzschlitz
+    px(13, 5, '#2a1a12');                                                                                                         // Auge
+    return (piggyCache[k] = c.toDataURL());
+  }
+  function planText(g, left) {
+    if (!g.date || left <= 0) return '';
+    const [y, m, d] = g.date.split('-').map(Number), end = new Date(y, m - 1, d), now = new Date();
+    const days = Math.round((end - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 864e5);
+    const nice = end.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: end.getFullYear() === now.getFullYear() ? undefined : 'numeric' });
+    if (days < 0) return ` · Zieldatum ${nice} ist vorbei`;
+    const months = days / 30.44;
+    return months >= 1 ? ` · bis ${nice} ≈ ${eur(Math.ceil(left / months))} pro Monat` : ` · bis ${nice} ≈ ${eur(Math.ceil(left / Math.max(1, days / 7)))} pro Woche`;
+  }
+  function renderSavings() {
+    const open = state.savings.filter((g) => !g.done), reached = state.savings.filter((g) => g.done);
+    const total = state.savings.reduce((a, g) => a + savedOf(g), 0);
+    $('saveCount').textContent = state.savings.length ? `${eur(total)} gespart` : 'noch kein Ziel';
+    $('saveMini').src = piggyURL(open.length ? open.reduce((a, g) => a + Math.min(1, savedOf(g) / g.target), 0) / open.length : 0);
+    const card = (g) => {
+      const saved = savedOf(g), frac = Math.min(1, saved / g.target), left = Math.max(0, g.target - saved);
+      const last = g.entries.slice(-3).reverse().map((x) => `<span class="${x.amount < 0 ? 'neg' : ''}">${x.amount < 0 ? '−' : '+'}${eur(Math.abs(x.amount))}</span>`).join(' ');
+      return `<article class="goal ${g.done ? 'reached' : ''}" data-goal="${g.id}">
+        <img class="piggy" src="${piggyURL(frac)}" alt="Sparschwein, ${Math.round(frac * 100)} % gefüllt">
+        <div class="goal-main">
+          <div class="goal-top"><b>${esc(g.name)}</b><button class="todo-del" type="button" data-sdel="${g.id}" aria-label="Sparziel ${esc(g.name)} löschen">×</button></div>
+          <div class="goal-amount"><strong>${eur(saved)}</strong> von ${eur(g.target)} · ${Math.round(frac * 100)} %</div>
+          <div class="progress save-bar"><div data-style="width:${Math.round(frac * 100)}%"></div></div>
+          <small class="goal-hint">${g.done ? `Erreicht am ${new Date(g.doneAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' })} 🎉` : `Noch ${eur(left)}${planText(g, left)}`}</small>
+          ${g.done ? '' : `<form class="goal-form" data-sform="${g.id}">
+            <button class="pill" type="button" data-quick="10">+10 €</button><button class="pill" type="button" data-quick="50">+50 €</button>
+            <input name="amount" inputmode="decimal" placeholder="Betrag" aria-label="Betrag in Euro für ${esc(g.name)}" autocomplete="off">
+            <button class="pill primary" type="submit" name="dir" value="in">Einzahlen</button><button class="pill ghost" type="submit" name="dir" value="out">Abheben</button>
+          </form>`}
+          ${last ? `<small class="goal-last">Zuletzt: ${last}</small>` : ''}
+        </div>
+      </article>`;
+    };
+    $('saveList').innerHTML = open.length ? open.map(card).join('') : '<p class="muted">Leg unten dein erstes Sparziel an, z. B. ein neues Handy oder einen Urlaub.</p>';
+    $('saveDoneWrap').hidden = !reached.length; $('saveDoneCount').textContent = reached.length; $('saveDone').innerHTML = reached.map(card).join('');
+  }
+  function deposit(g, amount, e) {
+    if (!Number.isFinite(amount) || !amount) return;
+    const before = savedOf(g);
+    if (amount < 0 && before + amount < 0) amount = -before;
+    g.entries.push({ id: uid(), amount, at: Date.now() });
+    const after = savedOf(g);
+    e.dogHandled = true;
+    if (!g.done && after >= g.target) { g.done = true; g.doneAt = Date.now(); window.janaDog?.happy(`Wuff! Du hast es geschafft: ${g.name}! 🎉`); }
+    else if (amount > 0) window.janaDog?.happy(`Klimper! 💰 Noch ${eur(Math.max(0, g.target - after))} bis ${g.name}!`);
+    save(); renderSavings();
+  }
+  $('saveCard').addEventListener('click', (e) => {
+    const q = e.target.closest('[data-quick]'), del = e.target.closest('[data-sdel]');
+    if (q) { const g = state.savings.find((x) => x.id === q.closest('[data-sform]').dataset.sform); deposit(g, +q.dataset.quick, e); }
+    if (del) {
+      e.dogHandled = true;
+      if (!del.classList.contains('armed')) { del.classList.add('armed'); del.textContent = 'Löschen?'; setTimeout(() => { if (del.isConnected) { del.classList.remove('armed'); del.textContent = '×'; } }, 3000); return; }
+      state.savings = state.savings.filter((x) => x.id !== del.dataset.sdel); save(); renderSavings();
+    }
+  });
+  $('saveCard').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target;
+    if (f.id === 'saveNew') {
+      const name = f.elements.name.value.trim(), target = parseEur(f.elements.target.value);
+      if (!name) { f.elements.name.focus(); return; }
+      if (!(target > 0)) { f.elements.target.focus(); return; }
+      state.savings.push({ id: uid(), name, target, date: f.elements.date.value || '', entries: [], done: false, createdAt: Date.now() });
+      f.reset(); save(); renderSavings(); return;
+    }
+    const g = state.savings.find((x) => x.id === f.dataset.sform);
+    const amount = parseEur(f.elements.amount.value);
+    if (!(amount > 0)) { f.elements.amount.focus(); return; }
+    deposit(g, e.submitter?.value === 'out' ? -amount : amount, e);
+  });
+  try { $('saveDetails').open = localStorage.getItem('janas-woche.saveOpen') === '1'; } catch {}
+  $('saveDetails').addEventListener('toggle', () => { try { localStorage.setItem('janas-woche.saveOpen', $('saveDetails').open ? '1' : '0'); } catch {} });
+  renderSavings();
+
+  // ---------- 🌸 Zyklus-Tracker (nur auf diesem Gerät, alles geschätzt) ----------
+  state.cycle ||= { periods: [], settings: { cycleLen: 28, periodLen: 5 }, symptoms: {} };
+  const CY = state.cycle;
+  const cyOn = () => !!state.profile?.cycle && state.profile?.gender !== 'm';
+  const dayNum = (k) => { const [y, m, d] = k.split('-').map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
+  const keyOfNum = (n) => { const d = new Date(n * 864e5); return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`; };
+  const median = (a) => { const b = [...a].sort((x, y) => x - y); return b.length ? (b.length % 2 ? b[(b.length - 1) / 2] : (b[b.length / 2 - 1] + b[b.length / 2]) / 2) : null; };
+  const SYMPTOMS = ['Krämpfe', 'Kopfweh', 'Müde', 'Heißhunger', 'Unreine Haut', 'Rückenweh', 'Blähbauch', 'Gereizt', 'Gute Laune', 'Viel Energie'];
+  const PHASES = {
+    mens: { name: 'Menstruation', icon: '🩸', col: '#f29a9a', tip: 'Gönn dir Ruhe. Wärme, viel trinken und sanfte Bewegung tun jetzt gut.' },
+    foll: { name: 'Follikelphase', icon: '🌱', col: '#a6dcc2', tip: 'Die Energie steigt meist an. Gut für Sport, Neues und Verabredungen.' },
+    fert: { name: 'Fruchtbare Tage', icon: '🌸', col: '#cdb4e8', tip: 'Rund um den Eisprung (geschätzt). Viele fühlen sich jetzt besonders fit und gesellig.' },
+    ovu: { name: 'Eisprung (geschätzt)', icon: '🌸', col: '#a67cc4', tip: 'Heute ist der geschätzte Eisprung, der Höhepunkt der fruchtbaren Tage.' },
+    lut: { name: 'Lutealphase', icon: '🌙', col: '#f8cfa0', tip: 'Plane etwas mehr Ruhe ein. Gegen Ende können PMS-Beschwerden auftreten.' },
+  };
+  function cycleModel() {
+    const ps = [...CY.periods].sort((a, b) => a.start.localeCompare(b.start));
+    const gaps = ps.slice(1).map((x, i) => dayNum(x.start) - dayNum(ps[i].start)).filter((g) => g >= 18 && g <= 45).slice(-6);
+    const lens = ps.filter((x) => x.end).map((x) => dayNum(x.end) - dayNum(x.start) + 1).filter((l) => l >= 1 && l <= 10).slice(-6);
+    const cycleLen = Math.round(median(gaps) ?? CY.settings.cycleLen ?? 28);
+    const periodLen = Math.round(median(lens) ?? CY.settings.periodLen ?? 5);
+    const ovu = Math.max(10, cycleLen - 14);
+    const phaseOf = (day, ongoing) => (ongoing || day <= periodLen) && day <= 10 ? 'mens' : day === ovu ? 'ovu' : day >= ovu - 5 && day <= ovu + 1 ? 'fert' : day < ovu - 5 ? 'foll' : 'lut';
+    // Nicht beendete Periode: läuft höchstens 10 Tage, danach gilt die übliche Länge
+    const isOpen = (x) => !x.end && dayNum(todayKey()) - dayNum(x.start) < 10;
+    const endOf = (x) => x.end ? dayNum(x.end) : isOpen(x) ? Math.max(dayNum(x.start) + periodLen - 1, dayNum(todayKey())) : dayNum(x.start) + periodLen - 1;
+    return { ps, last: ps[ps.length - 1], cycleLen, periodLen, ovu, phaseOf, isOpen, endOf, learned: gaps.length > 0 };
+  }
+  // In den Tageskarten: 🩸 für eingetragene, blass für erwartete Periodentage
+  function periodMark(k) {
+    if (!cyOn()) return '';
+    const n = dayNum(k), M = cycleModel();
+    for (const x of M.ps) {
+      const end = M.endOf(x);
+      if (n >= dayNum(x.start) && n <= end) return '<span class="pmark" title="Periode">🩸</span>';
+    }
+    if (M.last) {
+      const next = dayNum(M.last.start) + M.cycleLen;
+      if (n >= next && n < next + M.periodLen && n > dayNum(todayKey())) return '<span class="pmark soon" title="Periode erwartet">🩸</span>';
+    }
+    return '';
+  }
+  function renderCycle() {
+    $('cycleCard').hidden = !cyOn();
+    if (!cyOn()) return;
+    const M = cycleModel(), today = dayNum(todayKey()), fmt = (n) => new Date(n * 864e5).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+    const ongoing = M.last && M.isOpen(M.last);
+    $('cyStartBtn').hidden = !!ongoing; $('cyStartOther').hidden = !!ongoing; $('cyEndBtn').hidden = !ongoing;
+    if (!M.last) {
+      $('cycleSum').textContent = 'noch nichts eingetragen';
+      $('cyPhase').innerHTML = '<p class="muted">Trag ein, wann deine letzte Periode begonnen hat. Dann zeige ich dir deine aktuelle Zyklusphase.</p>';
+      $('cyStrip').innerHTML = ''; $('cyNext').textContent = '';
+    } else {
+      const day = today - dayNum(M.last.start) + 1, ph = PHASES[M.phaseOf(day, ongoing)];
+      const late = day > M.cycleLen;
+      $('cycleSum').textContent = `Tag ${day} · ${late ? 'Periode erwartet' : ph.name}`;
+      $('cyPhase').innerHTML = `<div class="cy-now"><span class="cy-icon" data-style="background:${ph.col}">${ph.icon}</span><div><b>Zyklustag ${day}: ${late ? 'Periode erwartet' : ph.name}</b><small>${late ? `Deine Periode ist nach meiner Schätzung seit ${daysWord(day - M.cycleLen)} fällig. Zyklen schwanken oft um ein paar Tage.` : ph.tip}</small></div></div>`;
+      const cells = Math.max(M.cycleLen, Math.min(day, 45));
+      $('cyStrip').innerHTML = Array.from({ length: cells }, (_, i) => {
+        const d = i + 1, p_ = d > M.cycleLen ? 'lut' : M.phaseOf(d, ongoing && d <= day);
+        return `<i class="${d === day ? 'now' : ''}" title="Tag ${d}: ${PHASES[p_].name}" data-style="background:${PHASES[p_].col}"></i>`;
+      }).join('');
+      const next = dayNum(M.last.start) + M.cycleLen, fertFrom = dayNum(M.last.start) + M.ovu - 6, fertTo = dayNum(M.last.start) + M.ovu;
+      const inN = next - today;
+      $('cyNext').innerHTML = `Nächste Periode ${inN > 0 ? `voraussichtlich <b>${fmt(next)}</b> (noch ${daysWord(inN)})` : inN === 0 ? '<b>heute erwartet</b>' : 'überfällig'} · fruchtbare Tage ca. ${fmt(fertFrom)}–${fmt(fertTo)}<br><span class="muted">Zyklus Ø ${M.cycleLen} Tage${M.learned ? ' (aus deinen Einträgen)' : ' (Standardwert)'} · Periode Ø ${M.periodLen} Tage</span>`;
+    }
+    // Beschwerden heute
+    const sym = CY.symptoms[todayKey()] || [];
+    $('cySym').innerHTML = SYMPTOMS.map((x) => `<button type="button" class="tag" data-sym="${x}" aria-pressed="${sym.includes(x)}" data-style="--c: var(--c-sozial)">${x}</button>`).join('');
+    // Verlauf
+    const hist = [...M.ps].reverse().slice(0, 6);
+    $('cyHist').innerHTML = hist.map((x, i) => {
+      const prev = M.ps[M.ps.length - 2 - i], gap = prev ? dayNum(x.start) - dayNum(prev.start) : null;
+      const len = x.end ? dayNum(x.end) - dayNum(x.start) + 1 : null;
+      return `<li><span>🩸 ${fmt(dayNum(x.start))}${M.isOpen(x) ? ' (läuft)' : x.end ? ` – ${fmt(dayNum(x.end))}` : ''}</span><small>${len ? `${len} ${len === 1 ? 'Tag' : 'Tage'}` : ''}${gap ? ` · Zyklus ${gap} Tage` : ''}</small><button class="todo-del" type="button" data-cydel="${x.id}" aria-label="Eintrag löschen">×</button></li>`;
+    }).join('') || '<li class="muted">Noch keine Einträge.</li>';
+    $('cyLen').value = CY.settings.cycleLen || 28;
+  }
+  function startPeriod(k, e) {
+    const M = cycleModel();
+    if (M.last && M.isOpen(M.last) && dayNum(k) - dayNum(M.last.start) < 10) return;
+    for (const x of M.ps) if (!x.end && x.start < k) x.end = keyOfNum(Math.min(dayNum(x.start) + M.periodLen - 1, dayNum(k) - 1));   // alte offene Periode abschließen
+    CY.periods.push({ id: uid(), start: k, end: '' });
+    e.dogHandled = true;
+    window.janaDog?.happy(pick2(['Ich bring dir eine Wärmflasche! 💕', 'Kuschelzeit! Ich bleib bei dir. 💕', 'Tee und Decke? Ich bin da! 🫖']));
+    save(); renderCycle(); render();
+  }
+  const pick2 = (a) => a[Math.floor(Math.random() * a.length)];
+  $('cyStartBtn').addEventListener('click', (e) => startPeriod(todayKey(), e));
+  $('cyStartOther').addEventListener('change', (e) => { if (e.target.value && e.target.value <= todayKey()) startPeriod(e.target.value, e); e.target.value = ''; });
+  $('cyEndBtn').addEventListener('click', (e) => {
+    const M = cycleModel(); if (!M.last) return;
+    M.last.end = todayKey() < M.last.start ? M.last.start : todayKey();
+    e.dogHandled = true; window.janaDog?.happy('Geschafft! Gut gemacht. 💕');
+    save(); renderCycle(); render();
+  });
+  $('cycleCard').addEventListener('click', (e) => {
+    const sb = e.target.closest('[data-sym]'), del = e.target.closest('[data-cydel]');
+    if (sb) {
+      e.dogHandled = true;
+      const list = (CY.symptoms[todayKey()] ||= []), x = sb.dataset.sym;
+      CY.symptoms[todayKey()] = list.includes(x) ? list.filter((y) => y !== x) : [...list, x];
+      save(); renderCycle();
+    }
+    if (del) {
+      e.dogHandled = true;
+      if (!del.classList.contains('armed')) { del.classList.add('armed'); del.textContent = 'Löschen?'; setTimeout(() => { if (del.isConnected) { del.classList.remove('armed'); del.textContent = '×'; } }, 3000); return; }
+      CY.periods = CY.periods.filter((x) => x.id !== del.dataset.cydel); save(); renderCycle(); render();
+    }
+  });
+  $('cyLen').addEventListener('change', (e) => { const v = parseInt(e.target.value, 10); if (v >= 18 && v <= 45) { CY.settings.cycleLen = v; save(); renderCycle(); render(); } });
+  try { $('cycleDetails').open = localStorage.getItem('janas-woche.cycleOpen') === '1'; } catch {}
+  $('cycleDetails').addEventListener('toggle', () => { try { localStorage.setItem('janas-woche.cycleOpen', $('cycleDetails').open ? '1' : '0'); } catch {} });
+  window.renderCycle = renderCycle;
+  renderCycle();
+
+  // ---------- ⚽ Lieblingsverein: Countdown zum nächsten Spiel ----------
+  // Bundesliga-Vereine 2026/27, Namen genau wie bei OpenLigaDB. Die Liste wird außerdem automatisch von dort aktualisiert (Auf- und Absteiger).
+  const CLUBS = [
+    ['fcb', 'FC Bayern München', 'FC Bayern', '#dc052d', '#ffffff'], ['bvb', 'Borussia Dortmund', 'BVB', '#fde100', '#1a1a1a'],
+    ['b04', 'Bayer 04 Leverkusen', 'Leverkusen', '#e32221', '#1a1a1a'], ['sge', 'Eintracht Frankfurt', 'Frankfurt', '#e1000f', '#1a1a1a'],
+    ['rbl', 'RB Leipzig', 'Leipzig', '#dd0741', '#ffffff'], ['vfb', 'VfB Stuttgart', 'Stuttgart', '#e32219', '#ffffff'],
+    ['scf', 'SC Freiburg', 'Freiburg', '#e2001a', '#1a1a1a'], ['m05', '1. FSV Mainz 05', 'Mainz 05', '#c3141e', '#ffffff'],
+    ['svw', 'SV Werder Bremen', 'Werder', '#1d9053', '#ffffff'], ['bmg', 'Borussia Mönchengladbach', 'Gladbach', '#1a1a1a', '#ffffff'],
+    ['fca', 'FC Augsburg', 'Augsburg', '#ba3733', '#46714d'], ['fcu', '1. FC Union Berlin', 'Union', '#eb1923', '#ffffff'],
+    ['tsg', 'TSG Hoffenheim', 'Hoffenheim', '#1961b5', '#ffffff'], ['koe', '1. FC Köln', 'Köln', '#ed1c24', '#ffffff'],
+    ['hsv', 'Hamburger SV', 'HSV', '#0a3f86', '#ffffff'], ['s04', 'FC Schalke 04', 'Schalke', '#004d9d', '#ffffff'],
+    ['scp', 'SC Paderborn 07', 'Paderborn', '#005ca9', '#1a1a1a'], ['sve', 'SV 07 Elversberg', 'Elversberg', '#1a1a1a', '#ffffff'],
+    // frühere Bundesligisten: Farben, falls sie wieder aufsteigen
+    ['wob', 'VfL Wolfsburg', 'Wolfsburg', '#65b32e', '#ffffff'], ['stp', 'FC St. Pauli', 'St. Pauli', '#624839', '#ffffff'], ['fch', '1. FC Heidenheim 1846', 'Heidenheim', '#e30613', '#003b79'],
+    ['bsc', 'Hertha BSC', 'Hertha', '#005ca9', '#ffffff'], ['h96', 'Hannover 96', 'Hannover', '#00843d', '#1a1a1a'], ['bie', 'Arminia Bielefeld', 'Bielefeld', '#004e95', '#1a1a1a'],
+  ];
+  const TEAMS_KEY = 'janas-woche.teams';
+  let olTeams = null;   // aktuelle Bundesliga-Teams von OpenLigaDB: [{ name, short }]
+  try { olTeams = JSON.parse(localStorage.getItem(TEAMS_KEY)); } catch {}
+  const clubChoices = () => {
+    const names = olTeams?.teams?.length >= 16 ? olTeams.teams : CLUBS.slice(0, 18).map((c) => ({ name: c[1], short: c[2] }));
+    return names.map((t) => { const c = CLUBS.find((x) => x[1] === t.name); return c ? { key: c[0], name: c[1], short: c[2], c1: c[3], c2: c[4] } : { key: 'ol:' + t.name, name: t.name, short: t.short || t.name, c1: '#8f96a8', c2: '#ffffff' }; })
+      .sort((a, b) => a.name.localeCompare(b.name, 'de'));
+  };
+  async function loadTeams() {
+    const season = seasonOf(new Date());
+    if (GUEST || (olTeams?.season === season && Date.now() - olTeams.at < 7 * 864e5)) return;
+    try {
+      const r = await fetch(`https://api.openligadb.de/getavailableteams/bl1/${season}`);
+      const data = r.ok ? await r.json() : [];
+      if (Array.isArray(data) && data.length >= 16) { olTeams = { season, at: Date.now(), teams: data.map((t) => ({ name: t.teamName, short: t.shortName })) }; try { localStorage.setItem(TEAMS_KEY, JSON.stringify(olTeams)); } catch {} window.habitRefreshClubs?.(); return; }
+    } catch {}
+    const snap = window.HB_FIXTURE_SNAPSHOT;   // Vorschau: Vereinsliste aus dem mitgelieferten Spielplan
+    if (snap?.teams?.length >= 16) { olTeams = { season: snap.season, at: snap.at, teams: snap.teams.map(([name, short]) => ({ name, short })) }; window.habitRefreshClubs?.(); }
+  }
+  window.habitClubChoices = clubChoices;
+  state.football ||= { manual: [] };
+  const FX_KEY = 'janas-woche.fixtures';
+  const COMP_ICON = { 'Bundesliga': '🇩🇪', 'Champions League': '⭐', 'DFB-Pokal': '🏆' };
+  const clubOf = () => {
+    const pr = state.profile || {};
+    if (pr.club === 'other') return pr.clubName ? { key: 'other', name: pr.clubName, short: pr.clubName, c1: '#8f96a8', c2: '#ffffff', loose: true } : null;
+    const c = CLUBS.find((x) => x[0] === pr.club);
+    if (c) return { key: c[0], name: c[1], short: c[2], c1: c[3], c2: c[4] };
+    return pr.club?.startsWith('ol:') ? { key: pr.club, name: pr.club.slice(3), short: pr.clubShort || pr.club.slice(3), c1: '#8f96a8', c2: '#ffffff' } : null;
+  };
+  let fxCache = null, fxStatus = '';
+  try { fxCache = JSON.parse(localStorage.getItem(FX_KEY)); } catch {}
+  const seasonOf = (d) => (d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1);
+  const isClub = (name, c) => { const n = String(name || '').toLowerCase().trim(), w = c.name.toLowerCase().trim(); return c.loose ? n.includes(w) : n === w; };
+  const clubId = (c) => c.key + ':' + c.name;
+  // Spielplan von OpenLigaDB (kostenlos, ohne Schlüssel), höchstens alle 6 Stunden
+  let fxLoading = false;
+  async function loadFixtures(force) {
+    const c = clubOf();
+    if (!c || GUEST || fxLoading) return;
+    if (!force && fxCache?.club === clubId(c) && Date.now() - fxCache.at < 6 * 3600e3) return;
+    fxLoading = true;
+    const season = seasonOf(new Date()), out = [];
+    let okAny = false;
+    const getJson = async (path) => { const r = await fetch('https://api.openligadb.de/' + path); return r.ok ? r.json() : null; };
+    const usable = (data) => Array.isArray(data) && data.length && new Set(data.map((m) => m.matchDateTimeUTC || m.matchDateTime)).size > 1;   // nur Platzhalter-Termine? dann nicht
+    for (const [comp, shortcuts] of [['Bundesliga', ['bl1']], ['DFB-Pokal', ['dfb']], ['Champions League', ['ucl']]]) {
+      let list = shortcuts, found = false;
+      for (let round = 0; round < 2 && !found; round++) {
+        for (const sc of list) {
+          try {
+            const data = await getJson(`getmatchdata/${encodeURIComponent(sc)}/${season}`);
+            if (!usable(data)) continue;
+            okAny = found = true;
+            for (const m of data) {
+              const h = m.team1?.teamName, a = m.team2?.teamName, home = isClub(h, c);
+              if (!home && !isClub(a, c)) continue;
+              const rs = m.matchResults || [], res = rs.find((x) => x.resultTypeID === 2) || rs[rs.length - 1];
+              out.push({ id: 'o' + m.matchID, comp, when: Date.parse(m.matchDateTimeUTC || m.matchDateTime), opp: home ? a : h, isHome: home, round: m.group?.groupName || '',
+                done: !!m.matchIsFinished, score: res ? (home ? `${res.pointsTeam1}:${res.pointsTeam2}` : `${res.pointsTeam2}:${res.pointsTeam1}`) : '' });
+            }
+            break;
+          } catch {}
+        }
+        if (!found && comp === 'Champions League' && round === 0) {   // Kürzel hat sich geändert? In der Ligenliste nachsehen
+          try {
+            const leagues = await getJson('getavailableleagues') || [];
+            list = leagues.filter((l) => String(l.leagueSeason) === String(season) && /^(UEFA )?Champions League \d{4}\/\d{2,4}$/i.test(l.leagueName || '') && l.leagueShortcut !== 'ucl').map((l) => l.leagueShortcut);
+          } catch { list = []; }
+        } else break;
+      }
+    }
+    let snapAt = 0;
+    if (!okAny && window.HB_FIXTURE_SNAPSHOT) {   // Claude-Vorschau darf nichts abrufen: mitgelieferter Spielplan
+      const snap = window.HB_FIXTURE_SNAPSHOT;
+      for (const [comp, rows] of Object.entries(snap.comps || {})) for (const [id, utc, h, a, group, fin, s1, s2] of rows) {
+        const home = isClub(h, c);
+        if (!home && !isClub(a, c)) continue;
+        out.push({ id: 'o' + id, comp, when: Date.parse(utc), opp: home ? a : h, isHome: home, round: group, done: !!fin, score: s1 == null ? '' : (home ? `${s1}:${s2}` : `${s2}:${s1}`) });
+      }
+      okAny = true; snapAt = snap.at;
+    }
+    if (okAny) { fxCache = { club: clubId(c), at: Date.now(), matches: out, snap: snapAt }; fxStatus = ''; try { localStorage.setItem(FX_KEY, JSON.stringify(fxCache)); } catch {} }
+    else fxStatus = 'offline';
+    fxLoading = false;
+    renderFuss();
+  }
+  const allMatches = () => {
+    const c = clubOf(), auto = c && fxCache?.club === clubId(c) ? fxCache.matches : [];
+    const man = (state.football.manual || []).map((x) => ({ ...x, when: Date.parse(x.when), done: !!x.score }));
+    return [...auto, ...man].filter((m) => Number.isFinite(m.when)).sort((a, b) => a.when - b.when);
+  };
+  const p2 = (n) => String(n).padStart(2, '0');
+  const fmtKick = (ts) => new Date(ts).toLocaleString('de-DE', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' Uhr';
+  const LIVE = 2 * 3600e3;
+  function renderFuss(reload) {
+    const c = clubOf();
+    $('fussCard').hidden = !c;
+    if (!c) { window.fussNext = null; return; }
+    if (reload) loadFixtures(true);
+    $('fussBadge').setAttribute('data-style', `background:linear-gradient(135deg, ${c.c1} 50%, ${c.c2} 50%)`);
+    $('fussTitle').textContent = c.short;
+    const now = Date.now(), list = allMatches();
+    const coming = list.filter((m) => !m.done && m.when > now - LIVE), next = coming[0];
+    const last = list.filter((m) => m.done && m.score && m.when <= now).pop();
+    $('fussNext').innerHTML = next
+      ? `<b>${COMP_ICON[next.comp] || '⚽'} ${esc(next.isHome ? `${c.short} – ${next.opp}` : `${next.opp} – ${c.short}`)}</b><small>${esc(next.comp)}${next.round ? ' · ' + esc(next.round) : ''} · ${fmtKick(next.when)} · ${next.isHome ? 'Heimspiel' : 'Auswärts'}</small>`
+      : '<b>Noch kein nächstes Spiel bekannt</b><small>Du kannst es unten selbst eintragen.</small>';
+    $('fussLast').textContent = last ? `Letztes Spiel: ${last.score} ${last.isHome ? 'gegen' : 'bei'} ${last.opp}` : '';
+    $('fussList').innerHTML = coming.slice(1, 4).map((m) => `<li><span aria-hidden="true">${COMP_ICON[m.comp] || '⚽'}</span>${m.isHome ? 'gegen' : 'bei'} ${esc(m.opp)}<small>${fmtKick(m.when)}</small>${m.id.startsWith('m') ? `<button class="todo-del" type="button" data-fdel="${m.id}" aria-label="Spiel gegen ${esc(m.opp)} löschen">×</button>` : ''}</li>`).join('');
+    $('fussSrc').textContent = GUEST ? 'Beispiel-Spielplan' : fxStatus === 'offline' ? 'Der Spielplan ist gerade nicht erreichbar. Selbst eingetragene Spiele werden angezeigt.'
+      : fxCache?.club === clubId(c) ? (fxCache.snap ? `Spielplan: OpenLigaDB · Stand ${new Date(fxCache.snap).toLocaleString('de-DE', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })} Uhr (in der Vorschau fest, auf der Webseite live)`
+        : `Spielplan: OpenLigaDB · Stand ${new Date(fxCache.at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`) : 'Spielplan wird geladen…';
+    window.fussNext = next || null;
+    tickFuss();
+    // Am Spieltag freut sich das Haustier einmal
+    if (next && new Date(next.when).toDateString() === new Date().toDateString()) {
+      let seen = ''; try { seen = localStorage.getItem('janas-woche.matchday'); } catch {}
+      if (seen !== key(new Date()) + c.key) {
+        try { localStorage.setItem('janas-woche.matchday', key(new Date()) + c.key); } catch {}
+        setTimeout(() => window.janaDog?.happy(`Heute spielt ${c.short}! ⚽ Daumen drücken!`), 2500);
+      }
+    }
+  }
+  function tickFuss() {
+    const n = window.fussNext;
+    if (!n || $('fussCard').hidden) { $('fussCount').textContent = ''; $('fussSum').textContent = ''; return; }
+    const d = n.when - Date.now();
+    if (d <= 0) {
+      $('fussCount').textContent = d > -LIVE ? `⚽ Läuft gerade!${n.score ? ' ' + n.score : ''}` : ''; $('fussSum').textContent = 'Läuft gerade!';
+      if (d <= -LIVE) renderFuss();
+      else if (!fxLoading && Date.now() - (fxCache?.at || 0) > 5 * 60e3) loadFixtures(true);   // Spielstand alle 5 Minuten
+      return;
+    }
+    const dd = Math.floor(d / 864e5), hh = Math.floor(d / 36e5) % 24, mm = Math.floor(d / 6e4) % 60, ss = Math.floor(d / 1e3) % 60;
+    $('fussCount').textContent = dd ? `${dd} ${dd === 1 ? 'Tag' : 'Tage'} · ${p2(hh)}:${p2(mm)}:${p2(ss)}` : `${p2(hh)}:${p2(mm)}:${p2(ss)}`;
+    const today = new Date(n.when).toDateString() === new Date().toDateString();
+    $('fussSum').textContent = today ? `Heute ${new Date(n.when).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr` : `in ${dd ? `${dd} ${dd === 1 ? 'Tag' : 'Tagen'}` : `${hh} Std.`}`;
+  }
+  $('fussForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target, opp = f.elements.opp.value.trim(), when = f.elements.when.value;
+    if (!opp || !when) return;
+    state.football.manual.push({ id: 'm' + uid(), comp: f.elements.comp.value, opp, isHome: f.elements.home.value === '1', when });
+    f.elements.opp.value = ''; f.elements.when.value = '';
+    save(); renderFuss();
+    e.target.closest('details').open = false;
+  });
+  $('fussCard').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-fdel]');
+    if (!b) return;
+    e.dogHandled = true;
+    if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = 'Löschen?'; setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = '×'; } }, 3000); return; }
+    state.football.manual = state.football.manual.filter((x) => x.id !== b.dataset.fdel); save(); renderFuss();
+  });
+  window.renderFuss = renderFuss;
+  window.habitRefreshClubs = () => { if (!$('setupOverlay').hidden && cur?.() === 'club') renderSetup(); };
+  loadTeams();
+  setInterval(tickFuss, 1000);
+  setInterval(() => loadFixtures(false), 30 * 60 * 1000);
+  renderFuss();
+  loadFixtures(false);
+
   // ---------- KW-Übersicht ----------
   const shortDate = (d) => d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
   function weekStats(mk) {
@@ -1486,9 +2336,10 @@
     const water = Array.from({ length: 7 }, (_, i) => waterOf(key(addDays(mon, i))));
     return {
       mon, planned, done, perDay, waterGoals: water.filter((v) => v >= GOAL).length, waterSum: water.reduce((a, b) => a + b, 0),
-      study: Object.values(weekMinutes(mon)).reduce((a, b) => a + b, 0),
-      booksDone: (state.books || []).filter((b) => b.date >= key(mon) && b.date <= key(addDays(mon, 6))).length,
       note: (w?.note || '').trim(), top: Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 3),
+      saved: (state.savings || []).reduce((a, g) => a + g.entries.filter((x) => x.at >= mon.getTime() && x.at < addDays(mon, 7).getTime()).reduce((b, x) => b + x.amount, 0), 0),
+      booksDone: (state.books || []).filter((b) => b.date >= key(mon) && b.date <= key(addDays(mon, 6))).length,
+      study: (state.uni?.sessions || []).filter((x) => x.at >= mon.getTime() && x.at < addDays(mon, 7).getTime()).reduce((a, x) => a + x.minutes, 0),
       mood: (() => { const vs = Array.from({ length: 7 }, (_, i) => state.mood[key(addDays(mon, i))]?.v).filter(Boolean); return vs.length ? Math.round(vs.reduce((a, b) => a + b, 0) / vs.length) : 0; })(),
     };
   }
@@ -1509,8 +2360,9 @@
       const parts = [s.planned ? `✅\u00a0${s.done} von ${s.planned} erledigt` : 'Keine Gewohnheiten'];
       if (s.waterGoals) parts.push(`💧\u00a0${s.waterGoals}×\u00a02,5\u00a0l`); else if (s.waterSum) parts.push(`💧\u00a0${fmtL(s.waterSum).replace(' ', '\u00a0')}`);
       if (s.note) parts.push('📝 Notiz');
-      if (s.study) parts.push(`📚\u00a0${fmtMin(s.study).replace(/ /g, '\u00a0')}`);
+      if (s.saved > 0) parts.push(`💰\u00a0${s.saved.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).replace(/ /g, '\u00a0')}\u00a0gespart`);
       if (s.booksDone) parts.push(`📖\u00a0${s.booksDone}\u00a0${s.booksDone === 1 ? 'Buch' : 'Bücher'}`);
+      if (s.study) parts.push(`📚\u00a0${fmtMin(s.study).replace(/ /g, '\u00a0')}`);
       const maxD = Math.max(3, ...s.perDay);
       const bars = s.perDay.map((n, i) => `<i data-style="height:${n ? Math.max(4, Math.round(n / maxD * 22)) : 2}px" title="${['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i]}: ${n} erledigt" class="${n ? 'on' : ''}"></i>`).join('');
       return `<button class="kw-row ${k === cur ? 'cur' : ''}" type="button" data-week="${k}">
@@ -1552,8 +2404,7 @@
   const COLLAPSE_KEY = 'janas-woche.collapsed';
   let collapsed = [];
   try { collapsed = JSON.parse(localStorage.getItem(COLLAPSE_KEY)) || []; } catch {}
-  const cardCtl = [];
-  for (const id of ['timerCard', 'uniCard', 'manageCard', 'noteCard', 'todos']) {
+  for (const id of ['fussCard', 'timerCard', 'uniCard', 'manageCard', 'noteCard', 'todos']) {
     const card = $(id);
     let head = card.querySelector(':scope > .todos-head, :scope > .mood-head');
     if (!head) { const h2 = card.querySelector(':scope > h2'); head = document.createElement('div'); h2.before(head); head.append(h2); }
@@ -1567,86 +2418,27 @@
     head.addEventListener('click', (e) => {
       if (e.target.closest('a, input, select, textarea') || (e.target.closest('button') && e.target.closest('button') !== btn)) return;
       e.dogHandled = true;
-      card.classList.toggle('collapsed'); sync(); storeCollapsed();
+      card.classList.toggle('collapsed'); sync();
+      collapsed = [...card.parentElement.ownerDocument.querySelectorAll('.card.collapsed[id]')].map((c) => c.id);
+      try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed)); } catch {}
     });
-    cardCtl.push({ id, title, isOpen: () => !card.classList.contains('collapsed'), set: (open) => { card.classList.toggle('collapsed', !open); sync(); } });
-  }
-  function storeCollapsed() {
-    collapsed = [...document.querySelectorAll('.card.collapsed[id]')].map((c) => c.id);
-    try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed)); } catch {}
   }
   window.janaOpenCard = (id) => $(id)?.classList.remove('collapsed');
 
-  // ---------- Einstellungen: Haustier und Fellfarbe ----------
-  const ANIMALS = [['dog', 'Hund', '🐶'], ['cat', 'Katze', '🐱'], ['rabbit', 'Kaninchen', '🐰']];
-  const FUR_OPTS = [['golden', 'Golden', '#ecc173'], ['schoko', 'Schoko', '#a8714a'], ['schwarz', 'Schwarz', '#4a4250'], ['weiss', 'Weiß', '#f4efe9']];
-  const HELLO = { dog: 'Wuff! Da bin ich wieder! 🐶', cat: 'Miau! Ich bin jetzt deine Katze! 🐱', rabbit: 'Hopp hopp! Ich bin jetzt dein Kaninchen! 🐰' };
-  const SET_TABS = [['pet', '🐾 Haustier'], ['fur', '🎨 Fellfarbe'], ['cards', '🗂️ Bereiche'], ['about', 'ℹ️ Version']];
-  let setTab = 'pet';
-  try { setTab = localStorage.getItem('janas-woche.setTab') || 'pet'; } catch {}
-  function renderSettings() {
-    const pt = state.pet;
-    if (!SET_TABS.some(([k]) => k === setTab)) setTab = 'pet';
-    const tabs = `<div class="set-tabs" role="tablist" aria-label="Bereiche der Einstellungen">${SET_TABS.map(([k, n]) => `<button type="button" class="set-tab" role="tab" data-settab="${k}" aria-selected="${setTab === k}">${n}</button>`).join('')}</div>`;
-    if (setTab === 'pet') $('setBody').innerHTML = tabs + `<h3>Haustier</h3><div class="set-row" role="group" aria-label="Haustier">${ANIMALS.map(([k, n, e]) => `<button type="button" class="set-opt" data-animal="${k}" aria-pressed="${pt.animal === k}"><span class="set-emoji" aria-hidden="true">${e}</span>${n}</button>`).join('')}</div>
-      <p class="set-hint">Jedes Tier hat sein eigenes Häuschen. Unten im Garten siehst du die Änderung sofort.</p>`;
-    if (setTab === 'fur') $('setBody').innerHTML = tabs + `<h3>Fellfarbe</h3><div class="set-row" role="group" aria-label="Fellfarbe">${FUR_OPTS.map(([k, n, c]) => `<button type="button" class="set-opt" data-fur="${k}" aria-pressed="${pt.fur === k}"><span class="set-dot" data-style="background:${c}" aria-hidden="true"></span>${n}</button>`).join('')}</div>
-      <p class="set-hint">Unten im Garten siehst du die Änderung sofort.</p>`;
-    if (setTab === 'cards') $('setBody').innerHTML = tabs + `<h3>Aufgeklappte Bereiche</h3><ul class="set-list">${cardCtl.map((c) => `<li><label><input type="checkbox" data-card="${c.id}" ${c.isOpen() ? 'checked' : ''}>${esc(c.title)}</label></li>`).join('')}</ul>
-      <div class="set-btns"><button type="button" class="pill" data-allcards="1">Alle aufklappen</button><button type="button" class="pill" data-allcards="0">Alle zuklappen</button></div>
-      <p class="set-hint">Du kannst Bereiche auch direkt mit einem Tipp auf ihre Überschrift auf- und zuklappen.</p>`;
-    if (setTab === 'about') $('setBody').innerHTML = tabs + `<h3>Version</h3><p class="set-ver">Janas Woche · Version ${APP_VERSION}</p>
-      <div class="set-btns"><button type="button" class="pill" data-shownews>✨ Was ist neu?</button></div>
-      <p class="set-hint">Deine Einträge werden nur auf diesem Gerät gespeichert.</p>`;
-  }
-  function petChanged() {
-    window.janaPet = state.pet; save();
-    dispatchEvent(new Event('jana:pet'));
-    renderAch(); renderSpecial(); renderSettings();
-  }
-  let setReturnFocus = null;
-  function openSettings() { renderSettings(); setReturnFocus = document.activeElement; $('setOverlay').hidden = false; $('setClose').focus(); }
-  function closeSettings(e) { if (e) e.dogHandled = true; $('setOverlay').hidden = true; setReturnFocus?.focus?.(); }
-  $('setBtn').addEventListener('click', (e) => { e.dogHandled = true; openSettings(); });
-  $('setOk').addEventListener('click', closeSettings);
-  $('setClose').addEventListener('click', closeSettings);
-  $('setOverlay').addEventListener('click', (e) => { if (e.target === $('setOverlay')) closeSettings(e); });
-  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('setOverlay').hidden) closeSettings(); });
-  $('setBody').addEventListener('change', (e) => {
-    const cb = e.target.closest('[data-card]'); if (!cb) return;
-    cardCtl.find((c) => c.id === cb.dataset.card)?.set(cb.checked); storeCollapsed();
-  });
-  $('setBody').addEventListener('click', (e) => {
-    const tb = e.target.closest('[data-settab]'), all = e.target.closest('[data-allcards]');
-    if (tb) { e.dogHandled = true; setTab = tb.dataset.settab; try { localStorage.setItem('janas-woche.setTab', setTab); } catch {} renderSettings(); $('setBody').querySelector(`[data-settab="${setTab}"]`)?.focus(); return; }
-    if (all) { e.dogHandled = true; cardCtl.forEach((c) => c.set(all.dataset.allcards === '1')); storeCollapsed(); renderSettings(); return; }
-    if (e.target.closest('[data-shownews]')) { e.dogHandled = true; closeSettings(); openNews(); return; }
-    if (e.target.closest('[data-card]')) { e.dogHandled = true; return; }
-    const a = e.target.closest('[data-animal]'), f = e.target.closest('[data-fur]');
-    if (!a && !f) return;
-    e.dogHandled = true;
-    if (a && state.pet.animal !== a.dataset.animal) { state.pet = { ...state.pet, animal: a.dataset.animal }; petChanged(); window.janaDog?.happy(HELLO[state.pet.animal]); }
-    if (f && state.pet.fur !== f.dataset.fur) { state.pet = { ...state.pet, fur: f.dataset.fur }; petChanged(); window.janaDog?.happy('Wie gefällt dir mein neues Fell? ✨'); }
-  });
-  window.janaSettings = { open: openSettings, close: closeSettings, pet: (animal, fur) => { state.pet = { animal, fur: fur || state.pet.fur }; petChanged(); } };
-
   // ---------- Versionsnummer und Patch Notes ----------
   // Bei jedem Upload: Version erhöhen und oben einen neuen Eintrag ergänzen.
-  const CHANGELOG = [
-    { v: '0.9.1', title: 'Katze, Kaninchen und mehr Ordnung', notes: [
-      ['⚙️', 'Einstellungen', 'Oben gibt es jetzt Einstellungen mit Tabs: Haustier (statt des Hundes auch Katze oder Kaninchen, jeweils mit eigenem Häuschen), Fellfarbe, Bereiche und Version.'],
-      ['🗂️', 'Ein- und ausklappen', 'Uni, Lern-Timer, Gewohnheiten, Wochen-Notiz und To-dos lassen sich mit einem Tipp auf die Überschrift zuklappen. Die Seite merkt sich das.'],
-      ['🐾', 'Mehr Platz im Garten', 'Der Garten sitzt wieder ganz unten am Bildschirm.'],
+  const CHANGELOG = CFG.changelog || [
+    { v: '0.2.0', title: 'Tabs und Live-Spielplan', notes: [
+      ['⚙️', 'Einstellungen mit Tabs', 'Alle Bereiche der Einstellungen stehen oben als Tabs. Ein Tipp, und du bist da.'],
+      ['⚽', 'Spielplan automatisch', 'Bundesliga, DFB-Pokal und Champions League kommen von selbst, während eines Spiels sogar mit Spielstand.'],
+      ['📱', 'Als App', 'Über „Zum Home-Bildschirm“ landet der Wochenplaner mit Pixel-Hund als App auf deinem Handy.'],
     ] },
-    { v: '0.9.0', title: 'Das große Herbst-Update', notes: [
-      ['🎓', 'Uni-Bereich', 'Lern-Timer, Fächer mit Lernzeit, Abgaben und Deadlines und Lernziele für jede Woche. Beim Lernen ist der Hund ganz leise.'],
-      ['💬', 'Discord-Lerngruppe', 'Speichere den Einladungslink im Uni-Bereich und öffne deine Gruppe mit einem Tipp.'],
-      ['📖', 'Gelesene Bücher', 'Dein eigenes Bücherregal mit Titel, Autor:in und Sternen.'],
-      ['😊', 'Stimmungsbarometer', 'Trag jeden Tag ein, wie es dir geht. Der Hund reagiert darauf.'],
-      ['🌦️', 'Wetter', 'Das Wetter aktualisiert sich jetzt jede Stunde von selbst.'],
-      ['🏆', 'Neue Erfolge', 'Für Lernrunden, Abgaben und Bücher.'],
-      ['🔊', 'Ton immer an', 'Der Ton-Knopf ist weg: Der Hund bellt jetzt immer, sobald du einmal auf die Seite getippt hast.'],
-      ['🤫', 'Geheimnisse', 'Im Garten und am Himmel verstecken sich viele neue Überraschungen. Mehr wird nicht verraten!'],
+    { v: '0.1.0', title: 'Die erste Version für alle', notes: [
+      ['👤', 'Eigenes Konto', 'Leg dir Benutzername und Passwort selbst an. Mehrere Personen können sich ein Gerät teilen.'],
+      ['👩👨', 'Für Frauen und Männer', 'Der Zyklus-Tracker erscheint nur, wenn du ihn als Frau einschaltest.'],
+      ['⚽', 'Lieblingsverein', 'Wähle deinen Bundesliga-Verein und sieh den Countdown zum nächsten Spiel, inklusive Champions League.'],
+      ['🗂️', 'Ein- und ausklappen', 'Tippe auf eine Überschrift, um einen Bereich zuzuklappen.'],
+      ['🤫', 'Geheimnisse', 'Im Garten und am Himmel verstecken sich viele Überraschungen.'],
     ] },
   ];
   const APP_VERSION = CHANGELOG[0].v, SEEN_KEY = 'janas-woche.version';
@@ -1696,10 +2488,10 @@
     size();
     fxRaf = requestAnimationFrame(frame);
   }
-  function openNews(since) {
+  function openNews(since, welcome) {
     const fresh = CHANGELOG.filter((e) => !since || verNum(e.v) > verNum(since));
     const show = fresh.length ? fresh : [CHANGELOG[0]], older = CHANGELOG.filter((e) => !show.includes(e));
-    $('newsTitle').textContent = since ? 'Neu seit deinem letzten Besuch ✨' : 'Was ist neu? ✨';
+    $('newsTitle').textContent = welcome ? 'Willkommen! Das steckt drin ✨' : since ? 'Neu seit deinem letzten Besuch ✨' : 'Was ist neu? ✨';
     $('newsBody').innerHTML = show.map((e) => `<p class="news-ver">Version ${e.v} · ${e.title}</p>${newsItems(e)}`).join('')
       + (older.length ? `<details class="news-old"><summary>Frühere Versionen</summary>${older.map((e) => `<h3>Version ${e.v} · ${e.title}</h3>${newsItems(e)}`).join('')}</details>` : '');
     newsReturnFocus = document.activeElement;
@@ -1715,6 +2507,7 @@
     newsReturnFocus?.focus?.();
     window.janaDog?.happy('Wuff! Viel Spaß mit dem Update! 🎉');
   }
+  window.habitWelcome = () => { try { localStorage.setItem(SEEN_KEY, APP_VERSION); } catch {} openNews(null, true); };
   $('versionBtn').textContent = `Version ${APP_VERSION} · Was ist neu?`;
   $('versionBtn').addEventListener('click', (e) => { e.dogHandled = true; openNews(); });
   $('newsOk').addEventListener('click', closeNews);
@@ -1725,7 +2518,135 @@
   if (!GUEST) {
     let seen = null, ok = true;
     try { seen = localStorage.getItem(SEEN_KEY); } catch { ok = false; }
-    if (ok && seen !== APP_VERSION) setTimeout(() => openNews(seen), 700);
+    if (ok && !seen) { try { localStorage.setItem(SEEN_KEY, APP_VERSION); } catch {} }
+    else if (ok && seen !== APP_VERSION && !window.HB_LOCKED) setTimeout(() => openNews(seen), 700);
+  }
+
+  // ---------- 👤 Anmelden, Konto erstellen, Abmelden ----------
+  if (window.HB_LOCKED) {
+    let authMode = Object.keys(accounts).length ? 'login' : 'create';
+    const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+    async function hashPw(pw, saltB64) {
+      const salt = Uint8Array.from(atob(saltB64), (c) => c.charCodeAt(0));
+      const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+      return b64(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 150000, hash: 'SHA-256' }, k, 256));
+    }
+    const err = (t) => { $('authErr').textContent = t; $('authErr').hidden = !t; };
+    function renderAuth() {
+      document.querySelectorAll('[data-auth]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.auth === authMode)));
+      $('authRepeat').hidden = authMode !== 'create';
+      $('authPass').autocomplete = authMode === 'create' ? 'new-password' : 'current-password';
+      $('authSubmit').textContent = authMode === 'create' ? 'Konto erstellen' : 'Anmelden';
+      $('authTitle').textContent = authMode === 'create' ? '👋 Willkommen bei „Mein Wochenplaner“! Leg dir ein Konto an' : '👋 Schön, dass du wieder da bist!';
+      err('');
+    }
+    document.querySelector('.auth-tabs').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-auth]'); if (!b) return;
+      e.dogHandled = true; authMode = b.dataset.auth; renderAuth(); $('authUser').focus();
+    });
+    $('authForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const u = $('authUser').value.trim().toLowerCase(), pw = $('authPass').value;
+      if (u === 'admin') {
+        if (authMode === 'create') return err('Der Benutzername „admin“ ist reserviert.');
+        if (!crypto?.subtle) return err('Dieser Browser unterstützt das sichere Prüfen von Passwörtern nicht.');
+        if ((await hashPw(pw, ADMIN.salt)) !== ADMIN.hash) return err('Benutzername oder Passwort stimmt nicht.');
+        try { localStorage.setItem(SES_KEY, 'admin'); } catch {}
+        return location.reload();
+      }
+      if (!/^[a-z0-9äöüß._-]{3,20}$/.test(u)) return err('Der Benutzername braucht 3 bis 20 Zeichen (Buchstaben, Zahlen, Punkt, Strich).');
+      if (pw.length < 6) return err('Das Passwort braucht mindestens 6 Zeichen.');
+      if (!crypto?.subtle) return err('Dieser Browser unterstützt das sichere Speichern von Passwörtern nicht.');
+      $('authSubmit').disabled = true;
+      try {
+        if (authMode === 'create') {
+          if (accounts[u]) return err('Diesen Benutzernamen gibt es auf diesem Gerät schon.');
+          if (pw !== $('authPass2').value) return err('Die beiden Passwörter stimmen nicht überein.');
+          const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
+          const first = !Object.keys(accounts).length;
+          accounts[u] = { salt, hash: await hashPw(pw, salt), created: Date.now() };
+          localStorage.setItem(ACC_KEY, JSON.stringify(accounts));
+          const legacy = localStorage.getItem('janas-woche.v2');   // Einträge aus der Zeit vor den Konten übernimmt das erste Konto
+          if (first && legacy) { localStorage.setItem('janas-woche.v2:' + u, legacy); localStorage.removeItem('janas-woche.v2'); }
+        } else {
+          const a = accounts[u];
+          if (!a || (await hashPw(pw, a.salt)) !== a.hash) return err('Benutzername oder Passwort stimmt nicht.');
+        }
+        localStorage.setItem(SES_KEY, u);
+        location.reload();
+      } catch { err('Das hat leider nicht geklappt. Bitte versuch es noch einmal.'); }
+      finally { $('authSubmit').disabled = false; }
+    });
+    if (window.JANA_PREVIEW) {
+      const d = document.createElement('button');
+      d.type = 'button'; d.className = 'su-demo'; d.textContent = '🧪 Lieber erst die Demo ansehen';
+      d.addEventListener('click', (e) => { e.dogHandled = true; try { localStorage.setItem('janas-woche.previewMode', 'demo'); } catch {} location.reload(); });
+      document.querySelector('.auth-sheet').append(d);
+    }
+    renderAuth();
+    $('authOverlay').hidden = false;
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => $('authUser').focus(), 50);
+  } else if (window.HB_USER) {
+    if (window.HB_ADMIN) {
+      const ab = document.createElement('button');
+      ab.type = 'button'; ab.className = 'pill'; ab.id = 'adminBtn'; ab.textContent = '🛠️ Konten verwalten';
+      document.querySelector('header .nav').append(ab);
+      const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+      async function hashPw2(pw, saltB64) {
+        const salt = Uint8Array.from(atob(saltB64), (c) => c.charCodeAt(0));
+        const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+        return b64(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 150000, hash: 'SHA-256' }, k, 256));
+      }
+      const saveAcc = () => { try { localStorage.setItem(ACC_KEY, JSON.stringify(accounts)); } catch {} };
+      const info = (u) => {
+        let d = null; try { d = JSON.parse(localStorage.getItem('janas-woche.v2:' + u)); } catch {}
+        const days = d ? Object.values(d.weeks || {}).reduce((a, w) => a + w.days.filter((x) => x.length).length, 0) : 0;
+        return { name: d?.profile?.name || '–', days };
+      };
+      let resetFor = '';
+      function renderAdmin() {
+        const list = Object.entries(accounts).sort((a, b) => a[0].localeCompare(b[0]));
+        $('adminBody').innerHTML = list.length ? `<ul class="admin-list">${list.map(([u, a]) => {
+          const i = info(u);
+          return `<li><div><b>👤 ${esc(u)}</b><small>Name: ${esc(i.name)} · angelegt ${new Date(a.created || 0).toLocaleDateString('de-DE')} · ${i.days} Tage mit Einträgen</small></div>
+            <div class="admin-act">${resetFor === u ? `<form class="admin-reset" data-reset="${esc(u)}"><input type="password" class="su-input" placeholder="Neues Passwort (mind. 6 Zeichen)" aria-label="Neues Passwort für ${esc(u)}" autocomplete="new-password"><button class="pill primary" type="submit">Speichern</button><button class="pill" type="button" data-cancel>Abbrechen</button></form>`
+              : `<button class="pill" type="button" data-pw="${esc(u)}">🔑 Passwort zurücksetzen</button><button class="pill" type="button" data-adel="${esc(u)}">🗑️ Löschen</button>`}</div></li>`;
+        }).join('')}</ul>` : '<p class="muted">Auf diesem Gerät gibt es noch keine Konten.</p>';
+        $('adminBody').insertAdjacentHTML('beforeend', '<p class="auth-note">Die Einträge der Konten bleiben privat. Du siehst nur Name, Datum und Anzahl der Tage. Konten gibt es nur auf diesem Gerät.</p><p class="su-err" id="adminMsg" hidden></p>');
+      }
+      const msg = (t) => { const m = $('adminMsg'); if (m) { m.textContent = t; m.hidden = !t; } };
+      ab.addEventListener('click', (e) => { e.dogHandled = true; resetFor = ''; renderAdmin(); $('adminOverlay').hidden = false; $('adminClose').focus(); });
+      $('adminClose').addEventListener('click', (e) => { e.dogHandled = true; $('adminOverlay').hidden = true; ab.focus(); });
+      $('adminOverlay').addEventListener('click', (e) => {
+        if (e.target === $('adminOverlay')) { $('adminOverlay').hidden = true; return; }
+        const b = e.target.closest('button'); if (!b) return;
+        e.dogHandled = true;
+        if (b.dataset.pw) { resetFor = b.dataset.pw; renderAdmin(); $('adminBody').querySelector('.admin-reset input')?.focus(); }
+        if (b.hasAttribute('data-cancel')) { resetFor = ''; renderAdmin(); }
+        if (b.dataset.adel) {
+          if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = 'Wirklich löschen?'; setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = '🗑️ Löschen'; } }, 3000); return; }
+          const u = b.dataset.adel;
+          delete accounts[u]; saveAcc();
+          try { localStorage.removeItem('janas-woche.v2:' + u); } catch {}
+          renderAdmin(); msg(`Konto „${u}“ und seine Einträge wurden gelöscht.`);
+        }
+      });
+      $('adminOverlay').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const f = e.target.closest('[data-reset]'); if (!f) return;
+        const u = f.dataset.reset, pw = f.querySelector('input').value;
+        if (pw.length < 6) return msg('Das neue Passwort braucht mindestens 6 Zeichen.');
+        const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
+        accounts[u] = { ...accounts[u], salt, hash: await hashPw2(pw, salt) }; saveAcc();
+        resetFor = ''; renderAdmin(); msg(`Neues Passwort für „${u}“ gespeichert.`);
+      });
+      addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('adminOverlay').hidden) $('adminOverlay').hidden = true; });
+    }
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pill'; b.id = 'logoutBtn'; b.textContent = `👤 ${window.HB_USER} · Abmelden`;
+    b.addEventListener('click', (e) => { e.dogHandled = true; try { localStorage.removeItem(SES_KEY); } catch {} location.reload(); });
+    document.querySelector('header .nav').append(b);
   }
 
   // Einmaliges Zurücksetzen der Erfolge. Einträge bleiben, gezählt wird nur, was danach passiert.
@@ -1773,7 +2694,7 @@
   try { last = +localStorage.getItem('janas-woche.quote'); } catch {}
   function nextQuote() {
     let i; do { i = Math.floor(Math.random() * QUOTES.length); } while (i === last);
-    last = i; q.textContent = QUOTES[i];
+    last = i; q.textContent = window.P ? window.P(QUOTES[i]) : QUOTES[i];
     try { localStorage.setItem('janas-woche.quote', i); } catch {}
   }
   q.addEventListener('click', nextQuote);
@@ -1794,11 +2715,13 @@
   const DOG_COL = { b: C.b, l: C.l, e: C.e }, WOLF_COL = { b: '#a3a8b6', l: '#dfe2e8', e: '#727889' };
   const FURS = { golden: { ...DOG_COL }, schoko: { b: '#a8714a', l: '#d6a57c', e: '#7d5133' }, schwarz: { b: '#4a4250', l: '#7a7180', e: '#2f2934' }, weiss: { b: '#f4efe9', l: '#ffffff', e: '#ddd2c6' } };
   const WERE = { dog: { ...WOLF_COL }, cat: { b: '#2f2934', l: '#4a4250', e: '#1f1a24' }, rabbit: { b: '#e6ebf7', l: '#ffffff', e: '#c3cbe4' } };
-  const animal = () => window.janaPet?.animal || 'dog';
-  function applyFur() { const f = FURS[window.janaPet?.fur] || FURS.golden; Object.assign(C, f); Object.assign(DOG_COL, f); Object.assign(WOLF_COL, WERE[animal()] || WERE.dog); }
-  applyFur();
-  addEventListener('jana:pet', applyFur);
-  C.hy = '#ffd36e'; C.wy = '#ffd84d'; C.ct = '#2a2330'; C.cy = '#ffd84d'; C.nt = '#b48ee0';
+  window.habitApplyFur = () => {
+    const f = FURS[window.habitProfile?.fur] || FURS.golden;
+    Object.assign(C, f); Object.assign(DOG_COL, f);
+    Object.assign(WOLF_COL, WERE[window.habitProfile?.animal] || WERE.dog);
+  };
+  window.habitApplyFur();
+  C.wy = '#ffd84d'; C.ct = '#2a2330'; C.cy = '#ffd84d'; C.nt = '#b48ee0';
   function outlined(parts) {
     for (const [x, y, w, h] of parts) { ctx.fillStyle = C.o; ctx.fillRect(x - 1, y - 1, w + 2, h + 2); }
     for (const [x, y, w, h, c] of parts) fill(x, y, w, h, c);
@@ -1829,8 +2752,9 @@
 
   // ---------- Zeichnen ----------
   function drawHouse() {
-    if (animal() === 'cat') return drawCatHouse();
-    if (animal() === 'rabbit') return drawHutch();
+    const animal = window.habitProfile?.animal || 'dog';
+    if (animal === 'cat') return drawCatHouse();
+    if (animal === 'rabbit') return drawHutch();
     const x0 = houseX, parts = [[x0 + 2, 12, 16, 11, 'w']];
     for (let r = 0; r < 8; r++) parts.push([x0 + 9 - r, 4 + r, 2 + 2 * r, 1, 'r']);
     parts.push([x0 + 1, 12, 18, 1, 'r']);
@@ -1900,7 +2824,7 @@
     ctx.save();
     if (mode === 'trick') {   // Kunststück: eine Rolle in der Luft
       const pr = Math.min(1, (t - trickT) / 1200), cx = Math.round(dogX) + 16, lift = Math.round(Math.sin(pr * Math.PI) * 5);
-      ctx.translate(cx, 15 - lift); ctx.rotate(Math.round(pr * 4) / 4 * Math.PI * 2 * dir); ctx.translate(-cx, -15);   // Vierteldrehungen bleiben pixelscharf
+      ctx.translate(cx, 15 - lift); ctx.rotate(pr * Math.PI * 2 * dir); ctx.translate(-cx, -15);
     }
     if (dir < 0) { ctx.translate(Math.round(dogX) + 32, 0); ctx.scale(-1, 1); } else ctx.translate(Math.round(dogX), 0);
     ctx.fillStyle = C.s; ctx.fillRect(8, 23, 16 - jump, 1);
@@ -1938,7 +2862,7 @@
     ctx.save();
     if (mode === 'trick') {   // Kunststück: eine Rolle in der Luft
       const pr = Math.min(1, (t - trickT) / 1200), cx = Math.round(dogX) + 16, lift = Math.round(Math.sin(pr * Math.PI) * 5);
-      ctx.translate(cx, 15 - lift); ctx.rotate(Math.round(pr * 4) / 4 * Math.PI * 2 * dir); ctx.translate(-cx, -15);
+      ctx.translate(cx, 15 - lift); ctx.rotate(pr * Math.PI * 2 * dir); ctx.translate(-cx, -15);
     }
     if (dir < 0) { ctx.translate(Math.round(dogX) + 32, 0); ctx.scale(-1, 1); } else ctx.translate(Math.round(dogX), 0);
   }
@@ -2000,7 +2924,7 @@
     ctx.restore();
   }
   function drawPet(t) {
-    const a = animal();
+    const a = window.habitProfile?.animal || 'dog';
     if (a === 'dog') return drawDog(t);
     const were = mode === 'transform' ? Math.floor(t / 150) % 2 === 0 : wolf;
     Object.assign(C, were ? WOLF_COL : DOG_COL);
@@ -2044,11 +2968,11 @@
     const sp = window.janaSpecial;
     if (!sp) return;
     const x = bowlX + 12;
-    if (sp.lights && animal() !== 'dog') {   // Lichterkette an Katzenhaus und Stall
+    if (sp.lights && (window.habitProfile?.animal || 'dog') !== 'dog') {   // Lichterkette an Katzenhaus und Stall
       const cols = ['#ff6b6b', '#ffd36e', '#7fd18b', '#7fb2ec'];
-      for (let i = 0; i < 9; i++) { ctx.fillStyle = cols[(i + Math.floor(t / 500)) % 4]; ctx.fillRect(houseX + 2 + i * 2, animal() === 'cat' ? 9 : 10, 1, 1); }
+      for (let i = 0; i < 9; i++) { ctx.fillStyle = cols[(i + Math.floor(t / 500)) % 4]; ctx.fillRect(houseX + 2 + i * 2, window.habitProfile?.animal === 'cat' ? 9 : 10, 1, 1); }
     }
-    if (sp.lights && animal() === 'dog') {                                   // Lichterkette am Dach
+    if (sp.lights && (window.habitProfile?.animal || 'dog') === 'dog') {                                   // Lichterkette am Dach
       const cols = ['#ff6b6b', '#ffd36e', '#7fd18b', '#7fb2ec'];
       for (let r = 1; r < 8; r += 2) {
         const ci = (r + Math.floor(t / 500)) % 4;
@@ -2098,6 +3022,8 @@
   const wolfTime = () => performance.now() < forcedWolfUntil || (window.janaMoon?.().name === 'Vollmond' && night());
   addEventListener('jana:forcewolf', () => { forcedWolfUntil = performance.now() + 45000; forcedMsg = true; });
   function mood() {
+    const pn = window.habitProfile?.pet;
+    if (pn && Math.random() < 0.2) return `Ich bin ${pn}! 🐾`;
     const sp = window.janaSpecial;
     if (sp?.bark && Math.random() < 0.5) return sp.bark;
     if (hot()) return pick(['Puh, ist das warm! 🥵', 'Hechel hechel…']);
@@ -2178,9 +3104,9 @@
     const wantWolf = wolfTime();
     if (wantWolf !== wolf && mode !== 'transform' && mode !== 'happy') {
       if (mode === 'sleep') { dogX = houseX + 3; dir = 1; }
-      ball.carried = false; document.documentElement.classList.remove('disco'); discoUntil = window.janaDisco = 0;
+      ball.carried = false; document.documentElement.classList.remove('disco'); discoUntil = 0;
       mode = 'transform'; until = t + 1800;
-      const inMsg = { dog: 'Oh nein… Vollmond! 🌕', cat: 'Der Vollmond ruft… ich werde zur Werkatze! 🌕', rabbit: 'Vollmond! Zeit, den Mondhasen zu besuchen! 🌕✨' }[animal()];
+      const inMsg = { dog: 'Oh nein… Vollmond! 🌕', cat: 'Der Vollmond ruft… ich werde zur Werkatze! 🌕', rabbit: 'Vollmond! Zeit, den Mondhasen zu besuchen! 🌕✨' }[window.habitProfile?.animal || 'dog'];
       say(wantWolf ? (forcedMsg ? 'Huch… was passiert mit mir?! 🌕' : inMsg) : 'Wuff? Was war denn los?', dogX + 16, 1800);
       forcedMsg = false;
     }
@@ -2225,7 +3151,7 @@
       case 'transform': if (t > until) { wolf = wolfTime(); if (wolf) dispatchEvent(new Event('jana:wolf')); decide(t); } break;
       case 'howl':
         dir = 1;
-        if (t > nextHowl) { howlUntil = t + 1800; nextHowl = t + 3800; say(pick({ dog: ['Auuuuuu! 🌕', 'Auuuu-uuuu! 🐺', 'Ahuuuuu! 🌕'], cat: ['Miauuuuu! 🌕', 'Mrrraaauuu~ 🐈‍⬛', 'Miau-uuu! 🌕'], rabbit: ['✨ Hallo Mondhase! 🌕', '*klopf klopf* 🌕', 'Hopp hopp, zum Mond! ✨'] }[animal()]), dogX + 16, 1800); howlSound(); }
+        if (t > nextHowl) { howlUntil = t + 1800; nextHowl = t + 3800; say(pick({ dog: ['Auuuuuu! 🌕', 'Auuuu-uuuu! 🐺', 'Ahuuuuu! 🌕'], cat: ['Miauuuuu! 🌕', 'Mrrraaauuu~ 🐈‍⬛', 'Miau-uuu! 🌕'], rabbit: ['✨ Hallo Mondhase! 🌕', '*klopf klopf* 🌕', 'Hopp hopp, zum Mond! ✨'] }[window.habitProfile?.animal || 'dog']), dogX + 16, 1800); howlSound(); }
         if (t > until && t > howlUntil) decide(t);
         break;
     }
@@ -2252,7 +3178,13 @@
   }
 
   function drawDisco(t) {
-    const cols = ['#f2a9c8', '#cdb7ef', '#ffd36e', '#a6dcc2', '#a9c8ec', '#ffffff'];
+    const x = Math.round(W / 2), cols = ['#f2a9c8', '#cdb7ef', '#ffd36e', '#a6dcc2', '#a9c8ec', '#ffffff'];
+    fill(x + 2, 0, 1, 3, 'o');
+    for (let yy = 0; yy < 5; yy++) for (let xx = 0; xx < 5; xx++) {
+      if ((xx === 0 || xx === 4) && (yy === 0 || yy === 4)) continue;
+      ctx.fillStyle = (xx + yy + Math.floor(t / 180)) % 2 ? '#d9dde6' : '#8f96a8'; ctx.fillRect(x + xx, 3 + yy, 1, 1);
+    }
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(x + 1 + Math.floor(t / 240) % 3, 4, 1, 1);
     if (reduce) return;
     for (let i = 0; i < 16; i++) {   // Lichtpunkte im Garten
       const k = Math.floor(t / 220) + i * 7;
@@ -2271,10 +3203,6 @@
     if (!window.janaSpecial?.cat || reduce) { cat = null; return; }
     if (!cat) { if (t > nextCat) { cat = { x: W + 2, v: -13, seen: false }; } return; }
     cat.x += cat.v * dt;
-    if (!cat.seen && !wolf && mode === 'sleep' && Math.abs(cat.x - (houseX + 10)) < 30) {   // schläft: bellt aus der Hütte
-      cat.seen = true; cat.v = -32;
-      say('Wuff?! Eine Katze! 🐈‍⬛', houseX + 10, 1600); bark(2);
-    }
     if (!cat.seen && !wolf && mode !== 'sleep' && mode !== 'transform' && Math.abs(cat.x - (dogX + 16)) < 34) {
       cat.seen = true; cat.v = -32;
       if (!['trick', 'fetch', 'fetchBack', 'sing'].includes(mode)) { mode = 'idle'; until = t + 1600; dir = cat.x > dogX + 16 ? 1 : -1; }
@@ -2339,15 +3267,18 @@
     o.connect(f); f.connect(g); n.connect(nf); nf.connect(ng); ng.connect(g); g.connect(actx.destination);
     o.start(t0); o.stop(t0 + 0.21); n.start(t0); n.stop(t0 + 0.13);
   }
-  // Heulen bei Vollmond (sobald einmal getippt wurde)
+  // Heulen bei Vollmond (nur wenn der Ton an ist und schon einmal getippt wurde)
   function howlSound() {
     if (!soundOn || !actx) return;
-    if (animal() !== 'dog') {
+    const an = window.habitProfile?.animal || 'dog';
+    if (an !== 'dog') {
       try {
         if (actx.state === 'suspended') actx.resume();
         const t0 = actx.currentTime + 0.02;
-        if (animal() === 'cat') { meow(t0); meow(t0 + 0.55); }
-        else [880, 1175, 1568, 1175].forEach((fr, i) => tone(t0 + i * 0.13, fr, 0.4, 'sine', 0.18));
+        if (an === 'cat') { meow(t0); meow(t0 + 0.55); }
+        else [880, 1175, 1568, 1175].forEach((fr, i) => { const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.value = fr;
+          g.gain.setValueAtTime(0.0001, t0 + i * 0.13); g.gain.exponentialRampToValueAtTime(0.18, t0 + i * 0.13 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.13 + 0.4);
+          o.connect(g); g.connect(actx.destination); o.start(t0 + i * 0.13); o.stop(t0 + i * 0.13 + 0.45); });
       } catch {}
       return;
     }
@@ -2409,7 +3340,7 @@
       actx ||= new (window.AudioContext || window.webkitAudioContext)();
       if (actx.state === 'suspended') actx.resume();
       const now = actx.currentTime + 0.01;
-      const a = animal();
+      const a = window.habitProfile?.animal || 'dog';
       for (let i = 0; i < times; i++) (a === 'cat' ? meow : a === 'rabbit' ? squeak : woof)(now + i * (a === 'cat' ? 0.6 : 0.24));
     } catch {}
   }
@@ -2432,7 +3363,7 @@
     say('Achtung, Kunststück! 🤸', dogX + 16, 1300);
   }
   function disco() {   // 🪩 5× auf den Titel: Disco
-    discoUntil = window.janaDisco = performance.now() + 12000;
+    discoUntil = performance.now() + 12000;
     document.documentElement.classList.add('disco');
     setTimeout(() => { if (performance.now() >= discoUntil - 60) { document.documentElement.classList.remove('disco'); discoUntil = 0; } }, 12000);
     if (mode !== 'transform') { wake(); mode = 'dance'; danceUntil = discoUntil; }
@@ -2481,7 +3412,7 @@
       if (dogTaps.length >= 10) { dogTaps = []; startTrick(); return; }
     }
     const sp = window.janaSpecial;
-    if (onDog || onHouse || e.target.closest('button')) happy(wolf ? pick({ dog: ['Auuu! 🐺', 'Grrr… Wuff! 🌕', 'Wuff… äh, Auuu!'], cat: ['Mrrrau! 🌕', 'Fauch… äh, Miau!'], rabbit: ['✨ Psst, ich bin beim Mondhasen!', 'Hopp! 🌕'] }[animal()]) : sp?.bark && Math.random() < 0.5 ? sp.bark : pick(BARKS));
+    if (onDog || onHouse || e.target.closest('button')) happy(wolf ? pick({ dog: ['Auuu! 🐺', 'Grrr… Wuff! 🌕', 'Wuff… äh, Auuu!'], cat: ['Mrrrau! 🌕', 'Fauch… äh, Miau!'], rabbit: ['✨ Psst, ich bin beim Mondhasen!', 'Hopp! 🌕'] }[window.habitProfile?.animal || 'dog']) : sp?.bark && Math.random() < 0.5 ? sp.bark : pick(BARKS));
   });
 
   requestAnimationFrame(loop);
@@ -2641,7 +3572,7 @@
 
   function renderStatic() {
     const now = new Date();
-    $('greet').textContent = greeting(now);
+    $('greet').textContent = window.P ? window.P(greeting(now)) : greeting(now);
     const date = now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     const c = state.data;
     $('dateLine').textContent = c?.city ? `${date} · ${c.city}${c.source === 'approx' ? ' (ungefähr)' : ''}` : date;
@@ -2680,7 +3611,8 @@
     renderStatic();
   }
 
-  window.janaWx = { show: (data) => renderWeather(data) };
+  window.janaWx = { show: (data) => renderWeather(data), refresh: () => renderStatic() };
+  window.habitReloadWeather = () => { try { localStorage.removeItem(WX_KEY); } catch {} state.data = null; load(true); };
 
   function fallbackScene() {
     const h = new Date().getHours();
@@ -2696,6 +3628,29 @@
     navigator.geolocation.getCurrentPosition(res, rej, { timeout: 9000, maximumAge: 10 * 60 * 1000, enableHighAccuracy: false });
   });
 
+  // Wetter direkt bei Open-Meteo (kostenlos, ohne Anmeldung); Ort aus dem Profil oder per Standort
+  async function directWeather(qs) {
+    const prof = window.habitProfile || {};
+    let lat, lon, city = prof.city || null;
+    const m = qs.match(/lat=([-\d.]+)&lon=([-\d.]+)/);
+    if (m) { lat = +m[1]; lon = +m[2]; }
+    else if (prof.city) {
+      const g = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(prof.city)}&count=1&language=de`).then((r) => r.json());
+      const hit = g.results?.[0];
+      if (!hit) throw new Error('Ort unbekannt');
+      lat = hit.latitude; lon = hit.longitude; city = hit.name;
+    } else if (window.HB_CONFIG?.serverWeather) {
+      const r = await fetch('/api/weather' + qs, { credentials: 'same-origin', cache: 'no-store' });
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    } else throw new Error('kein Ort');
+    const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}&current=temperature_2m,apparent_temperature,weather_code,is_day,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&forecast_days=2`)
+      .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    const c = w.current || {}, d = w.daily || {};
+    return { source: m ? 'precise' : 'city', city, time: c.time,
+      current: { temp: c.temperature_2m, feels: c.apparent_temperature, code: c.weather_code, isDay: c.is_day === 1, wind: c.wind_speed_10m },
+      today: { max: d.temperature_2m_max?.[0], min: d.temperature_2m_min?.[0] }, sunrise: d.sunrise || [], sunset: d.sunset || [] };
+  }
   async function load(force = false) {
     if (window.JANA_DEMO) return;   // Gast-Vorschau steuert das Wetter selbst
     if (window.JANA_PREVIEW) { $('wxLine').textContent = 'Echtes Wetter gibt es nur auf der Live-Seite.'; return; }
@@ -2710,13 +3665,11 @@
       catch { /* Standort gerade nicht verfügbar: ungefährer Ort */ }
     }
     try {
-      const res = await fetch('/api/weather' + qs, { credentials: 'same-origin', cache: 'no-store' });
-      if (!res.ok) throw new Error(res.status);
-      const data = await res.json();
+      const data = await directWeather(qs);
       renderWeather(data);
       try { localStorage.setItem(WX_KEY, JSON.stringify({ at: Date.now(), mode: geoMode, data })); } catch {}
     } catch {
-      if (!state.data) { $('wxLine').textContent = 'Wetter gerade nicht verfügbar. Ich versuche es gleich noch einmal.'; fallbackScene(); }
+      if (!state.data) { $('wxLine').textContent = window.habitProfile?.city ? 'Wetter gerade nicht verfügbar. Ich versuche es gleich noch einmal.' : 'Trag unter ⚙️ deinen Wohnort ein, dann siehst du hier dein Wetter.'; fallbackScene(); }
     }
   }
 
@@ -2817,20 +3770,6 @@
     drawRainbow(t);
     sg.save(); sg.translate(SW - 26, 0); scene(sg, state.kind, state.isDay, moon(), t); sg.restore();
     drawShoot(t);
-    if (performance.now() < (window.janaDisco || 0)) {   // 🪩 Discokugel
-      const x = Math.round(SW * 0.42), cols = ['#f2a9c8', '#cdb7ef', '#ffd36e', '#a6dcc2', '#a9c8ec'];
-      sg.fillStyle = dark ? '#cfc6db' : '#6b5f7a'; sg.fillRect(x + 3, 0, 1, 4);
-      for (let yy = 0; yy < 7; yy++) for (let xx = 0; xx < 7; xx++) {
-        if (Math.hypot(xx - 3, yy - 3) > 3.4) continue;
-        sg.fillStyle = (xx + yy + Math.floor(t / 180)) % 2 ? '#e3e6ee' : '#8f96a8'; sg.fillRect(x + xx, 4 + yy, 1, 1);
-      }
-      sg.fillStyle = '#ffffff'; sg.fillRect(x + 1 + Math.floor(t / 240) % 4, 5, 1, 1);
-      if (!reduce) for (let i = 0; i < 14; i++) {   // Lichtstrahlen
-        const k = Math.floor(t / 200) + i * 5;
-        sg.fillStyle = cols[(i + k) % cols.length];
-        sg.fillRect((k * 23 + i * 17) % Math.max(10, SW - 28), (k * 7 + i * 3) % 24, 1, 1);
-      }
-    }
     const batNight = window.janaSpecial?.sky === 'bats' && !state.isDay;
     if (!reduce && (state.isDay || batNight) && state.kind !== 'thunder' && t > nextFlock) { spawnFlock(t); nextFlock = t + 9000 + Math.random() * 16000; }
     const bc = dark ? '#cfc6db' : '#6b5f7a';
@@ -2908,7 +3847,6 @@
 
   fallbackScene();
   renderStatic();
-  addEventListener('jana:pet', renderStatic);
   load();
   const still = () => drawSky(0);
   if (reduce) { still(); setInterval(still, 60000); }
@@ -2966,6 +3904,8 @@
     { label: '🎄 Weihnachten', hour: 18, wx: wx(71, false, 0), moon: 3, special: () => app.getSpecial(new Date(Y, 11, 24, 18)) },
     { label: '🎆 Silvester-Feuerwerk', hour: 22, wx: wx(0, false, 1), moon: 25, special: () => app.getSpecial(new Date(Y, 11, 31, 22)) },
     { label: '💖 Valentinstag', hour: 12, wx: wx(2, true, 6), special: () => app.getSpecial(new Date(Y, 1, 14, 12)) },
+    { label: '🌸 Zyklus-Tracker mit aktueller Phase', hour: 12, wx: wx(1, true, 15), ms: 9000, run: () => { toEl('cycleCard'); later(700, () => { $('cycleDetails').open = true; }); }, after: () => { $('cycleDetails').open = false; } },
+    { label: '🐷 Sparziele mit Pixel-Sparschwein', hour: 13, wx: wx(1, true, 15), ms: 9000, run: () => { toEl('saveCard'); later(700, () => { $('saveDetails').open = true; }); later(2400, () => document.querySelector('#saveList [data-quick="50"]')?.click()); later(5200, () => document.querySelector('#saveList [data-quick="50"]')?.click()); }, after: () => { $('saveDetails').open = false; } },
     { label: '📖 Gelesene Bücher mit Bücherregal', hour: 20, wx: wx(1, false, 9), moon: 20, ms: 9000, run: () => { toEl('bookCard'); later(700, () => { $('bookDetails').open = true; }); later(2000, () => { const f = $('bookForm'); f.elements.title.value = 'Momo'; f.elements.author.value = 'Michael Ende'; document.querySelector('#bookStars [data-star="5"]')?.click(); }); later(4200, () => $('bookForm').requestSubmit()); }, after: () => { $('bookDetails').open = false; } },
     { label: '⏱️ Lern-Timer: 25 Minuten lernen, Haustier bleibt still', hour: 15, wx: wx(1, true, 16), run: () => { toEl('timerCard'); later(1200, () => $('timerStart').click()); }, after: () => { if ($('timerStop') && !$('timerStop').hidden) $('timerStop').click(); } },
     { label: '🎓 Uni: Lernzeit, Abgaben und Lernziele', hour: 16, wx: wx(1, true, 16), ms: 9000, run: () => { toEl('uniCard'); later(3500, () => document.querySelector('#goalList [data-gcheck]:not([aria-pressed="true"])')?.click()); } },
@@ -2977,10 +3917,9 @@
     { label: '🌈 Regenbogen, wenn nach Regen die Sonne kommt', hour: 15, wx: wx(1, true, 17), run: () => { toTop(); window.janaEggs.rainbow(7600); } },
     { label: '🐈‍⬛ Freitag, der 13.: eine schwarze Katze schleicht vorbei', hour: 16, wx: wx(2, true, 14), ms: 11000, special: () => { const d = new Date(); d.setDate(13); while (d.getDay() !== 5) d.setMonth(d.getMonth() + 1); return app.getSpecial(d); }, run: () => window.janaEggs.cat() },
     { label: '💌 „Ich liebe dich“ eintragen: es regnet Herzen', hour: 18, wx: wx(1, true, 15), run: () => { toEl('todos'); later(1000, () => { $('todoInput').value = 'Ich liebe dich'; }); later(2400, () => $('todoForm').requestSubmit()); } },
-    { label: '🎵 Nachts 3× auf die Hütte: der Hund singt', hour: 23, wx: wx(0, false, 7), moon: 8, run: () => later(900, () => window.janaEggs.sing()) },
+    { label: '🎵 Nachts 3× auf die Hütte (Ton an): der Hund singt', hour: 23, wx: wx(0, false, 7), moon: 8, run: () => later(900, () => window.janaEggs.sing()) },
     { label: '🕚 Um 11:11 und 22:22: Wunschzeit', hour: 11, wx: wx(1, true, 16), run: () => { toTop(); later(800, () => window.janaEggs.wish('11:11')); } },
-    { label: '⚙️ Einstellungen: Katze oder Kaninchen statt Hund', hour: 12, wx: wx(1, true, 18), ms: 10000, run: () => { toTop(); later(600, () => window.janaSettings.open()); later(1200, () => document.querySelector('#setBody [data-settab="pet"]')?.click()); later(2200, () => document.querySelector('#setBody [data-animal="cat"]')?.click()); later(5200, () => document.querySelector('#setBody [data-animal="rabbit"]')?.click()); later(6800, () => document.querySelector('#setBody [data-settab="fur"]')?.click()); later(7800, () => document.querySelector('#setBody [data-fur="weiss"]')?.click()); }, after: () => { window.janaSettings.pet('dog', 'golden'); window.janaSettings.close(); } },
-    { label: '🗂️ Bereiche ein- und ausklappen', hour: 16, wx: wx(1, true, 16), run: () => { toEl('uniCard'); later(1500, () => $('uniCard').querySelector('.c-toggle').click()); later(4500, () => $('uniCard').querySelector('.c-toggle').click()); } },
+    { label: '⚽ Lieblingsverein: Countdown zum nächsten Spiel', hour: 17, wx: wx(1, true, 14), run: () => toEl('fussCard') },
     { label: '📅 KW-Übersicht aller Wochen', hour: 18, wx: wx(2, true, 12), ms: 9000, run: () => { later(900, () => $('overviewBtn').click()); later(7600, () => { if (!$('kwOverlay').hidden) $('kwClose').click(); }); } },
     { label: '🏆 Erfolge zum Aufklappen', hour: 19, wx: wx(2, false, 10), run: () => { toEl('achCard'); later(1000, () => { $('achDetails').open = true; }); }, after: () => { $('achDetails').open = false; } },
     { label: '📝 Langfristige To-dos', hour: 17, wx: wx(1, true, 14), run: () => toEl('todos') },

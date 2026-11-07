@@ -52,6 +52,11 @@ Hund 10× schnell antippen (Kunststück), Ball antippen (apportieren), leeren Na
 Freitag der 13. (schwarze Katze), Regenbogen nach Regen, „Ich liebe dich“ als Gewohnheit oder To-do (Herzregen),
 nachts 3× auf die Hütte (Hund singt). Jede gibt einen geheimen Erfolg.
 
+**Seit Version 0.10.0 wird Janas Seite aus der allgemeinen Version gebaut** (`habit-baukasten/public/index.html`):
+`python3 janas-woche/tools/build-from-template.py` erzeugt `janas-woche/public/index.html` mit Janas festem Profil
+(ohne Mann/Frau-Frage, ohne eigene Konten, Wetter ohne Ort über `/api/weather`), ihren Speicher-Schlüsseln `janas-woche.*`
+und ihren eigenen Patch Notes (Version und Texte stehen im Skript). Änderungen also in der allgemeinen Version machen und danach bauen.
+
 ## Änderungen testen, ohne Netlify-Guthaben zu verbrauchen
 1. Änderungen in `janas-woche/public/index.html` machen.
 2. Vorschau erzeugen: `python3 janas-woche/tools/make-preview.py vorschau.html` und als Claude-Artifact ansehen.
