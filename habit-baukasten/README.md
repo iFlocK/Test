@@ -1,7 +1,8 @@
 # Mein Wochenplaner
 
 Die allgemeine Version von „Janas Woche“ für alle (Ordner `habit-baukasten/`). Janas Seite (`janas-woche/`) bleibt davon unberührt.
-Die Seite liegt in `public/` (mit Icons und App-Manifest) und kann direkt bei Netlify veröffentlicht werden.
+Live und öffentlich unter https://mein-wochenplaner.netlify.app (Netlify-Projekt `mein-wochenplaner`).
+Die Seite liegt in `public/` (mit Icons und App-Manifest); zum Veröffentlichen aus dem Ordner `habit-baukasten/` hochladen.
 
 - Beim ersten Öffnen führt ein Einrichtungs-Assistent durch Name, Farbe, Fellfarbe und Name des Hundes,
   Gewohnheiten, Geburtstag, Jahrestag (optional) und Wohnort für das Wetter.
