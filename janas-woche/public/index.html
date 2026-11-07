@@ -323,6 +323,14 @@
   .set-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(60, 40, 60, .3); }
   .set-hint { margin: 0; color: var(--muted); font-size: .82rem; }
   .settings .pill.primary { justify-self: center; padding: 8px 22px; }
+  .set-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .set-tab { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: 4px 11px; font: inherit; font-size: .8rem; font-weight: 800; }
+  .set-tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .set-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .set-list label { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); font-weight: 700; cursor: pointer; }
+  .set-list input { width: 18px; height: 18px; accent-color: var(--accent-ink); }
+  .set-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .set-ver { margin: 0; font-weight: 800; }
 
   /* Patch Notes */
   .news { max-width: 460px; display: grid; gap: 10px; position: relative; z-index: 1; }
@@ -1544,6 +1552,7 @@
   const COLLAPSE_KEY = 'janas-woche.collapsed';
   let collapsed = [];
   try { collapsed = JSON.parse(localStorage.getItem(COLLAPSE_KEY)) || []; } catch {}
+  const cardCtl = [];
   for (const id of ['timerCard', 'uniCard', 'manageCard', 'noteCard', 'todos']) {
     const card = $(id);
     let head = card.querySelector(':scope > .todos-head, :scope > .mood-head');
@@ -1558,10 +1567,13 @@
     head.addEventListener('click', (e) => {
       if (e.target.closest('a, input, select, textarea') || (e.target.closest('button') && e.target.closest('button') !== btn)) return;
       e.dogHandled = true;
-      card.classList.toggle('collapsed'); sync();
-      collapsed = [...card.parentElement.ownerDocument.querySelectorAll('.card.collapsed[id]')].map((c) => c.id);
-      try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed)); } catch {}
+      card.classList.toggle('collapsed'); sync(); storeCollapsed();
     });
+    cardCtl.push({ id, title, isOpen: () => !card.classList.contains('collapsed'), set: (open) => { card.classList.toggle('collapsed', !open); sync(); } });
+  }
+  function storeCollapsed() {
+    collapsed = [...document.querySelectorAll('.card.collapsed[id]')].map((c) => c.id);
+    try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed)); } catch {}
   }
   window.janaOpenCard = (id) => $(id)?.classList.remove('collapsed');
 
@@ -1569,11 +1581,23 @@
   const ANIMALS = [['dog', 'Hund', '🐶'], ['cat', 'Katze', '🐱'], ['rabbit', 'Kaninchen', '🐰']];
   const FUR_OPTS = [['golden', 'Golden', '#ecc173'], ['schoko', 'Schoko', '#a8714a'], ['schwarz', 'Schwarz', '#4a4250'], ['weiss', 'Weiß', '#f4efe9']];
   const HELLO = { dog: 'Wuff! Da bin ich wieder! 🐶', cat: 'Miau! Ich bin jetzt deine Katze! 🐱', rabbit: 'Hopp hopp! Ich bin jetzt dein Kaninchen! 🐰' };
+  const SET_TABS = [['pet', '🐾 Haustier'], ['fur', '🎨 Fellfarbe'], ['cards', '🗂️ Bereiche'], ['about', 'ℹ️ Version']];
+  let setTab = 'pet';
+  try { setTab = localStorage.getItem('janas-woche.setTab') || 'pet'; } catch {}
   function renderSettings() {
     const pt = state.pet;
-    $('setBody').innerHTML = `<h3>Haustier</h3><div class="set-row" role="group" aria-label="Haustier">${ANIMALS.map(([k, n, e]) => `<button type="button" class="set-opt" data-animal="${k}" aria-pressed="${pt.animal === k}"><span class="set-emoji" aria-hidden="true">${e}</span>${n}</button>`).join('')}</div>
-      <h3>Fellfarbe</h3><div class="set-row" role="group" aria-label="Fellfarbe">${FUR_OPTS.map(([k, n, c]) => `<button type="button" class="set-opt" data-fur="${k}" aria-pressed="${pt.fur === k}"><span class="set-dot" data-style="background:${c}" aria-hidden="true"></span>${n}</button>`).join('')}</div>
+    if (!SET_TABS.some(([k]) => k === setTab)) setTab = 'pet';
+    const tabs = `<div class="set-tabs" role="tablist" aria-label="Bereiche der Einstellungen">${SET_TABS.map(([k, n]) => `<button type="button" class="set-tab" role="tab" data-settab="${k}" aria-selected="${setTab === k}">${n}</button>`).join('')}</div>`;
+    if (setTab === 'pet') $('setBody').innerHTML = tabs + `<h3>Haustier</h3><div class="set-row" role="group" aria-label="Haustier">${ANIMALS.map(([k, n, e]) => `<button type="button" class="set-opt" data-animal="${k}" aria-pressed="${pt.animal === k}"><span class="set-emoji" aria-hidden="true">${e}</span>${n}</button>`).join('')}</div>
+      <p class="set-hint">Jedes Tier hat sein eigenes Häuschen. Unten im Garten siehst du die Änderung sofort.</p>`;
+    if (setTab === 'fur') $('setBody').innerHTML = tabs + `<h3>Fellfarbe</h3><div class="set-row" role="group" aria-label="Fellfarbe">${FUR_OPTS.map(([k, n, c]) => `<button type="button" class="set-opt" data-fur="${k}" aria-pressed="${pt.fur === k}"><span class="set-dot" data-style="background:${c}" aria-hidden="true"></span>${n}</button>`).join('')}</div>
       <p class="set-hint">Unten im Garten siehst du die Änderung sofort.</p>`;
+    if (setTab === 'cards') $('setBody').innerHTML = tabs + `<h3>Aufgeklappte Bereiche</h3><ul class="set-list">${cardCtl.map((c) => `<li><label><input type="checkbox" data-card="${c.id}" ${c.isOpen() ? 'checked' : ''}>${esc(c.title)}</label></li>`).join('')}</ul>
+      <div class="set-btns"><button type="button" class="pill" data-allcards="1">Alle aufklappen</button><button type="button" class="pill" data-allcards="0">Alle zuklappen</button></div>
+      <p class="set-hint">Du kannst Bereiche auch direkt mit einem Tipp auf ihre Überschrift auf- und zuklappen.</p>`;
+    if (setTab === 'about') $('setBody').innerHTML = tabs + `<h3>Version</h3><p class="set-ver">Janas Woche · Version ${APP_VERSION}</p>
+      <div class="set-btns"><button type="button" class="pill" data-shownews>✨ Was ist neu?</button></div>
+      <p class="set-hint">Deine Einträge werden nur auf diesem Gerät gespeichert.</p>`;
   }
   function petChanged() {
     window.janaPet = state.pet; save();
@@ -1588,7 +1612,16 @@
   $('setClose').addEventListener('click', closeSettings);
   $('setOverlay').addEventListener('click', (e) => { if (e.target === $('setOverlay')) closeSettings(e); });
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('setOverlay').hidden) closeSettings(); });
+  $('setBody').addEventListener('change', (e) => {
+    const cb = e.target.closest('[data-card]'); if (!cb) return;
+    cardCtl.find((c) => c.id === cb.dataset.card)?.set(cb.checked); storeCollapsed();
+  });
   $('setBody').addEventListener('click', (e) => {
+    const tb = e.target.closest('[data-settab]'), all = e.target.closest('[data-allcards]');
+    if (tb) { e.dogHandled = true; setTab = tb.dataset.settab; try { localStorage.setItem('janas-woche.setTab', setTab); } catch {} renderSettings(); $('setBody').querySelector(`[data-settab="${setTab}"]`)?.focus(); return; }
+    if (all) { e.dogHandled = true; cardCtl.forEach((c) => c.set(all.dataset.allcards === '1')); storeCollapsed(); renderSettings(); return; }
+    if (e.target.closest('[data-shownews]')) { e.dogHandled = true; closeSettings(); openNews(); return; }
+    if (e.target.closest('[data-card]')) { e.dogHandled = true; return; }
     const a = e.target.closest('[data-animal]'), f = e.target.closest('[data-fur]');
     if (!a && !f) return;
     e.dogHandled = true;
@@ -1601,7 +1634,7 @@
   // Bei jedem Upload: Version erhöhen und oben einen neuen Eintrag ergänzen.
   const CHANGELOG = [
     { v: '0.9.1', title: 'Katze, Kaninchen und mehr Ordnung', notes: [
-      ['⚙️', 'Einstellungen', 'Oben gibt es jetzt Einstellungen. Dort kannst du statt des Hundes eine Katze oder ein Kaninchen wählen, jeweils mit eigenem Häuschen, und die Fellfarbe ändern.'],
+      ['⚙️', 'Einstellungen', 'Oben gibt es jetzt Einstellungen mit Tabs: Haustier (statt des Hundes auch Katze oder Kaninchen, jeweils mit eigenem Häuschen), Fellfarbe, Bereiche und Version.'],
       ['🗂️', 'Ein- und ausklappen', 'Uni, Lern-Timer, Gewohnheiten, Wochen-Notiz und To-dos lassen sich mit einem Tipp auf die Überschrift zuklappen. Die Seite merkt sich das.'],
       ['🐾', 'Mehr Platz im Garten', 'Der Garten sitzt wieder ganz unten am Bildschirm.'],
     ] },
@@ -2946,7 +2979,7 @@
     { label: '💌 „Ich liebe dich“ eintragen: es regnet Herzen', hour: 18, wx: wx(1, true, 15), run: () => { toEl('todos'); later(1000, () => { $('todoInput').value = 'Ich liebe dich'; }); later(2400, () => $('todoForm').requestSubmit()); } },
     { label: '🎵 Nachts 3× auf die Hütte: der Hund singt', hour: 23, wx: wx(0, false, 7), moon: 8, run: () => later(900, () => window.janaEggs.sing()) },
     { label: '🕚 Um 11:11 und 22:22: Wunschzeit', hour: 11, wx: wx(1, true, 16), run: () => { toTop(); later(800, () => window.janaEggs.wish('11:11')); } },
-    { label: '⚙️ Einstellungen: Katze oder Kaninchen statt Hund', hour: 12, wx: wx(1, true, 18), ms: 10000, run: () => { toTop(); later(600, () => window.janaSettings.open()); later(2200, () => document.querySelector('#setBody [data-animal="cat"]')?.click()); later(5200, () => document.querySelector('#setBody [data-animal="rabbit"]')?.click()); later(7800, () => document.querySelector('#setBody [data-fur="weiss"]')?.click()); }, after: () => { window.janaSettings.pet('dog', 'golden'); window.janaSettings.close(); } },
+    { label: '⚙️ Einstellungen: Katze oder Kaninchen statt Hund', hour: 12, wx: wx(1, true, 18), ms: 10000, run: () => { toTop(); later(600, () => window.janaSettings.open()); later(1200, () => document.querySelector('#setBody [data-settab="pet"]')?.click()); later(2200, () => document.querySelector('#setBody [data-animal="cat"]')?.click()); later(5200, () => document.querySelector('#setBody [data-animal="rabbit"]')?.click()); later(6800, () => document.querySelector('#setBody [data-settab="fur"]')?.click()); later(7800, () => document.querySelector('#setBody [data-fur="weiss"]')?.click()); }, after: () => { window.janaSettings.pet('dog', 'golden'); window.janaSettings.close(); } },
     { label: '🗂️ Bereiche ein- und ausklappen', hour: 16, wx: wx(1, true, 16), run: () => { toEl('uniCard'); later(1500, () => $('uniCard').querySelector('.c-toggle').click()); later(4500, () => $('uniCard').querySelector('.c-toggle').click()); } },
     { label: '📅 KW-Übersicht aller Wochen', hour: 18, wx: wx(2, true, 12), ms: 9000, run: () => { later(900, () => $('overviewBtn').click()); later(7600, () => { if (!$('kwOverlay').hidden) $('kwClose').click(); }); } },
     { label: '🏆 Erfolge zum Aufklappen', hour: 19, wx: wx(2, false, 10), run: () => { toEl('achCard'); later(1000, () => { $('achDetails').open = true; }); }, after: () => { $('achDetails').open = false; } },
