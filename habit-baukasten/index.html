@@ -1449,7 +1449,7 @@
   function openSetup() {
     const p = state.profile || {};
     draft = {
-      gender: p.gender || '', club: p.club || '', clubName: p.clubName || '',
+      gender: p.gender || '', club: p.club || '', clubName: p.clubName || '', clubShort: p.clubShort || '',
       name: p.name || (window.HB_USER ? window.HB_USER[0].toUpperCase() + window.HB_USER.slice(1) : ''), palette: p.palette || 'rosa', animal: p.animal || 'dog', fur: p.fur || 'golden', pet: p.pet || '',
       habits: state.profile ? state.tags.map((t) => t.id) : ['kraft', 'spazieren', 'gemuese', 'wasser', 'lesen', 'schlafen', 'freunde', 'entspannen'],
       custom: [], cycle: !!p.cycle, cycleStart: '', cycleLen: state.cycle?.settings?.cycleLen || 28, uni: !!p.uni, subjects: (state.uni?.subjects || []).map((x) => ({ ...x })), birthday: p.birthday || '', together: { date: p.together?.date || '', partner: p.together?.partner || '' }, city: p.city || '',
@@ -1479,7 +1479,7 @@
       <button type="button" class="su-swatch" data-gender="m" aria-pressed="${draft.gender === 'm'}"><span class="su-emoji">👨</span>Mann</button></div>
       <p class="su-hint">Als Frau kannst du gleich noch einen Zyklus-Tracker einschalten. Ändern kannst du das jederzeit in den Einstellungen.</p><p class="su-err" id="suErr" hidden>Bitte wähle eine Antwort.</p>`;
     if (cur() === 'club') b.innerHTML = `<p>Hast du einen Lieblingsverein? Dann siehst du oben einen Countdown zum nächsten Spiel, in der Bundesliga, im DFB-Pokal und in der Champions League.</p>
-      <div class="su-swatches">${CLUBS.map(([k, , sh, c1, c2]) => `<button type="button" class="su-swatch su-club" data-club="${k}" aria-pressed="${draft.club === k}"><span class="club-badge" data-style="background:linear-gradient(135deg, ${c1} 50%, ${c2} 50%)"></span>${sh}</button>`).join('')}
+      <div class="su-swatches">${(window.habitClubChoices?.() || []).map((c) => `<button type="button" class="su-swatch su-club" data-club="${esc(c.key)}" data-short="${esc(c.short)}" aria-pressed="${draft.club === c.key}"><span class="club-badge" data-style="background:linear-gradient(135deg, ${c.c1} 50%, ${c.c2} 50%)"></span>${esc(c.short)}</button>`).join('')}
       <button type="button" class="su-swatch su-club" data-club="other" aria-pressed="${draft.club === 'other'}"><span class="su-emoji">✏️</span>Anderer Verein</button>
       <button type="button" class="su-swatch su-club" data-club="" aria-pressed="${!draft.club}"><span class="su-emoji">🙅</span>Kein Verein</button></div>
       ${draft.club === 'other' ? `<label class="su-label" for="suClub">Wie heißt dein Verein?</label><input id="suClub" class="su-input" placeholder="z. B. Hertha BSC" value="${esc(draft.clubName)}">` : ''}`;
@@ -1535,7 +1535,7 @@
     if (gd || cl) {
       e.dogHandled = true;
       if (gd) { draft.gender = gd.dataset.gender; if (draft.gender === 'm') draft.cycle = false; }
-      if (cl) { if ($('suClub')) draft.clubName = $('suClub').value.trim(); draft.club = cl.dataset.club; }
+      if (cl) { if ($('suClub')) draft.clubName = $('suClub').value.trim(); draft.club = cl.dataset.club; draft.clubShort = cl.dataset.short || ''; }
       renderSetup();
       if (cl && draft.club === 'other') $('suClub')?.focus();
       return;
@@ -1597,6 +1597,7 @@
     }
     if (profile.gender === 'm') profile.cycle = false;
     if (profile.club !== 'other') profile.clubName = '';
+    if (!profile.club?.startsWith('ol:')) profile.clubShort = '';
     state.profile = profile;
     save(); closeSetup(); render(); renderLove(); renderUni(); window.renderCycle?.(); window.renderFuss?.(true);
     window.janaApp.renderSpecial(); window.janaWx?.refresh?.(); window.habitReloadWeather?.();
@@ -2088,60 +2089,94 @@
   renderCycle();
 
   // ---------- ⚽ Lieblingsverein: Countdown zum nächsten Spiel ----------
-  // Bundesliga-Vereine der Saison 2025/26 (Auf- und Absteiger: „Anderer Verein“)
+  // Bundesliga-Vereine 2026/27, Namen genau wie bei OpenLigaDB. Die Liste wird außerdem automatisch von dort aktualisiert (Auf- und Absteiger).
   const CLUBS = [
-    ['fcb', 'FC Bayern München', 'FC Bayern', '#dc052d', '#ffffff', ['Bayern']], ['bvb', 'Borussia Dortmund', 'BVB', '#fde100', '#1a1a1a', ['Dortmund']],
-    ['b04', 'Bayer 04 Leverkusen', 'Leverkusen', '#e32221', '#1a1a1a', ['Leverkusen']], ['sge', 'Eintracht Frankfurt', 'Frankfurt', '#e1000f', '#1a1a1a', ['Frankfurt']],
-    ['rbl', 'RB Leipzig', 'Leipzig', '#dd0741', '#ffffff', ['Leipzig']], ['vfb', 'VfB Stuttgart', 'Stuttgart', '#e32219', '#ffffff', ['Stuttgart']],
-    ['scf', 'SC Freiburg', 'Freiburg', '#e2001a', '#1a1a1a', ['Freiburg']], ['m05', '1. FSV Mainz 05', 'Mainz 05', '#c3141e', '#ffffff', ['Mainz']],
-    ['svw', 'SV Werder Bremen', 'Werder', '#1d9053', '#ffffff', ['Bremen']], ['bmg', 'Borussia Mönchengladbach', 'Gladbach', '#1a1a1a', '#ffffff', ['Gladbach']],
-    ['wob', 'VfL Wolfsburg', 'Wolfsburg', '#65b32e', '#ffffff', ['Wolfsburg']], ['fca', 'FC Augsburg', 'Augsburg', '#ba3733', '#46714d', ['Augsburg']],
-    ['fcu', '1. FC Union Berlin', 'Union', '#eb1923', '#ffffff', ['Union Berlin']], ['stp', 'FC St. Pauli', 'St. Pauli', '#624839', '#ffffff', ['Pauli']],
-    ['tsg', 'TSG Hoffenheim', 'Hoffenheim', '#1961b5', '#ffffff', ['Hoffenheim']], ['fch', '1. FC Heidenheim', 'Heidenheim', '#e30613', '#003b79', ['Heidenheim']],
-    ['koe', '1. FC Köln', 'Köln', '#ed1c24', '#ffffff', ['Köln']], ['hsv', 'Hamburger SV', 'HSV', '#0a3f86', '#ffffff', ['Hamburger']],
+    ['fcb', 'FC Bayern München', 'FC Bayern', '#dc052d', '#ffffff'], ['bvb', 'Borussia Dortmund', 'BVB', '#fde100', '#1a1a1a'],
+    ['b04', 'Bayer 04 Leverkusen', 'Leverkusen', '#e32221', '#1a1a1a'], ['sge', 'Eintracht Frankfurt', 'Frankfurt', '#e1000f', '#1a1a1a'],
+    ['rbl', 'RB Leipzig', 'Leipzig', '#dd0741', '#ffffff'], ['vfb', 'VfB Stuttgart', 'Stuttgart', '#e32219', '#ffffff'],
+    ['scf', 'SC Freiburg', 'Freiburg', '#e2001a', '#1a1a1a'], ['m05', '1. FSV Mainz 05', 'Mainz 05', '#c3141e', '#ffffff'],
+    ['svw', 'SV Werder Bremen', 'Werder', '#1d9053', '#ffffff'], ['bmg', 'Borussia Mönchengladbach', 'Gladbach', '#1a1a1a', '#ffffff'],
+    ['fca', 'FC Augsburg', 'Augsburg', '#ba3733', '#46714d'], ['fcu', '1. FC Union Berlin', 'Union', '#eb1923', '#ffffff'],
+    ['tsg', 'TSG Hoffenheim', 'Hoffenheim', '#1961b5', '#ffffff'], ['koe', '1. FC Köln', 'Köln', '#ed1c24', '#ffffff'],
+    ['hsv', 'Hamburger SV', 'HSV', '#0a3f86', '#ffffff'], ['s04', 'FC Schalke 04', 'Schalke', '#004d9d', '#ffffff'],
+    ['scp', 'SC Paderborn 07', 'Paderborn', '#005ca9', '#1a1a1a'], ['sve', 'SV 07 Elversberg', 'Elversberg', '#1a1a1a', '#ffffff'],
+    // frühere Bundesligisten: Farben, falls sie wieder aufsteigen
+    ['wob', 'VfL Wolfsburg', 'Wolfsburg', '#65b32e', '#ffffff'], ['stp', 'FC St. Pauli', 'St. Pauli', '#624839', '#ffffff'], ['fch', '1. FC Heidenheim 1846', 'Heidenheim', '#e30613', '#003b79'],
+    ['bsc', 'Hertha BSC', 'Hertha', '#005ca9', '#ffffff'], ['h96', 'Hannover 96', 'Hannover', '#00843d', '#1a1a1a'], ['bie', 'Arminia Bielefeld', 'Bielefeld', '#004e95', '#1a1a1a'],
   ];
+  const TEAMS_KEY = 'habit-baukasten.teams';
+  let olTeams = null;   // aktuelle Bundesliga-Teams von OpenLigaDB: [{ name, short }]
+  try { olTeams = JSON.parse(localStorage.getItem(TEAMS_KEY)); } catch {}
+  const clubChoices = () => {
+    const names = olTeams?.teams?.length >= 16 ? olTeams.teams : CLUBS.slice(0, 18).map((c) => ({ name: c[1], short: c[2] }));
+    return names.map((t) => { const c = CLUBS.find((x) => x[1] === t.name); return c ? { key: c[0], name: c[1], short: c[2], c1: c[3], c2: c[4] } : { key: 'ol:' + t.name, name: t.name, short: t.short || t.name, c1: '#8f96a8', c2: '#ffffff' }; })
+      .sort((a, b) => a.name.localeCompare(b.name, 'de'));
+  };
+  async function loadTeams() {
+    const season = seasonOf(new Date());
+    if (GUEST || (olTeams?.season === season && Date.now() - olTeams.at < 7 * 864e5)) return;
+    try {
+      const r = await fetch(`https://api.openligadb.de/getavailableteams/bl1/${season}`);
+      const data = r.ok ? await r.json() : [];
+      if (Array.isArray(data) && data.length >= 16) { olTeams = { season, at: Date.now(), teams: data.map((t) => ({ name: t.teamName, short: t.shortName })) }; try { localStorage.setItem(TEAMS_KEY, JSON.stringify(olTeams)); } catch {} window.habitRefreshClubs?.(); }
+    } catch {}
+  }
+  window.habitClubChoices = clubChoices;
   state.football ||= { manual: [] };
   const FX_KEY = 'habit-baukasten.fixtures';
   const COMP_ICON = { 'Bundesliga': '🇩🇪', 'Champions League': '⭐', 'DFB-Pokal': '🏆' };
   const clubOf = () => {
     const pr = state.profile || {};
-    if (pr.club === 'other') return pr.clubName ? { key: 'other', name: pr.clubName, short: pr.clubName, c1: '#8f96a8', c2: '#ffffff', terms: [pr.clubName] } : null;
+    if (pr.club === 'other') return pr.clubName ? { key: 'other', name: pr.clubName, short: pr.clubName, c1: '#8f96a8', c2: '#ffffff', loose: true } : null;
     const c = CLUBS.find((x) => x[0] === pr.club);
-    return c ? { key: c[0], name: c[1], short: c[2], c1: c[3], c2: c[4], terms: c[5] } : null;
+    if (c) return { key: c[0], name: c[1], short: c[2], c1: c[3], c2: c[4] };
+    return pr.club?.startsWith('ol:') ? { key: pr.club, name: pr.club.slice(3), short: pr.clubShort || pr.club.slice(3), c1: '#8f96a8', c2: '#ffffff' } : null;
   };
   let fxCache = null, fxStatus = '';
   try { fxCache = JSON.parse(localStorage.getItem(FX_KEY)); } catch {}
   const seasonOf = (d) => (d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1);
-  const isClub = (name, c) => c.terms.some((w) => String(name || '').toLowerCase().includes(w.toLowerCase()));
+  const isClub = (name, c) => { const n = String(name || '').toLowerCase().trim(), w = c.name.toLowerCase().trim(); return c.loose ? n.includes(w) : n === w; };
   const clubId = (c) => c.key + ':' + c.name;
   // Spielplan von OpenLigaDB (kostenlos, ohne Schlüssel), höchstens alle 6 Stunden
+  let fxLoading = false;
   async function loadFixtures(force) {
     const c = clubOf();
-    if (!c || GUEST) return;
+    if (!c || GUEST || fxLoading) return;
     if (!force && fxCache?.club === clubId(c) && Date.now() - fxCache.at < 6 * 3600e3) return;
+    fxLoading = true;
     const season = seasonOf(new Date()), out = [];
     let okAny = false;
-    for (const [comp, shortcuts] of [['Bundesliga', ['bl1']], ['Champions League', ['ucl', 'cl']], ['DFB-Pokal', ['dfb']]]) {
-      for (const sc of shortcuts) {
-        try {
-          const r = await fetch(`https://api.openligadb.de/getmatchdata/${sc}/${season}`);
-          if (!r.ok) continue;
-          const data = await r.json();
-          if (!Array.isArray(data) || !data.length) continue;
-          okAny = true;
-          for (const m of data) {
-            const h = m.team1?.teamName, a = m.team2?.teamName, home = isClub(h, c);
-            if (!home && !isClub(a, c)) continue;
-            const rs = m.matchResults || [], res = rs.find((x) => x.resultTypeID === 2) || rs[rs.length - 1];
-            out.push({ id: 'o' + m.matchID, comp, when: Date.parse(m.matchDateTimeUTC || m.matchDateTime), opp: home ? a : h, isHome: home, round: m.group?.groupName || '',
-              done: !!m.matchIsFinished, score: res ? (home ? `${res.pointsTeam1}:${res.pointsTeam2}` : `${res.pointsTeam2}:${res.pointsTeam1}`) : '' });
-          }
-          break;
-        } catch {}
+    const getJson = async (path) => { const r = await fetch('https://api.openligadb.de/' + path); return r.ok ? r.json() : null; };
+    const usable = (data) => Array.isArray(data) && data.length && new Set(data.map((m) => m.matchDateTimeUTC || m.matchDateTime)).size > 1;   // nur Platzhalter-Termine? dann nicht
+    for (const [comp, shortcuts] of [['Bundesliga', ['bl1']], ['DFB-Pokal', ['dfb']], ['Champions League', ['ucl']]]) {
+      let list = shortcuts, found = false;
+      for (let round = 0; round < 2 && !found; round++) {
+        for (const sc of list) {
+          try {
+            const data = await getJson(`getmatchdata/${encodeURIComponent(sc)}/${season}`);
+            if (!usable(data)) continue;
+            okAny = found = true;
+            for (const m of data) {
+              const h = m.team1?.teamName, a = m.team2?.teamName, home = isClub(h, c);
+              if (!home && !isClub(a, c)) continue;
+              const rs = m.matchResults || [], res = rs.find((x) => x.resultTypeID === 2) || rs[rs.length - 1];
+              out.push({ id: 'o' + m.matchID, comp, when: Date.parse(m.matchDateTimeUTC || m.matchDateTime), opp: home ? a : h, isHome: home, round: m.group?.groupName || '',
+                done: !!m.matchIsFinished, score: res ? (home ? `${res.pointsTeam1}:${res.pointsTeam2}` : `${res.pointsTeam2}:${res.pointsTeam1}`) : '' });
+            }
+            break;
+          } catch {}
+        }
+        if (!found && comp === 'Champions League' && round === 0) {   // Kürzel hat sich geändert? In der Ligenliste nachsehen
+          try {
+            const leagues = await getJson('getavailableleagues') || [];
+            list = leagues.filter((l) => String(l.leagueSeason) === String(season) && /^(UEFA )?Champions League \d{4}\/\d{2,4}$/i.test(l.leagueName || '') && l.leagueShortcut !== 'ucl').map((l) => l.leagueShortcut);
+          } catch { list = []; }
+        } else break;
       }
     }
     if (okAny) { fxCache = { club: clubId(c), at: Date.now(), matches: out }; fxStatus = ''; try { localStorage.setItem(FX_KEY, JSON.stringify(fxCache)); } catch {} }
     else fxStatus = 'offline';
+    fxLoading = false;
     renderFuss();
   }
   const allMatches = () => {
@@ -2161,7 +2196,7 @@
     $('fussTitle').textContent = c.short;
     const now = Date.now(), list = allMatches();
     const coming = list.filter((m) => !m.done && m.when > now - LIVE), next = coming[0];
-    const last = list.filter((m) => m.score && m.when <= now).pop();
+    const last = list.filter((m) => m.done && m.score && m.when <= now).pop();
     $('fussNext').innerHTML = next
       ? `<b>${COMP_ICON[next.comp] || '⚽'} ${esc(next.isHome ? `${c.short} – ${next.opp}` : `${next.opp} – ${c.short}`)}</b><small>${esc(next.comp)}${next.round ? ' · ' + esc(next.round) : ''} · ${fmtKick(next.when)} · ${next.isHome ? 'Heimspiel' : 'Auswärts'}</small>`
       : '<b>Noch kein nächstes Spiel bekannt</b><small>Du kannst es unten selbst eintragen.</small>';
@@ -2184,7 +2219,12 @@
     const n = window.fussNext;
     if (!n || $('fussCard').hidden) { $('fussCount').textContent = ''; $('fussSum').textContent = ''; return; }
     const d = n.when - Date.now();
-    if (d <= 0) { $('fussCount').textContent = d > -LIVE ? '⚽ Läuft gerade!' : ''; $('fussSum').textContent = 'Läuft gerade!'; if (d <= -LIVE) renderFuss(); return; }
+    if (d <= 0) {
+      $('fussCount').textContent = d > -LIVE ? `⚽ Läuft gerade!${n.score ? ' ' + n.score : ''}` : ''; $('fussSum').textContent = 'Läuft gerade!';
+      if (d <= -LIVE) renderFuss();
+      else if (!fxLoading && Date.now() - (fxCache?.at || 0) > 5 * 60e3) loadFixtures(true);   // Spielstand alle 5 Minuten
+      return;
+    }
     const dd = Math.floor(d / 864e5), hh = Math.floor(d / 36e5) % 24, mm = Math.floor(d / 6e4) % 60, ss = Math.floor(d / 1e3) % 60;
     $('fussCount').textContent = dd ? `${dd} ${dd === 1 ? 'Tag' : 'Tage'} · ${p2(hh)}:${p2(mm)}:${p2(ss)}` : `${p2(hh)}:${p2(mm)}:${p2(ss)}`;
     const today = new Date(n.when).toDateString() === new Date().toDateString();
@@ -2207,6 +2247,8 @@
     state.football.manual = state.football.manual.filter((x) => x.id !== b.dataset.fdel); save(); renderFuss();
   });
   window.renderFuss = renderFuss;
+  window.habitRefreshClubs = () => { if (!$('setupOverlay').hidden && cur?.() === 'club') renderSetup(); };
+  loadTeams();
   setInterval(tickFuss, 1000);
   setInterval(() => loadFixtures(false), 30 * 60 * 1000);
   renderFuss();

@@ -23,6 +23,9 @@ Vorschau erzeugen:
   Konten und Einträge liegen bisher nur im Browser des Geräts (localStorage, je Konto ein eigener Schlüssel `habit-baukasten.v2:<name>`).
   Für eine echte Online-Version mit Anmeldung von überall braucht es noch einen Server (z. B. Netlify-Funktion mit Speicher).
 - Im Assistenten „Über dich“: Frau oder Mann. Den Zyklus-Tracker gibt es nur für Frauen.
-- „⚽ Lieblingsverein“: Bundesliga-Verein wählen (oder „Anderer Verein“). Countdown zum nächsten Spiel aus dem Spielplan von OpenLigaDB
-  (Bundesliga, DFB-Pokal, Champions League), höchstens alle 6 Stunden geladen. Spiele lassen sich auch selbst eintragen.
+- „⚽ Lieblingsverein“: Bundesliga-Verein wählen (oder „Anderer Verein“). Countdown zum nächsten Spiel, automatisch aus OpenLigaDB
+  (api.openligadb.de, kostenlos, ohne Schlüssel, Abruf direkt aus dem Browser erlaubt):
+  Bundesliga `bl1`, DFB-Pokal `dfb`, Champions League `ucl` (falls das Kürzel wechselt, wird es in `getavailableleagues` gesucht).
+  Die Vereinsliste kommt aus `getavailableteams/bl1/<Saison>` und passt sich Auf- und Absteigern an.
+  Spielplan höchstens alle 6 Stunden, während eines Spiels alle 5 Minuten (Spielstand). Spiele lassen sich auch selbst eintragen.
 - Dazu alle Funktionen von Janas Seite: Easter Eggs, Patch Notes mit Feuerwerk, einklappbare Tabs, Discord-Lerngruppe, Ton immer an.
