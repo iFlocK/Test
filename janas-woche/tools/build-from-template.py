@@ -19,7 +19,9 @@ CONFIG = {
     'preset': {'name': 'Jana', 'gender': 'w', 'palette': 'rosa', 'animal': 'dog', 'fur': 'golden', 'pet': '', 'uni': True, 'cycle': False,
                'club': '', 'clubName': '', 'clubShort': '', 'birthday': '2000-08-25', 'together': {'date': '2025-09-18', 'partner': ''}, 'city': ''},
     'changelog': [
-        {'v': '0.10.1', 'title': 'Auf allen Geräten gleich', 'notes': [
+        {'v': '0.10.1', 'title': 'Überall gleich und schönere Bücher', 'notes': [
+            ['⭐', 'Halbe Sterne', 'Bücher kannst du jetzt auch mit halben Sternen bewerten: links auf einen Stern tippen.'],
+            ['📚', 'Genres und Cover', 'Jedes Buch bekommt ein Genre mit eigener Farbe, das Regal ist danach sortiert. Fahr mit der Maus über einen Buchrücken oder tipp ihn an, dann siehst du das Cover.'],
             ['☁️', 'MacBook und iPhone', 'Was du am MacBook einträgst, ist auch auf dem iPhone da, und umgekehrt. Der Abgleich passiert automatisch beim Öffnen und nach jeder Änderung.'],
             ['💾', 'Datensicherung', 'Unten rechts gibt es jetzt den 💾-Knopf: Speichere deine Einträge (Deadlines, Gewohnheiten, Bücher …) als Datei, zum Beispiel über „In Dateien sichern“, und stelle sie bei Bedarf wieder her. Ein roter Punkt erinnert dich, wenn die letzte Sicherung länger als zwei Wochen her ist.'],
         ]},

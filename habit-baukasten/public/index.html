@@ -334,15 +334,30 @@
   .book-mini i { width: 4px; height: 16px; border-radius: 1px; border: 1px solid rgba(60, 40, 60, .25); }
   .book-body { display: grid; gap: 10px; margin-top: 12px; }
   .book-shelf { display: flex; flex-wrap: wrap; gap: 2px; align-items: flex-end; min-height: 40px; padding: 6px 8px 0; border-bottom: 5px solid #c99a6b; border-radius: 4px; }
-  .book-shelf i { width: 10px; border-radius: 2px 2px 0 0; border: 1px solid rgba(60, 40, 60, .3); box-shadow: inset 0 3px 0 rgba(255, 255, 255, .35); }
+  .book-shelf .spine { width: 10px; padding: 0; border-radius: 2px 2px 0 0; border: 1px solid rgba(60, 40, 60, .3); box-shadow: inset 0 3px 0 rgba(255, 255, 255, .35); cursor: pointer; transition: transform .12s; }
+  .book-shelf .spine:hover, .book-shelf .spine:focus-visible, .book-shelf .spine.on { transform: translateY(-4px); }
+  .book-shelf .gap { width: 6px; }
+  .shelf-wrap { position: relative; }
+  .book-peek { position: absolute; z-index: 5; width: 168px; bottom: calc(100% - 4px); background: var(--card); border: 2px solid var(--accent); border-radius: 14px;
+    padding: 8px; box-shadow: 0 8px 24px rgba(60, 30, 60, .25); display: grid; gap: 6px; pointer-events: none; }
+  .book-peek .cover { width: 100%; aspect-ratio: 2 / 3; border-radius: 6px; object-fit: cover; background: var(--soft); display: block; }
+  .book-peek .cover.ph { display: grid; place-items: center; text-align: center; padding: 10px; font-family: var(--font-display); font-weight: 700; font-size: .95rem; color: var(--chip-ink); }
+  .book-peek b { font-size: .85rem; line-height: 1.25; }
+  .book-peek small { color: var(--muted); font-size: .75rem; }
+  .genre-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: .75rem; color: var(--muted); }
+  .genre-legend span, .g-chip { display: inline-flex; align-items: center; gap: 4px; }
+  .genre-legend i, .g-chip i { width: 9px; height: 9px; border-radius: 2px; border: 1px solid rgba(60, 40, 60, .3); }
+  .g-select { justify-self: start; width: auto; font: inherit; font-size: .75rem; color: var(--muted); background: none; border: none; padding: 0; max-width: 100%; }
   .book-stats { margin: 0; font-weight: 800; font-size: .88rem; }
   .book-form { display: grid; gap: 6px; }
+  .book-form select { font: inherit; font-size: .9rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; min-width: 0; }
   .book-form input { font: inherit; font-size: .9rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; min-width: 0; }
   .book-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .book-label { font-size: .82rem; font-weight: 800; color: var(--muted); }
   .stars-pick { display: flex; }
   .star, .book-stars button { border: none; background: none; padding: 0 2px; font-size: 1.35rem; line-height: 1; color: #e8b84a; cursor: pointer; }
-  .star:not(.on) { color: var(--muted); opacity: .6; }
+  .st-empty { color: var(--muted) !important; opacity: .55; }
+  .st-half { background: linear-gradient(90deg, #e8b84a 50%, color-mix(in srgb, var(--muted) 55%, transparent) 50%); -webkit-background-clip: text; background-clip: text; color: transparent !important; }
   .book-list { list-style: none; margin: 0; padding: 0; display: grid; }
   .book { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 2px; border-top: 1px solid var(--border); }
   .book-spine { width: 8px; height: 30px; border-radius: 2px; border: 1px solid rgba(60, 40, 60, .3); }
@@ -352,6 +367,7 @@
   .book-stars { display: flex; }
   .book-stars button { font-size: 1rem; padding: 0 1px; }
   @media (max-width: 420px) { .book { grid-template-columns: auto minmax(0, 1fr) auto; } .book-stars { grid-column: 2; } }
+  @media (prefers-reduced-motion: reduce) { .book-shelf .spine { transition: none; } }
 
   /* Einrichtungs-Assistent */
   .setup p { margin: 0 0 10px; }
@@ -666,12 +682,14 @@
     <details id="bookDetails">
       <summary class="ach-summary"><h2>📖 Gelesene Bücher</h2><span class="book-mini" id="bookMini" aria-hidden="true"></span><span class="muted" id="bookCount"></span><span class="chev" aria-hidden="true">▾</span></summary>
       <div class="book-body">
-        <div class="book-shelf" id="bookShelf" aria-label="Bücherregal"></div>
+        <div class="shelf-wrap"><div class="book-shelf" id="bookShelf" aria-label="Bücherregal"></div><div class="book-peek" id="bookPeek" hidden aria-hidden="true"></div></div>
+        <div class="genre-legend" id="genreLegend"></div>
         <p class="book-stats" id="bookStats"></p>
         <form class="book-form" id="bookForm">
           <input name="title" placeholder="Titel des Buchs" aria-label="Titel des Buchs" autocomplete="off">
           <input name="author" placeholder="Autor:in" aria-label="Autor oder Autorin" autocomplete="off">
-          <div class="book-row"><span class="book-label">Bewertung</span><span class="stars-pick" id="bookStars" role="radiogroup" aria-label="Bewertung in Sternen"></span></div>
+          <select name="genre" id="bookGenre" aria-label="Genre"></select>
+          <div class="book-row"><span class="book-label">Bewertung</span><span class="stars-pick" id="bookStars" role="group" aria-label="Bewertung in Sternen"></span></div>
           <div class="book-row"><label class="book-label" for="bookDate">Beendet am</label><input name="date" id="bookDate" type="date"><button class="pill primary" type="submit">+ Ins Regal</button></div>
         </form>
         <ul class="book-list" id="bookList"></ul>
@@ -901,9 +919,9 @@
           entries: [{ id: 'e30', amount: 120, at: addDays(new Date(), -30).getTime() }] },
       ],
       books: [
-        ['Der kleine Prinz', 'Antoine de Saint-Exupéry', 5, 40], ['Atomic Habits', 'James Clear', 4, 30], ['Die Mitternachtsbibliothek', 'Matt Haig', 5, 18],
-        ['Das Café am Rande der Welt', 'John Strelecky', 3, 9], ['Eine kurze Geschichte der Menschheit', 'Yuval Noah Harari', 4, 2],
-      ].map(([title, author, stars, ago], i) => ({ id: 'b' + i, title, author, stars, date: key(addDays(new Date(), -ago)), at: Date.now(), color: ['#f4a7b9', '#a9c8ec', '#a6dcc2', '#f8cfa0', '#cdb4e8'][i] })),
+        ['Der kleine Prinz', 'Antoine de Saint-Exupéry', 5, 40, 'klassiker'], ['Atomic Habits', 'James Clear', 4.5, 30, 'ratgeber'], ['Die Mitternachtsbibliothek', 'Matt Haig', 5, 18, 'roman'],
+        ['Das Café am Rande der Welt', 'John Strelecky', 3.5, 9, 'ratgeber'], ['Eine kurze Geschichte der Menschheit', 'Yuval Noah Harari', 4, 2, 'sachbuch'], ['Momo', 'Michael Ende', 4.5, 60, 'fantasy'],
+      ].map(([title, author, stars, ago, genre], i) => ({ id: 'b' + i, title, author, stars, genre, date: key(addDays(new Date(), -ago)), at: Date.now(), color: ['#f4a7b9', '#a9c8ec', '#a6dcc2', '#f8cfa0', '#cdb4e8', '#c6e3a9'][i] })),
       uni: {
         subjects: [{ id: 's1', name: 'Statistik', color: 'gehirn' }, { id: 's2', name: 'Anatomie', color: 'sozial' }, { id: 's3', name: 'Englisch', color: 'ern' }],
         sessions: [0, 1, 1, 2, 3, 3, 4, 8, 9, 10].map((dd, i) => ({ id: 'ss' + i, subject: ['s1', 's2', 's3'][i % 3], minutes: i % 4 ? 25 : 50, at: addDays(new Date(), -dd).getTime(), full: true })),
@@ -1889,47 +1907,137 @@
   // ---------- 📖 Gelesene Bücher ----------
   state.books ||= [];
   const SPINES = ['#f4a7b9', '#a9c8ec', '#a6dcc2', '#f8cfa0', '#cdb4e8', '#c6e3a9', '#f6df96', '#b9d3db'];
+  // Genres mit festen Farben: so bekommt das Regal ein System
+  const GENRES = [
+    ['roman', 'Roman', '#f4a7b9'], ['krimi', 'Krimi & Thriller', '#7f93bd'], ['fantasy', 'Fantasy', '#c3a6e6'], ['scifi', 'Science-Fiction', '#8fd0e8'],
+    ['liebe', 'Liebesroman', '#ef8f95'], ['historisch', 'Historischer Roman', '#d6ad84'], ['horror', 'Horror', '#7d6b91'], ['klassiker', 'Klassiker', '#a88f78'],
+    ['jugend', 'Jugendbuch', '#f8c98f'], ['kinder', 'Kinderbuch', '#f6df96'], ['comic', 'Comic & Manga', '#f5a8d8'], ['lyrik', 'Lyrik & Gedichte', '#e2c8f2'],
+    ['humor', 'Humor', '#ffd36e'], ['biografie', 'Biografie', '#a6dcc2'], ['sachbuch', 'Sachbuch', '#8fc49c'], ['ratgeber', 'Ratgeber & Selbsthilfe', '#c6e3a9'],
+    ['fachbuch', 'Fachbuch & Studium', '#a9c8ec'], ['reise', 'Reise', '#7fcfc0'], ['kochen', 'Kochbuch', '#f2b48a'], ['sonstiges', 'Sonstiges', '#cfc8d6'],
+  ];
+  const genreOf = (k) => GENRES.find((g) => g[0] === k);
+  const bookColor = (b) => genreOf(b.genre)?.[2] || b.color || SPINES[0];
+  $('bookGenre').innerHTML = '<option value="">Genre wählen …</option>' + GENRES.map(([k, n]) => `<option value="${k}">${n}</option>`).join('');
   let bookStars = 0;
-  const starStr = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
-  function renderStarPick() {
-    $('bookStars').innerHTML = [1, 2, 3, 4, 5].map((n) => `<button type="button" class="star ${n <= bookStars ? 'on' : ''}" data-star="${n}" role="radio" aria-checked="${n === bookStars}" aria-label="${n} ${n === 1 ? 'Stern' : 'Sterne'}">${n <= bookStars ? '★' : '☆'}</button>`).join('');
+  const fmtStars = (r) => String(r).replace('.', ',');
+  // Sterne mit Hälften: links auf einen Stern = halber Stern, rechts = ganzer Stern
+  const starsHTML = (r, attrs) => [1, 2, 3, 4, 5].map((n) => {
+    const cls = r >= n ? '' : r >= n - 0.5 ? 'st-half' : 'st-empty';
+    return `<button type="button" class="star ${cls}" ${attrs(n)} aria-label="${n} ${n === 1 ? 'Stern' : 'Sterne'} (links: ${fmtStars(n - 0.5)})">★</button>`;
+  }).join('');
+  function starValue(e, btn, n, cur) {
+    const r = btn.getBoundingClientRect();
+    let v = e.detail === 0 || !e.clientX ? (cur === n ? n - 0.5 : n) : (e.clientX - r.left < r.width / 2 ? n - 0.5 : n);   // Tastatur: ganz, dann halb
+    return v === cur ? 0 : v;
   }
+  function renderStarPick() {
+    $('bookStars').innerHTML = starsHTML(bookStars, (n) => `data-star="${n}"`);
+    $('bookStars').setAttribute('aria-label', `Bewertung: ${bookStars ? fmtStars(bookStars) : 'keine'} von 5 Sternen`);
+  }
+  let shelfOrder = [];
   function renderBooks() {
     const list = [...state.books].sort((a, b) => b.date.localeCompare(a.date) || b.at - a.at);
     const y = String(new Date().getFullYear()), thisYear = list.filter((b) => b.date.startsWith(y));
     const rated = list.filter((b) => b.stars), avg = rated.length ? rated.reduce((a, b) => a + b.stars, 0) / rated.length : 0;
     $('bookCount').textContent = list.length ? `${list.length} ${list.length === 1 ? 'Buch' : 'Bücher'}` : 'noch keins';
     $('bookStats').textContent = list.length ? `Dieses Jahr ${thisYear.length} ${thisYear.length === 1 ? 'Buch' : 'Bücher'}${rated.length ? ` · Ø ${avg.toLocaleString('de-DE', { maximumFractionDigits: 1 })} ★` : ''}` : '';
-    // Bücherregal: ein Buchrücken pro Buch (älteste links)
-    const shelf = [...list].reverse().slice(-40);
-    $('bookShelf').innerHTML = shelf.length ? shelf.map((b, i) => `<i title="${esc(b.title)}" data-style="background:${b.color};height:${22 + ((b.title.length * 7 + i * 3) % 12)}px"></i>`).join('') : '<span class="muted">Dein Regal wartet auf das erste Buch 📚</span>';
-    $('bookMini').innerHTML = list.slice(0, 8).map((b) => `<i data-style="background:${b.color}"></i>`).join('');
+    // Bücherregal: nach Genre sortiert (Reihenfolge wie in der Liste), innerhalb eines Genres älteste links
+    const gi = (b) => { const i = GENRES.findIndex((g) => g[0] === b.genre); return i < 0 ? GENRES.length : i; };
+    shelfOrder = [...list].reverse().slice(-60).sort((a, b) => gi(a) - gi(b) || a.date.localeCompare(b.date));
+    $('bookShelf').innerHTML = shelfOrder.length ? shelfOrder.map((b, i) => `${i && gi(b) !== gi(shelfOrder[i - 1]) ? '<span class="gap"></span>' : ''}<button type="button" class="spine" data-bpeek="${b.id}" aria-label="${esc(b.title)}${b.author ? ' von ' + esc(b.author) : ''}" data-style="background:${bookColor(b)};height:${22 + ((b.title.length * 7 + i * 3) % 12)}px"></button>`).join('') : '<span class="muted">Dein Regal wartet auf das erste Buch 📚</span>';
+    const counts = {}; for (const b of list) if (b.genre) counts[b.genre] = (counts[b.genre] || 0) + 1;
+    $('genreLegend').innerHTML = GENRES.filter(([k]) => counts[k]).map(([k, n, c]) => `<span><i data-style="background:${c}"></i>${n} ${counts[k]}</span>`).join('');
+    $('bookMini').innerHTML = list.slice(0, 8).map((b) => `<i data-style="background:${bookColor(b)}"></i>`).join('');
     $('bookList').innerHTML = list.map((b) => {
       const d = new Date(b.date + 'T12:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' });
-      return `<li class="book"><span class="book-spine" data-style="background:${b.color}"></span>
-        <span class="book-info"><b>${esc(b.title)}</b><small>${b.author ? esc(b.author) + ' · ' : ''}beendet am ${d}</small></span>
-        <span class="book-stars" role="group" aria-label="Bewertung ${b.stars || 0} von 5">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-bstar="${b.id}" data-n="${n}" aria-label="${n} ${n === 1 ? 'Stern' : 'Sterne'}">${n <= (b.stars || 0) ? '★' : '☆'}</button>`).join('')}</span>
+      return `<li class="book"><span class="book-spine" data-style="background:${bookColor(b)}"></span>
+        <span class="book-info"><b>${esc(b.title)}</b><small>${b.author ? esc(b.author) + ' · ' : ''}beendet am ${d}</small>
+          <select class="g-select" data-bgenre="${b.id}" aria-label="Genre von ${esc(b.title)}"><option value="">＋ Genre</option>${GENRES.map(([k, n]) => `<option value="${k}" ${b.genre === k ? 'selected' : ''}>${n}</option>`).join('')}</select></span>
+        <span class="book-stars" role="group" aria-label="Bewertung ${fmtStars(b.stars || 0)} von 5">${starsHTML(b.stars || 0, (n) => `data-bstar="${b.id}" data-n="${n}"`)}</span>
         <button class="todo-del" type="button" data-bdel="${b.id}" aria-label="${esc(b.title)} löschen">×</button></li>`;
     }).join('');
   }
+  // Cover suchen: Apple Books (gut für deutsche Titel), sonst Open Library. Gefundene Adresse wird beim Buch gespeichert.
+  const norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  const coverLoading = new Set();
+  async function findCover(b) {
+    if (b.cover !== undefined || coverLoading.has(b.id) || GUEST) return;
+    coverLoading.add(b.id);
+    let url = null, reached = false;
+    try {
+      const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(`${b.title} ${b.author || ''}`.trim())}&media=ebook&entity=ebook&country=de&limit=8`);
+      if (r.ok) {
+        reached = true;
+        const res = (await r.json()).results || [], t = norm(b.title), a = norm(b.author).split(' ').pop();
+        const hit = res.find((x) => norm(x.trackName) === t && (!a || norm(x.artistName).includes(a))) || res.find((x) => norm(x.trackName).startsWith(t)) || res[0];
+        if (hit?.artworkUrl100) url = hit.artworkUrl100.replace('100x100bb', '400x400bb');
+      }
+    } catch {}
+    if (!url) try {
+      const r = await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(b.title)}${b.author ? '&author=' + encodeURIComponent(b.author) : ''}&limit=1&fields=cover_i`);
+      if (r.ok) { reached = true; const id = (await r.json()).docs?.[0]?.cover_i; if (id) url = `https://covers.openlibrary.org/b/id/${id}-M.jpg`; }
+    } catch {}
+    coverLoading.delete(b.id);
+    if (!reached) return;   // offline oder gesperrt: später noch einmal versuchen
+    const book = state.books.find((x) => x.id === b.id);
+    if (!book) return;
+    book.cover = url || ''; save();
+    if (peekId === b.id) showPeek(b.id);
+  }
+  // Vorschau mit Cover beim Darüberfahren (Maus) oder Antippen (Handy)
+  let peekId = null, peekAt = 0;
+  function showPeek(id) {
+    const b = state.books.find((x) => x.id === id), btn = $('bookShelf').querySelector(`[data-bpeek="${id}"]`);
+    if (!b || !btn) return hidePeek();
+    if (peekId !== id) peekAt = performance.now();
+    peekId = id;
+    $('bookShelf').querySelectorAll('.spine.on').forEach((x) => x.classList.remove('on')); btn.classList.add('on');
+    const g = genreOf(b.genre), stars = b.stars ? '★'.repeat(Math.floor(b.stars)) + (b.stars % 1 ? '½' : '') : '';
+    const pk = $('bookPeek');
+    pk.innerHTML = (b.cover ? `<img class="cover" src="${esc(b.cover)}" alt="" referrerpolicy="no-referrer">` : `<div class="cover ph" data-style="background:${bookColor(b)}">${b.cover === undefined && !GUEST ? '…' : esc(b.title)}</div>`)
+      + `<b>${esc(b.title)}</b><small>${b.author ? esc(b.author) : ''}${g ? `${b.author ? ' · ' : ''}<span class="g-chip"><i data-style="background:${g[2]}"></i>${g[1]}</span>` : ''}${stars ? ` · ${stars}` : ''}</small>`;
+    pk.querySelector('img')?.addEventListener('error', () => { const i = pk.querySelector('img'); if (i) i.outerHTML = `<div class="cover ph" data-style="background:${bookColor(b)}">${esc(b.title)}</div>`; });
+    pk.hidden = false;
+    const wrap = $('bookShelf').parentElement.getBoundingClientRect(), r = btn.getBoundingClientRect();
+    const left = Math.min(Math.max(0, r.left - wrap.left + r.width / 2 - 84), wrap.width - 168);
+    pk.style.left = left + 'px';
+    findCover(b);
+  }
+  function hidePeek() { peekId = null; $('bookPeek').hidden = true; $('bookShelf').querySelectorAll('.spine.on').forEach((x) => x.classList.remove('on')); }
+  $('bookShelf').addEventListener('mouseover', (e) => { const s = e.target.closest('[data-bpeek]'); if (s && s.dataset.bpeek !== peekId) showPeek(s.dataset.bpeek); });
+  $('bookShelf').addEventListener('mouseleave', hidePeek);
+  $('bookShelf').addEventListener('focusin', (e) => { const s = e.target.closest('[data-bpeek]'); if (s) showPeek(s.dataset.bpeek); });
+  $('bookShelf').addEventListener('focusout', () => setTimeout(() => { if (!$('bookShelf').contains(document.activeElement)) hidePeek(); }, 0));
+  $('bookShelf').addEventListener('click', (e) => {
+    const s = e.target.closest('[data-bpeek]'); if (!s) return;
+    e.dogHandled = true;
+    if (peekId === s.dataset.bpeek && e.pointerType !== 'mouse' && performance.now() - peekAt > 500) hidePeek(); else showPeek(s.dataset.bpeek);   // iPhone: Antippen öffnet, nochmal tippen schließt
+  });
+  document.addEventListener('click', (e) => { if (peekId && !e.target.closest('#bookShelf')) hidePeek(); });
   $('bookStars').addEventListener('click', (e) => {
     const b = e.target.closest('[data-star]'); if (!b) return;
-    e.dogHandled = true; bookStars = +b.dataset.star === bookStars ? 0 : +b.dataset.star; renderStarPick();
+    e.dogHandled = true; bookStars = starValue(e, b, +b.dataset.star, bookStars); renderStarPick();
   });
   $('bookForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const f = e.target, title = f.elements.title.value.trim();
     if (!title) { f.elements.title.focus(); return; }
-    state.books.push({ id: uid(), title, author: f.elements.author.value.trim(), stars: bookStars, date: f.elements.date.value || todayKey(), at: Date.now(), color: SPINES[state.books.length % SPINES.length] });
-    f.elements.title.value = ''; f.elements.author.value = ''; f.elements.date.value = todayKey(); bookStars = 0; renderStarPick();
-    save(); renderBooks();
+    const book = { id: uid(), title, author: f.elements.author.value.trim(), genre: f.elements.genre.value, stars: bookStars, date: f.elements.date.value || todayKey(), at: Date.now(), color: SPINES[state.books.length % SPINES.length] };
+    state.books.push(book);
+    f.elements.title.value = ''; f.elements.author.value = ''; f.elements.genre.value = ''; f.elements.date.value = todayKey(); bookStars = 0; renderStarPick();
+    save(); renderBooks(); findCover(book);
     const n = state.books.length;
     e.dogHandled = true;
     window.janaDog?.happy(n === 1 ? 'Wuff! Dein erstes Buch im Regal! 📖' : `Wuff! Schon ${n} Bücher! 📚`);
   });
+  $('bookList').addEventListener('change', (e) => {
+    const g = e.target.closest('[data-bgenre]'); if (!g) return;
+    const b = state.books.find((x) => x.id === g.dataset.bgenre); b.genre = g.value; save(); renderBooks();
+  });
   $('bookList').addEventListener('click', (e) => {
     const s = e.target.closest('[data-bstar]'), d = e.target.closest('[data-bdel]');
-    if (s) { e.dogHandled = true; const b = state.books.find((x) => x.id === s.dataset.bstar); b.stars = b.stars === +s.dataset.n ? 0 : +s.dataset.n; save(); renderBooks(); }
+    if (e.target.closest('[data-bgenre]')) { e.dogHandled = true; return; }
+    if (s) { e.dogHandled = true; const b = state.books.find((x) => x.id === s.dataset.bstar); b.stars = starValue(e, s, +s.dataset.n, b.stars || 0); save(); renderBooks(); }
     if (d) {
       e.dogHandled = true;
       if (!d.classList.contains('armed')) { d.classList.add('armed'); d.textContent = 'Löschen?'; setTimeout(() => { if (d.isConnected) { d.classList.remove('armed'); d.textContent = '×'; } }, 3000); return; }
@@ -2510,8 +2618,10 @@
   // ---------- Versionsnummer und Patch Notes ----------
   // Bei jedem Upload: Version erhöhen und oben einen neuen Eintrag ergänzen.
   const CHANGELOG = [
-    { v: '0.3.0', title: 'Datensicherung', notes: [
+    { v: '0.3.0', title: 'Datensicherung und schönere Bücher', notes: [
       ['💾', 'Datensicherung', 'Unten rechts gibt es jetzt den 💾-Knopf: Speichere deine Einträge als Datei und stelle sie bei Bedarf wieder her. Ein roter Punkt erinnert dich, wenn die letzte Sicherung länger als zwei Wochen her ist.'],
+      ['⭐', 'Halbe Sterne', 'Bücher kannst du jetzt auch mit halben Sternen bewerten: links auf einen Stern tippen.'],
+      ['📚', 'Genres und Cover', 'Jedes Buch bekommt ein Genre mit eigener Farbe, das Regal ist danach sortiert. Fahr mit der Maus über einen Buchrücken oder tipp ihn an, dann siehst du das Cover.'],
     ] },
     { v: '0.2.0', title: 'Tabs und Live-Spielplan', notes: [
       ['⚙️', 'Einstellungen mit Tabs', 'Alle Bereiche der Einstellungen stehen oben als Tabs. Ein Tipp, und du bist da.'],
