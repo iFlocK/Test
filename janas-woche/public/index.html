@@ -218,6 +218,90 @@
   .demo-step { color: var(--muted); font-size: .75rem; font-variant-numeric: tabular-nums; margin-right: 2px; }
   .demo-out { color: var(--muted); font-size: .78rem; margin-left: 4px; }
 
+  /* 🎓 Uni */
+  .timer { display: grid; gap: 6px; justify-items: start; }
+  .timer-time { font-family: var(--font-display); font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+  .timer[data-phase="focus"] .timer-time { color: var(--accent-ink); }
+  .timer[data-phase="short"] .timer-time, .timer[data-phase="long"] .timer-time { color: #3f9a73; }
+  .timer-dots { display: flex; gap: 4px; align-items: center; font-size: .72rem; color: var(--muted); }
+  .timer-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
+  .timer-dots i.on { background: var(--accent); }
+  .timer-dots span { margin-left: 4px; }
+  .timer-subj, .uni-form select, .uni-form input { font: inherit; font-size: .85rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 5px 8px; min-width: 0; }
+  .timer-btns { display: flex; gap: 6px; }
+  .timer .pill { padding: 4px 12px; font-size: .82rem; }
+  .uni-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); margin-top: 10px; align-items: start; }
+  .uni-col { display: grid; gap: 8px; min-width: 0; }
+  .uni-col h3 { font-size: 1rem; }
+  .uni-subjects { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag.subj { display: inline-flex; gap: 6px; align-items: center; background: color-mix(in srgb, var(--c) var(--tint), var(--card)); }
+  .tag.subj button { border: none; background: none; padding: 0; color: var(--muted); font-weight: 800; }
+  .tag.subj button.armed { color: var(--accent-ink); }
+  .uni-form { display: flex; gap: 6px; flex-wrap: wrap; }
+  .uni-form input[name="name"], .uni-form input[name="title"], .uni-form input[name="text"] { flex: 1 1 140px; }
+  .uni-form input[name="min"] { width: 5.5em; }
+  .uni-form .pill { padding: 4px 12px; font-size: .82rem; }
+  .uni-total { margin: 4px 0 0; font-weight: 800; font-size: .9rem; }
+  .study-bars { display: grid; gap: 5px; }
+  .sb { display: grid; grid-template-columns: minmax(0, 7em) minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: .82rem; }
+  .sb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sb-bar { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
+  .sb-bar i { display: block; height: 100%; border-radius: 5px; }
+  .sb-val { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .subj-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: 0; }
+  .due { font-style: normal; font-weight: 700; }
+  .due.soon { color: var(--accent-ink); }
+  .due.late { color: #c2453a; }
+  .goal-count { font-size: .8rem; margin-top: -6px; }
+  .goal-bar { margin: 0; }
+  .uni .todo { padding: 6px 2px; }
+  .su-x { border: none; background: none; padding: 0 0 0 4px; color: var(--muted); font-weight: 800; }
+
+  /* Fortschrittsbalken (Lernziele, Sparziele) */
+  .progress { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress > div { height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .3s; }
+  @media (prefers-reduced-motion: reduce) { .progress > div { transition: none; } }
+
+  /* 📖 Gelesene Bücher */
+  .book-mini { display: flex; gap: 2px; align-items: flex-end; height: 18px; }
+  .book-mini i { width: 4px; height: 16px; border-radius: 1px; border: 1px solid rgba(60, 40, 60, .25); }
+  .book-body { display: grid; gap: 10px; margin-top: 12px; }
+  .book-shelf { display: flex; flex-wrap: wrap; gap: 2px; align-items: flex-end; min-height: 40px; padding: 6px 8px 0; border-bottom: 5px solid #c99a6b; border-radius: 4px; }
+  .book-shelf i { width: 10px; border-radius: 2px 2px 0 0; border: 1px solid rgba(60, 40, 60, .3); box-shadow: inset 0 3px 0 rgba(255, 255, 255, .35); }
+  .book-stats { margin: 0; font-weight: 800; font-size: .88rem; }
+  .book-form { display: grid; gap: 6px; }
+  .book-form input { font: inherit; font-size: .9rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; min-width: 0; }
+  .book-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .book-label { font-size: .82rem; font-weight: 800; color: var(--muted); }
+  .stars-pick { display: flex; }
+  .star, .book-stars button { border: none; background: none; padding: 0 2px; font-size: 1.35rem; line-height: 1; color: #e8b84a; cursor: pointer; }
+  .star:not(.on) { color: var(--muted); opacity: .6; }
+  .book-list { list-style: none; margin: 0; padding: 0; display: grid; }
+  .book { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 2px; border-top: 1px solid var(--border); }
+  .book-spine { width: 8px; height: 30px; border-radius: 2px; border: 1px solid rgba(60, 40, 60, .3); }
+  .book-info { display: grid; min-width: 0; }
+  .book-info b { overflow-wrap: break-word; }
+  .book-info small { color: var(--muted); font-size: .78rem; }
+  .book-stars { display: flex; }
+  .book-stars button { font-size: 1rem; padding: 0 1px; }
+  @media (max-width: 420px) { .book { grid-template-columns: auto minmax(0, 1fr) auto; } .book-stars { grid-column: 2; } }
+
+  .uni-discord { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
+  .uni-discord a.pill { text-decoration: none; background: #5865f2; color: #fff; border-color: #5865f2; }
+  .uni-discord form { display: flex; gap: 6px; flex-wrap: wrap; flex: 1 1 240px; }
+  .uni-discord input { flex: 1 1 180px; font: inherit; font-size: .85rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 5px 8px; min-width: 0; }
+  .uni-discord .pill { padding: 4px 12px; font-size: .82rem; }
+  .uni-discord .su-err { color: #c2453a; font-size: .8rem; margin: 0; flex-basis: 100%; }
+
+  /* Easter Eggs */
+  #pageTitle { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+  @keyframes discoHue { to { filter: hue-rotate(360deg); } }
+  html.disco main { animation: discoHue 1.6s steps(8) infinite; }
+  .heart-rain { position: fixed; inset: 0; pointer-events: none; z-index: 60; overflow: hidden; }
+  .heart-rain i { position: absolute; top: -40px; font-style: normal; font-size: 22px; animation: heartFall 3.2s linear forwards; }
+  @keyframes heartFall { to { transform: translateY(calc(100vh + 80px)) rotate(25deg); } }
+  @media (prefers-reduced-motion: reduce) { html.disco main { animation: none; filter: hue-rotate(140deg); } .heart-rain { display: none; } }
+
   /* KW-Übersicht */
   .overlay { position: fixed; inset: 0; z-index: 40; background: rgba(40, 25, 45, .35); display: grid; place-items: center;
     padding: max(16px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
@@ -293,10 +377,25 @@
 </head>
 <body>
 
+<script>
+(() => {
+  // Farb- und Größenangaben aus data-style per CSSOM setzen: funktioniert auch dort, wo style-Attribute gesperrt sind
+  const apply = (el) => {
+    const css = el.getAttribute('data-style');
+    if (css == null) return;
+    for (const decl of css.split(';')) { const i = decl.indexOf(':'); if (i > 0) el.style.setProperty(decl.slice(0, i).trim(), decl.slice(i + 1).trim()); }
+  };
+  const scan = (node) => { if (node.nodeType !== 1) return; if (node.hasAttribute('data-style')) apply(node); node.querySelectorAll('[data-style]').forEach(apply); };
+  new MutationObserver((list) => {
+    for (const m of list) { if (m.type === 'attributes') apply(m.target); else m.addedNodes.forEach(scan); }
+  }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-style'] });
+  document.addEventListener('DOMContentLoaded', () => scan(document.body));
+})();
+</script>
 <main>
   <header class="top">
     <div>
-      <h1>Janas Woche</h1>
+      <h1 id="pageTitle">Janas Woche</h1>
       <div class="week" id="weekLabel"></div>
       <button class="quote" id="quote" type="button" title="Antippen für einen neuen Spruch"></button>
     </div>
@@ -334,6 +433,13 @@
       <div class="water-week" id="waterWeek" aria-label="Wasser diese Woche"></div>
     </div>
   </section>
+  <section class="card timer" id="timerCard">
+    <div class="mood-head"><h2>Lern-Timer</h2><span class="muted" id="timerPhase">Bereit</span></div>
+    <div class="timer-time" id="timerTime" aria-live="off">25:00</div>
+    <div class="timer-dots" id="timerDots" aria-hidden="true"></div>
+    <select id="timerSubject" class="timer-subj" aria-label="Fach für diese Lernrunde"></select>
+    <div class="timer-btns"><button class="pill primary" id="timerStart" type="button">▶ Start</button><button class="pill" id="timerStop" type="button" hidden>■ Beenden</button></div>
+  </section>
   <section class="card mood" id="moodCard">
     <div class="mood-head"><h2>Stimmung heute</h2><span class="muted" id="moodLabel">Wie geht’s dir?</span></div>
     <div class="mood-row" id="moodRow" role="radiogroup" aria-label="Stimmung heute"></div>
@@ -348,6 +454,50 @@
   </div>
 
   <section class="days" id="days"></section>
+
+  <section class="card uni" id="uniCard">
+    <div class="todos-head"><h2>🎓 Uni</h2></div>
+    <div class="uni-discord" id="discordRow"></div>
+    <div class="uni-grid">
+      <div class="uni-col">
+        <h3>📚 Fächer &amp; Lernzeit</h3>
+        <div class="uni-subjects" id="subjList"></div>
+        <form class="uni-form" id="subjForm"><input name="name" placeholder="Neues Fach" aria-label="Neues Fach" autocomplete="off"><select name="color" id="subjColor" aria-label="Farbe des Fachs"></select><button class="pill" type="submit">+</button></form>
+        <p class="uni-total" id="studyTotal"></p>
+        <div class="study-bars" id="studyBars"></div>
+        <form class="uni-form" id="studyForm"><select name="subj" id="studyAddSubj" aria-label="Fach"></select><input name="min" type="number" min="1" max="600" placeholder="Min." aria-label="Minuten" inputmode="numeric"><button class="pill" type="submit">Nachtragen</button></form>
+      </div>
+      <div class="uni-col">
+        <h3>📬 Abgaben &amp; Deadlines</h3>
+        <ul class="todo-list" id="dlOpen"></ul>
+        <details id="dlDoneWrap" hidden><summary>Erledigt (<span id="dlDoneCount">0</span>)</summary><ul class="todo-list" id="dlDone"></ul></details>
+        <form class="uni-form" id="dlForm"><input name="title" placeholder="Was ist abzugeben?" aria-label="Titel der Abgabe" autocomplete="off"><select name="subj" id="dlSubj" aria-label="Fach"></select><input name="due" type="date" aria-label="Abgabedatum"><button class="pill" type="submit">+</button></form>
+      </div>
+      <div class="uni-col">
+        <h3 id="goalHead">🎯 Lernziele</h3><span class="muted goal-count" id="goalCount"></span>
+        <div class="progress goal-bar" id="goalBar" hidden><div></div></div>
+        <ul class="todo-list" id="goalList"></ul>
+        <form class="uni-form" id="goalForm"><input name="text" placeholder="Neues Lernziel" aria-label="Neues Lernziel" autocomplete="off"><select name="subj" id="goalSubj" aria-label="Fach"></select><button class="pill" type="submit">+</button></form>
+      </div>
+    </div>
+  </section>
+
+  <section class="card books" id="bookCard">
+    <details id="bookDetails">
+      <summary class="ach-summary"><h2>📖 Gelesene Bücher</h2><span class="book-mini" id="bookMini" aria-hidden="true"></span><span class="muted" id="bookCount"></span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="book-body">
+        <div class="book-shelf" id="bookShelf" aria-label="Bücherregal"></div>
+        <p class="book-stats" id="bookStats"></p>
+        <form class="book-form" id="bookForm">
+          <input name="title" placeholder="Titel des Buchs" aria-label="Titel des Buchs" autocomplete="off">
+          <input name="author" placeholder="Autor:in" aria-label="Autor oder Autorin" autocomplete="off">
+          <div class="book-row"><span class="book-label">Bewertung</span><span class="stars-pick" id="bookStars" role="radiogroup" aria-label="Bewertung in Sternen"></span></div>
+          <div class="book-row"><label class="book-label" for="bookDate">Beendet am</label><input name="date" id="bookDate" type="date"><button class="pill primary" type="submit">+ Ins Regal</button></div>
+        </form>
+        <ul class="book-list" id="bookList"></ul>
+      </div>
+    </details>
+  </section>
 
   <div class="two">
     <section class="card manage">
@@ -458,6 +608,23 @@
       ],
       water, ach: { first: key(new Date()), five: key(new Date()), sip: key(new Date()), water: key(last), todo1: key(new Date()) }, flags: {},
       achResetId: 'reset-2026-11-06', achSince: 0,
+      uni: {
+        subjects: [{ id: 's1', name: 'Statistik', color: 'gehirn' }, { id: 's2', name: 'Anatomie', color: 'sozial' }, { id: 's3', name: 'Englisch', color: 'ern' }],
+        sessions: [0, 1, 1, 2, 3, 3, 4, 8, 9, 10].map((dd, i) => ({ id: 'ss' + i, subject: ['s1', 's2', 's3'][i % 3], minutes: i % 4 ? 25 : 50, at: addDays(new Date(), -dd).getTime(), full: true })),
+        deadlines: [
+          { id: 'd1', title: 'Übungsblatt 5', subject: 's1', due: key(addDays(new Date(), 2)), done: false },
+          { id: 'd2', title: 'Referat Herz-Kreislauf', subject: 's2', due: key(addDays(new Date(), 9)), done: false },
+          { id: 'd3', title: 'Essay „Climate Change“', subject: 's3', due: key(addDays(new Date(), 16)), done: false },
+          { id: 'd4', title: 'Übungsblatt 4', subject: 's1', due: key(addDays(new Date(), -5)), done: true, doneAt: Date.now() - 6 * 864e5 },
+        ],
+        goals: { [key(mon)]: [{ id: 'g1', text: 'Kapitel 3 zusammenfassen', subject: 's1', done: true }, { id: 'g2', text: 'Karteikarten Herz lernen', subject: 's2', done: true },
+          { id: 'g3', text: 'Vokabeln Unit 7', subject: 's3', done: false }, { id: 'g4', text: 'Altklausur 2024 rechnen', subject: 's1', done: false }] },
+        timer: { phase: 'idle', round: 1 },
+      },
+      books: [
+        ['Der kleine Prinz', 'Antoine de Saint-Exupéry', 5, 40], ['Atomic Habits', 'James Clear', 4, 30], ['Die Mitternachtsbibliothek', 'Matt Haig', 5, 18],
+        ['Das Café am Rande der Welt', 'John Strelecky', 3, 9], ['Eine kurze Geschichte der Menschheit', 'Yuval Noah Harari', 4, 2],
+      ].map(([title, author, stars, ago], i) => ({ id: 'b' + i, title, author, stars, date: key(addDays(new Date(), -ago)), at: Date.now(), color: ['#f4a7b9', '#a9c8ec', '#a6dcc2', '#f8cfa0', '#cdb4e8'][i] })),
       mood: Object.fromEntries([5, 4, 3, 4, 2, 5, 4, 3, 5, 4, 1, 4, 5].map((v, i) => [key(addDays(new Date(), -i - 1)), { v, at: Date.now() }])),
     };
   }
@@ -489,22 +656,23 @@
       return `<article class="card day ${isToday ? 'today' : ''}" data-day="${i}">
         <div class="day-head"><h3>${name}${isToday ? '<span class="badge">heute</span>' : ''}</h3><span class="date">${moodImg(key(d))}${fmt(d, { day: 'numeric', month: 'short' })}</span></div>
         <ul class="items">${items.length ? items.map(it => `
-          <li class="item ${it.done ? 'done' : ''}" style="--c: var(--c-${areaOf(it)})">
+          <li class="item ${it.done ? 'done' : ''}" data-style="--c: var(--c-${areaOf(it)})">
             <button class="toggle" data-toggle="${it.id}" aria-pressed="${!!it.done}" title="Erledigt umschalten">${esc(labelOf(it))}</button>
             <button class="x" data-del="${it.id}" aria-label="${esc(labelOf(it))} entfernen">×</button>
           </li>`).join('') : '<li class="empty">Noch nichts ausgewählt</li>'}</ul>
         <button class="add-btn" data-open="${i}" aria-expanded="${open}">${open ? 'Fertig' : '+ Tag'}</button>
         ${open ? `<div class="picker">
-          <div class="tags">${state.tags.map(t => `<button class="tag" style="--c: var(--c-${t.area})" data-pick="${t.id}" aria-pressed="${used.has(t.id)}">${esc(t.name)}</button>`).join('')}</div>
+          <div class="tags">${state.tags.map(t => `<button class="tag" data-style="--c: var(--c-${t.area})" data-pick="${t.id}" aria-pressed="${used.has(t.id)}">${esc(t.name)}</button>`).join('')}</div>
           <form data-custom="${i}"><input name="text" id="custom-${i}" placeholder="Eigene Gewohnheit…" aria-label="Eigener Eintrag für ${name}" autocomplete="off"><button type="submit">+</button></form>
         </div>` : ''}
       </article>`;
     }).join('');
 
     $('tagList').innerHTML = Object.keys(AREAS).flatMap(a => state.tags.filter(t => t.area === a)).map(t =>
-      `<span class="tag" style="--c: var(--c-${t.area})">${esc(t.name)}<button data-rmtag="${t.id}" aria-label="Tag ${esc(t.name)} löschen">×</button></span>`).join('');
+      `<span class="tag" data-style="--c: var(--c-${t.area})">${esc(t.name)}<button data-rmtag="${t.id}" aria-label="Tag ${esc(t.name)} löschen">×</button></span>`).join('');
 
     $('note').value = w.note || '';
+    window.renderUni?.();
   }
 
   $('days').addEventListener('click', (e) => {
@@ -530,6 +698,7 @@
     e.preventDefault();
     const f = e.target, day = +f.dataset.custom, text = f.text.value.trim();
     if (!text) return;
+    loveCheck(text);
     let t = state.tags.find(x => x.name.toLowerCase() === text.toLowerCase());
     if (!t) { t = { id: 't' + uid(), name: text, area: 'eigen' }; state.tags.push(t); }
     const list = week().days[day];
@@ -556,6 +725,7 @@
     e.preventDefault();
     const f = e.target, name = f.name.value.trim();
     if (!name) return;
+    loveCheck(name);
     state.tags.push({ id: 't' + uid(), name, area: f.area.value });
     f.name.value = '';
     save(); render();
@@ -587,6 +757,7 @@
     e.preventDefault();
     const v = e.target.text.value.trim();
     if (!v) return;
+    loveCheck(v);
     state.todos.push({ id: uid(), text: v, done: false, star: false, created: Date.now() });
     e.target.text.value = '';
     save(); renderTodos();
@@ -641,6 +812,7 @@
     if (m === 2 && d === 14) return { id: 'valentine', greet: 'Alles Liebe zum Valentinstag, Jana! 💕', line: 'Du bist toll, so wie du bist.', sky: 'hearts', bark: 'Wuff! Hab dich lieb! 💕' };
     if (m === 10 && d === 31) return { id: 'halloween', greet: 'Happy Halloween, Jana! 🎃', line: 'Süßes oder Saures! Heute Abend fliegen Fledermäuse.', decor: 'pumpkin', sky: 'bats', bark: 'Wuff! Buh! 🎃' };
     if (m === 12 && d === 6) return { id: 'nikolaus', greet: 'Schönen Nikolaustag, Jana! 🎅', line: 'Hast du deine Stiefel geputzt?', hat: 'santa', lights: true, bark: 'Wuff! Der Nikolaus war da! 🍫' };
+    if (now.getDay() === 5 && d === 13) return { id: 'fri13', line: 'Freitag, der 13. 🐈‍⬛ Heute schleicht eine schwarze Katze durch den Garten…', cat: true };
     if (m === 12 && d < 24) return { id: 'advent', line: `Noch ${daysWord(24 - d)} bis Heiligabend 🎄`, lights: true };
     if (m === 3 && d === 20) return { id: 'spring', line: 'Frühlingsanfang 🌷 Die Tage werden wieder länger!' };
     if (m === 6 && d === 21) return { id: 'summer', line: 'Sommeranfang ☀️ Heute ist der längste Tag des Jahres.' };
@@ -669,7 +841,7 @@
     const mon = startOfWeek(new Date()), tk = todayKey();
     $('waterWeek').innerHTML = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((n, i) => {
       const k = key(addDays(mon, i)), v = waterOf(k);
-      return `<div class="ww ${v >= GOAL ? 'goal' : ''} ${k === tk ? 'today' : ''}" title="${n}: ${fmtL(v)}"><div class="b" style="height:${Math.round(Math.min(1, v / GOAL) * 18)}px"></div>${n}</div>`;
+      return `<div class="ww ${v >= GOAL ? 'goal' : ''} ${k === tk ? 'today' : ''}" title="${n}: ${fmtL(v)}"><div class="b" data-style="height:${Math.round(Math.min(1, v / GOAL) * 18)}px"></div>${n}</div>`;
     }).join('');
   }
   function addWater(ml, e) {
@@ -757,6 +929,20 @@
     ['wolf', '🐺', 'Werwolf gesichtet', 'Den Hund bei Vollmond als Wolf erlebt', () => !!state.flags.wolf],
     ['moonclick', '🌝', 'Mondsüchtig', 'Ein Geheimnis entdeckt', () => !!state.flags.moonclick],
     ['mood7', '🎭', 'Gefühlsprofi', 'An 7 Tagen die Stimmung eingetragen', (s) => s.moodDays >= 7],
+    ['focus10', '🍅', 'Fokus-Profi', '10 Lernrunden à 25 Minuten geschafft', (s) => s.focusRounds >= 10],
+    ['deadline5', '📬', 'Fristgerecht', '5 Abgaben erledigt', (s) => s.deadlinesDone >= 5],
+    ['book5', '🐭', 'Lesemaus', '5 Bücher gelesen und ins Regal gestellt', (s) => s.books >= 5],
+    ['book25', '🏛️', 'Bibliothek', '25 Bücher gelesen', (s) => s.books >= 25],
+    ['star', '🌠', 'Sternschnuppe', 'Ein nächtliches Geheimnis entdeckt', () => !!state.flags.star],
+    ['disco', '🪩', 'Discoqueen', 'Ein buntes Geheimnis entdeckt', () => !!state.flags.disco],
+    ['trick', '🤸', 'Kunststück', 'Ein tierisches Geheimnis entdeckt', () => !!state.flags.trick],
+    ['fetch', '🎾', 'Apportiert!', 'Ein sportliches Geheimnis entdeckt', () => !!state.flags.fetch],
+    ['wish', '🕚', 'Wunschzeit', 'Ein Geheimnis zur richtigen Uhrzeit entdeckt', () => !!state.flags.wish],
+    ['fri13', '🍀', 'Glückspilz', 'An einem Freitag, dem 13., vorbeigeschaut', () => !!state.flags.fri13],
+    ['rainbow', '🌈', 'Regenbogen', 'Nach dem Regen kommt …', () => !!state.flags.rainbow],
+    ['love', '💌', 'Liebesbotschaft', 'Ein Geheimnis mit Herz entdeckt', () => !!state.flags.love],
+    ['feed', '🥣', 'Futterfee', 'Ein leckeres Geheimnis entdeckt', () => !!state.flags.feed],
+    ['choir', '🎵', 'Nachtkonzert', 'Ein musikalisches Geheimnis entdeckt', () => !!state.flags.choir],
   ];
   function runLength(dates) {
     let best = 0, run = 0, prev = null;
@@ -801,6 +987,9 @@
       anyWater: Object.keys(state.water).some((k) => waterSince(k) > 0), waterGoal: waterDays.length, wBest: runLength(waterDays),
       todosDone: (state.todos || []).filter((t) => t.done && (t.doneAt || 0) >= since).length,
       moodDays: Object.values(state.mood || {}).filter((m) => (m.at || 0) >= since).length,
+      focusRounds: (state.uni?.sessions || []).filter((x) => x.full && x.at >= since).length,
+      deadlinesDone: (state.uni?.deadlines || []).filter((x) => x.done && (x.doneAt || 0) >= since).length,
+      books: (state.books || []).filter((b) => (b.at || 0) >= since).length,
       custom: state.tags.some((t) => t.id.startsWith('t') && created(t) >= since),
     };
   }
@@ -832,13 +1021,45 @@
   addEventListener('jana:forcewolf', () => { if (!state.flags.moonclick) { state.flags.moonclick = true; save(); } });
   addEventListener('jana:wolf', () => { if (!state.flags.wolf) { state.flags.wolf = true; save(); } });
   addEventListener('jana:dogpat', () => { state.flags.dogPats = (state.flags.dogPats || 0) + 1; save(); });
+  addEventListener('jana:egg', (e) => { if (!state.flags[e.detail]) { state.flags[e.detail] = true; save(); } });
+  const egg = (id) => dispatchEvent(new CustomEvent('jana:egg', { detail: id }));
+
+  // 💌 Geheime Botschaft: „Ich liebe dich“ als Gewohnheit oder To-do → Herzregen
+  function heartRain() {
+    const box = document.createElement('div');
+    box.className = 'heart-rain'; box.setAttribute('aria-hidden', 'true');
+    box.innerHTML = Array.from({ length: 28 }, (_, i) => `<i data-style="left:${(i * 37 + Math.random() * 20) % 100}%;animation-delay:${(Math.random() * 1.6).toFixed(2)}s;font-size:${16 + Math.round(Math.random() * 16)}px">${['💕', '💖', '💗', '❤️', '💞'][i % 5]}</i>`).join('');
+    document.body.append(box);
+    setTimeout(() => box.remove(), 5200);
+  }
+  function loveCheck(text) {
+    if (!/ich\s+lieb(e)?\s+dich/i.test(text)) return;
+    heartRain();
+    setTimeout(() => window.janaDog?.happy('Ich dich auch! 💕'), 300);
+    egg('love');
+  }
+  // 🕚 11:11 und 22:22: kleiner Wunsch-Spruch
+  const WISHES = ['Wünsch dir was! ✨', 'Schnell, wünsch dir was! 🌟', 'Augen zu und wünschen! ✨'];
+  let lastWish = '';
+  function wishTime(force) {
+    const n = new Date(), hm = force || `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`;
+    if (hm !== '11:11' && hm !== '22:22') return;
+    if (!force && lastWish === key(n) + hm) return;
+    lastWish = key(n) + hm;
+    $('quote').textContent = `✨ Es ist ${hm} – wünsch dir was!`;
+    window.janaDog?.happy(`${hm}! ${pickOne(WISHES)}`);
+    egg('wish');
+  }
+  setInterval(wishTime, 15000);
+  setTimeout(wishTime, 2000);
+  window.janaEggs = Object.assign(window.janaEggs || {}, { hearts: heartRain, wish: wishTime });
 
   function renderSpecial() {
     const sp = window.janaSpecial = window.JANA_DEMO_SPECIAL !== undefined ? window.JANA_DEMO_SPECIAL : getSpecial();
     const el = $('specialLine');
     el.hidden = !sp?.line;
     if (sp?.line) el.textContent = sp.line;
-    if (sp && ['birthday', 'christmas', 'easter', 'nye', 'newyear', 'anniversary'].includes(sp.id) && !state.flags[sp.id]) { state.flags[sp.id] = true; save(); }
+    if (sp && ['birthday', 'christmas', 'easter', 'nye', 'newyear', 'anniversary', 'fri13'].includes(sp.id) && !state.flags[sp.id]) { state.flags[sp.id] = true; save(); }
   }
   // ---------- Zusammen seit 18.09.2025 ----------
   const TOGETHER = { y: 2025, m: 9, d: 18 };
@@ -917,6 +1138,259 @@
   renderMood();
   setInterval(renderMood, 10 * 60 * 1000);
 
+  // ---------- 🎓 Uni: Lern-Timer, Fächer & Lernzeit, Abgaben, Lernziele ----------
+  state.uni ||= { subjects: [], sessions: [], deadlines: [], goals: {}, timer: { phase: 'idle', round: 0 } };
+  const U = state.uni;
+  const SUBJ_COLORS = [['gehirn', 'Blau'], ['sozial', 'Rosa'], ['ern', 'Mint'], ['bew', 'Pfirsich'], ['schlaf', 'Lila'], ['psyche', 'Grün'], ['allg', 'Gelb'], ['eigen', 'Beige']];
+  const FOCUS_MIN = 25, SHORT_MIN = 5, LONG_MIN = 15;
+  const subjOf = (id) => U.subjects.find((x) => x.id === id);
+  const subjName = (id) => subjOf(id)?.name || 'Ohne Fach';
+  const fmtMin = (m) => { m = Math.round(m); const h = Math.floor(m / 60); return h ? `${h} h ${String(m % 60).padStart(2, '0')} min` : `${m} min`; };
+  const uniOn = () => true;
+  const subjOptions = (sel, withNone) => (withNone ? `<option value="">Ohne Fach</option>` : '') + U.subjects.map((x) => `<option value="${x.id}" ${x.id === sel ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
+  const weekMinutes = (mon) => {
+    const from = mon.getTime(), to = addDays(mon, 7).getTime(), per = {};
+    for (const ss of U.sessions) if (ss.at >= from && ss.at < to) per[ss.subject || ''] = (per[ss.subject || ''] || 0) + ss.minutes;
+    return per;
+  };
+
+  // --- Lern-Timer (läuft über Zeitstempel weiter, auch nach dem Neuladen) ---
+  const T = U.timer;
+  const phaseLabel = { idle: 'Bereit', focus: 'Lernen', short: 'Kurze Pause', long: 'Lange Pause', paused: 'Angehalten' };
+  function timeLeft() {
+    if (T.phase === 'idle') return FOCUS_MIN * 60;
+    if (T.pausedLeft != null) return T.pausedLeft;
+    return Math.max(0, Math.round((T.endAt - Date.now()) / 1000));
+  }
+  function startPhase(phase) {
+    const min = phase === 'focus' ? FOCUS_MIN : phase === 'short' ? SHORT_MIN : LONG_MIN;
+    T.phase = phase; T.endAt = Date.now() + min * 60000; T.startAt = Date.now(); T.pausedLeft = null;
+    window.habitFocus = phase === 'focus';
+    save(); renderTimer();
+  }
+  function logSession(minutes) {
+    if (minutes < 1) return;
+    U.sessions.push({ id: uid(), subject: T.subject || '', minutes: Math.round(minutes), at: T.startAt || Date.now(), full: minutes >= FOCUS_MIN - 0.5 });
+  }
+  function phaseEnd(silent) {
+    if (T.phase === 'focus') {
+      logSession(FOCUS_MIN);
+      T.round = (T.round || 0) + 1;
+      const long = T.round % 4 === 0;
+      if (!silent) window.janaDog?.happy(long ? 'Wuff! 4 Runden geschafft! Lange Pause! 🎉' : 'Pause! 🎾 25 Minuten geschafft!');
+      startPhase(long ? 'long' : 'short');
+    } else {
+      T.phase = 'idle'; T.pausedLeft = null; window.habitFocus = false;
+      if (!silent) window.janaDog?.happy('Wuff! Pause vorbei. Weiter geht’s? 📚');
+      save(); renderTimer();
+    }
+    renderUni();
+  }
+  function renderTimer() {
+    if (!uniOn()) return;
+    const left = timeLeft(), mm = String(Math.floor(left / 60)).padStart(2, '0'), ss = String(left % 60).padStart(2, '0');
+    $('timerTime').textContent = `${mm}:${ss}`;
+    const paused = T.pausedLeft != null && T.phase !== 'idle';
+    $('timerPhase').textContent = paused ? 'Angehalten' : phaseLabel[T.phase];
+    $('timerCard').dataset.phase = T.phase;
+    $('timerStart').textContent = T.phase === 'idle' ? '▶ Start' : paused ? '▶ Weiter' : '⏸ Pause';
+    $('timerStop').hidden = T.phase === 'idle';
+    $('timerSubject').disabled = T.phase !== 'idle';
+    $('timerDots').innerHTML = [0, 1, 2, 3].map((i) => `<i class="${i < (T.round || 0) % 4 ? 'on' : ''}"></i>`).join('') + `<span>Runde ${((T.round || 0) % 4) + 1} von 4</span>`;
+    const base = document.title.replace(/^⏱ \d\d:\d\d · /, '');
+    document.title = T.phase === 'idle' || paused ? base : `⏱ ${mm}:${ss} · ${base}`;
+  }
+  $('timerSubject').addEventListener('change', (e) => { T.subject = e.target.value; save(); });
+  $('timerStart').addEventListener('click', (e) => {
+    e.dogHandled = true;
+    if (T.phase === 'idle') { T.subject = $('timerSubject').value; startPhase('focus'); window.janaDog?.happy('Viel Erfolg! Ich bin ganz leise. 🤫'); return; }
+    if (T.pausedLeft != null) { T.endAt = Date.now() + T.pausedLeft * 1000; T.pausedLeft = null; window.habitFocus = T.phase === 'focus'; }
+    else { T.pausedLeft = timeLeft(); window.habitFocus = false; }
+    save(); renderTimer();
+  });
+  $('timerStop').addEventListener('click', (e) => {
+    e.dogHandled = true;
+    if (T.phase === 'focus') logSession((FOCUS_MIN * 60 - timeLeft()) / 60);
+    T.phase = 'idle'; T.pausedLeft = null; window.habitFocus = false;
+    save(); renderTimer(); renderUni();
+  });
+  // Ist eine Phase abgelaufen, während die Seite zu war? Dann still nachtragen.
+  if (T.phase !== 'idle' && T.pausedLeft == null && Date.now() >= T.endAt) { phaseEnd(true); if (T.phase !== 'idle' && Date.now() >= T.endAt) phaseEnd(true); }
+  window.habitFocus = T.phase === 'focus' && T.pausedLeft == null;
+  setInterval(() => {
+    if (!uniOn()) return;
+    if (T.phase !== 'idle' && T.pausedLeft == null && Date.now() >= T.endAt) phaseEnd(false);
+    else renderTimer();
+  }, 1000);
+
+  // --- Uni-Bereich: Fächer & Lernzeit, Abgaben, Lernziele ---
+  const relDue = (due) => {
+    const [y, m, d] = due.split('-').map(Number);
+    const diff = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())) / 864e5);
+    return diff < 0 ? { t: `seit ${daysWord(-diff)} überfällig`, cls: 'late' } : diff === 0 ? { t: 'heute', cls: 'soon' } : diff === 1 ? { t: 'morgen', cls: 'soon' } : { t: `in ${diff} Tagen`, cls: diff <= 3 ? 'soon' : '' };
+  };
+  function renderUni() {
+    const on = uniOn();
+    $('uniCard').hidden = $('timerCard').hidden = !on;
+    if (!on) return;
+    $('timerSubject').innerHTML = subjOptions(T.subject, true);
+    // Fächer
+    $('subjList').innerHTML = U.subjects.length ? U.subjects.map((x) => `<span class="tag subj" data-c="${x.color}" data-style="--c: var(--c-${x.color})">${esc(x.name)}<button type="button" data-rmsubj="${x.id}" aria-label="Fach ${esc(x.name)} löschen">×</button></span>`).join('')
+      : '<span class="muted">Noch keine Fächer. Leg unten dein erstes an.</span>';
+    // Lernzeit der angezeigten Woche
+    const per = weekMinutes(monday), entries = Object.entries(per).sort((a, b) => b[1] - a[1]);
+    const total = entries.reduce((a, [, v]) => a + v, 0), max = Math.max(1, ...entries.map(([, v]) => v));
+    $('studyTotal').textContent = total ? `${fmtMin(total)} diese Woche` : 'Diese Woche noch keine Lernzeit';
+    $('studyBars').innerHTML = entries.map(([id, v]) => `<div class="sb"><span class="sb-name">${esc(subjName(id))}</span><span class="sb-bar"><i data-style="width:${Math.max(4, Math.round(v / max * 100))}%;background:var(--c-${subjOf(id)?.color || 'eigen'})"></i></span><span class="sb-val">${fmtMin(v)}</span></div>`).join('');
+    $('studyAddSubj').innerHTML = subjOptions($('studyAddSubj').value, true);
+    // Abgaben
+    const open = U.deadlines.filter((x) => !x.done).sort((a, b) => a.due.localeCompare(b.due));
+    const done = U.deadlines.filter((x) => x.done).sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
+    const dlRow = (x) => {
+      const r = relDue(x.due), [y, m, d] = x.due.split('-').map(Number);
+      const date = new Date(y, m - 1, d).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' });
+      return `<li class="todo ${x.done ? 'done' : ''}"><button class="todo-check" type="button" data-dlcheck="${x.id}" aria-pressed="${!!x.done}" aria-label="${x.done ? 'Wieder öffnen' : 'Abhaken'}: ${esc(x.title)}"></button>
+        <span class="todo-text"><span class="t">${esc(x.title)}</span><small>${x.subject ? `<b class="subj-dot" data-style="background:var(--c-${subjOf(x.subject)?.color || 'eigen'})"></b>${esc(subjName(x.subject))} · ` : ''}${date}${x.done ? '' : ` · <em class="due ${r.cls}">${r.t}</em>`}</small></span>
+        <span></span><button class="todo-del" type="button" data-dldel="${x.id}" aria-label="${esc(x.title)} löschen">×</button></li>`;
+    };
+    $('dlOpen').innerHTML = open.length ? open.map(dlRow).join('') : '<li class="empty">Keine offenen Abgaben 🎉</li>';
+    $('dlDoneWrap').hidden = !done.length; $('dlDoneCount').textContent = done.length; $('dlDone').innerHTML = done.map(dlRow).join('');
+    $('dlSubj').innerHTML = subjOptions($('dlSubj').value, true);
+    // Lernziele der angezeigten Woche
+    const wk = key(monday), goals = (U.goals[wk] ||= []), gDone = goals.filter((g) => g.done).length;
+    $('goalHead').textContent = `Lernziele KW ${isoWeek(monday)}`;
+    $('goalCount').textContent = goals.length ? `${gDone} von ${goals.length}` : '';
+    $('goalBar').hidden = !goals.length;
+    $('goalBar').firstElementChild.setAttribute('data-style', `width:${goals.length ? Math.round(gDone / goals.length * 100) : 0}%`);
+    $('goalList').innerHTML = goals.length ? goals.map((g) => `<li class="todo ${g.done ? 'done' : ''}"><button class="todo-check" type="button" data-gcheck="${g.id}" aria-pressed="${!!g.done}" aria-label="${g.done ? 'Wieder öffnen' : 'Abhaken'}: ${esc(g.text)}"></button>
+        <span class="todo-text"><span class="t">${esc(g.text)}</span>${g.subject ? `<small><b class="subj-dot" data-style="background:var(--c-${subjOf(g.subject)?.color || 'eigen'})"></b>${esc(subjName(g.subject))}</small>` : ''}</span>
+        <span></span><button class="todo-del" type="button" data-gdel="${g.id}" aria-label="${esc(g.text)} löschen">×</button></li>`).join('') : '<li class="empty">Was willst du diese Woche schaffen?</li>';
+    $('goalSubj').innerHTML = subjOptions($('goalSubj').value, true);
+    renderTimer();
+  }
+  const twoClick = (b, done) => {
+    if (b.classList.contains('armed')) return done();
+    b.classList.add('armed'); const old = b.textContent; b.textContent = 'Löschen?';
+    setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = old; } }, 3000);
+  };
+  $('uniCard').addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    const d = b.dataset;
+    if (d.rmsubj) { e.dogHandled = true; return twoClick(b, () => { U.subjects = U.subjects.filter((x) => x.id !== d.rmsubj); save(); renderUni(); }); }
+    if (d.dlcheck) {
+      const x = U.deadlines.find((y) => y.id === d.dlcheck); x.done = !x.done; x.doneAt = x.done ? Date.now() : null; save(); renderUni();
+      if (x.done) { e.dogHandled = true; window.janaDog?.happy('Wuff! Abgegeben! 📬'); }
+      return;
+    }
+    if (d.dldel) { e.dogHandled = true; return twoClick(b, () => { U.deadlines = U.deadlines.filter((x) => x.id !== d.dldel); save(); renderUni(); }); }
+    if (d.gcheck) {
+      const g = U.goals[key(monday)].find((y) => y.id === d.gcheck); g.done = !g.done; g.doneAt = g.done ? Date.now() : null; save(); renderUni();
+      if (g.done) { e.dogHandled = true; window.janaDog?.happy('Wuff! Lernziel geschafft! 🎯'); }
+      return;
+    }
+    if (d.gdel) { e.dogHandled = true; return twoClick(b, () => { U.goals[key(monday)] = U.goals[key(monday)].filter((x) => x.id !== d.gdel); save(); renderUni(); }); }
+  });
+  $('uniCard').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target;
+    if (f.id === 'subjForm') {
+      const name = f.elements.name.value.trim(); if (!name) return;
+      U.subjects.push({ id: 's' + uid(), name, color: f.elements.color.value }); f.elements.name.value = '';
+    } else if (f.id === 'studyForm') {
+      const min = Math.max(0, Math.min(600, parseInt(f.elements.min.value, 10) || 0)); if (!min) return;
+      U.sessions.push({ id: uid(), subject: f.elements.subj.value, minutes: min, at: Date.now(), full: false }); f.elements.min.value = '';
+    } else if (f.id === 'dlForm') {
+      const title = f.elements.title.value.trim(), due = f.elements.due.value; if (!title || !due) return;
+      U.deadlines.push({ id: uid(), title, subject: f.elements.subj.value, due, done: false }); f.elements.title.value = '';
+    } else if (f.id === 'goalForm') {
+      const text = f.elements.text.value.trim(); if (!text) return;
+      (U.goals[key(monday)] ||= []).push({ id: uid(), text, subject: f.elements.subj.value, done: false }); f.elements.text.value = '';
+    }
+    save(); renderUni();
+  });
+  $('subjColor').innerHTML = SUBJ_COLORS.map(([k, n]) => `<option value="${k}">${n}</option>`).join('');
+  // --- Discord-Lerngruppe: Einladungslink speichern und mit einem Tipp öffnen ---
+  const okDiscord = (u) => /^https:\/\/(discord\.gg|(www\.)?discord\.com|discordapp\.com)\/\S+$/i.test(u);
+  let discordEdit = false;
+  function renderDiscord() {
+    const url = U.discord || '';
+    $('discordRow').innerHTML = url && !discordEdit
+      ? `<a class="pill" href="${esc(url)}" target="_blank" rel="noopener noreferrer">💬 Discord-Lerngruppe öffnen</a><button class="pill ghost" type="button" data-dcedit>✏️ Link ändern</button>`
+      : `<form id="discordForm"><input name="url" type="url" inputmode="url" placeholder="Einladungslink, z. B. https://discord.gg/…" aria-label="Einladungslink der Discord-Lerngruppe" value="${esc(url)}" autocomplete="off"><button class="pill" type="submit">💬 Speichern</button>${url ? '<button class="pill ghost" type="button" data-dcdel>Entfernen</button>' : ''}<p class="su-err" id="discordErr" hidden>Bitte einen Discord-Link einfügen (https://discord.gg/… oder https://discord.com/…).</p></form>`;
+  }
+  $('discordRow').addEventListener('click', (e) => {
+    if (e.target.closest('[data-dcedit]')) { e.dogHandled = true; discordEdit = true; renderDiscord(); $('discordRow').querySelector('input')?.focus(); }
+    if (e.target.closest('[data-dcdel]')) { e.dogHandled = true; delete U.discord; discordEdit = false; save(); renderDiscord(); }
+    if (e.target.closest('a')) window.janaDog?.happy('Wuff! Viel Spaß mit deiner Lerngruppe! 💬');
+  });
+  $('discordRow').addEventListener('submit', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const v = e.target.elements.url.value.trim();
+    if (!okDiscord(v)) { $('discordErr').hidden = false; return; }
+    U.discord = v; discordEdit = false; save(); renderDiscord();
+  });
+  renderDiscord();
+
+  window.renderUni = renderUni;
+  renderUni();
+
+  // ---------- 📖 Gelesene Bücher ----------
+  state.books ||= [];
+  const SPINES = ['#f4a7b9', '#a9c8ec', '#a6dcc2', '#f8cfa0', '#cdb4e8', '#c6e3a9', '#f6df96', '#b9d3db'];
+  let bookStars = 0;
+  const starStr = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
+  function renderStarPick() {
+    $('bookStars').innerHTML = [1, 2, 3, 4, 5].map((n) => `<button type="button" class="star ${n <= bookStars ? 'on' : ''}" data-star="${n}" role="radio" aria-checked="${n === bookStars}" aria-label="${n} ${n === 1 ? 'Stern' : 'Sterne'}">${n <= bookStars ? '★' : '☆'}</button>`).join('');
+  }
+  function renderBooks() {
+    const list = [...state.books].sort((a, b) => b.date.localeCompare(a.date) || b.at - a.at);
+    const y = String(new Date().getFullYear()), thisYear = list.filter((b) => b.date.startsWith(y));
+    const rated = list.filter((b) => b.stars), avg = rated.length ? rated.reduce((a, b) => a + b.stars, 0) / rated.length : 0;
+    $('bookCount').textContent = list.length ? `${list.length} ${list.length === 1 ? 'Buch' : 'Bücher'}` : 'noch keins';
+    $('bookStats').textContent = list.length ? `Dieses Jahr ${thisYear.length} ${thisYear.length === 1 ? 'Buch' : 'Bücher'}${rated.length ? ` · Ø ${avg.toLocaleString('de-DE', { maximumFractionDigits: 1 })} ★` : ''}` : '';
+    // Bücherregal: ein Buchrücken pro Buch (älteste links)
+    const shelf = [...list].reverse().slice(-40);
+    $('bookShelf').innerHTML = shelf.length ? shelf.map((b, i) => `<i title="${esc(b.title)}" data-style="background:${b.color};height:${22 + ((b.title.length * 7 + i * 3) % 12)}px"></i>`).join('') : '<span class="muted">Dein Regal wartet auf das erste Buch 📚</span>';
+    $('bookMini').innerHTML = list.slice(0, 8).map((b) => `<i data-style="background:${b.color}"></i>`).join('');
+    $('bookList').innerHTML = list.map((b) => {
+      const d = new Date(b.date + 'T12:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' });
+      return `<li class="book"><span class="book-spine" data-style="background:${b.color}"></span>
+        <span class="book-info"><b>${esc(b.title)}</b><small>${b.author ? esc(b.author) + ' · ' : ''}beendet am ${d}</small></span>
+        <span class="book-stars" role="group" aria-label="Bewertung ${b.stars || 0} von 5">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-bstar="${b.id}" data-n="${n}" aria-label="${n} ${n === 1 ? 'Stern' : 'Sterne'}">${n <= (b.stars || 0) ? '★' : '☆'}</button>`).join('')}</span>
+        <button class="todo-del" type="button" data-bdel="${b.id}" aria-label="${esc(b.title)} löschen">×</button></li>`;
+    }).join('');
+  }
+  $('bookStars').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-star]'); if (!b) return;
+    e.dogHandled = true; bookStars = +b.dataset.star === bookStars ? 0 : +b.dataset.star; renderStarPick();
+  });
+  $('bookForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target, title = f.elements.title.value.trim();
+    if (!title) { f.elements.title.focus(); return; }
+    state.books.push({ id: uid(), title, author: f.elements.author.value.trim(), stars: bookStars, date: f.elements.date.value || todayKey(), at: Date.now(), color: SPINES[state.books.length % SPINES.length] });
+    f.elements.title.value = ''; f.elements.author.value = ''; f.elements.date.value = todayKey(); bookStars = 0; renderStarPick();
+    save(); renderBooks();
+    const n = state.books.length;
+    e.dogHandled = true;
+    window.janaDog?.happy(n === 1 ? 'Wuff! Dein erstes Buch im Regal! 📖' : `Wuff! Schon ${n} Bücher! 📚`);
+  });
+  $('bookList').addEventListener('click', (e) => {
+    const s = e.target.closest('[data-bstar]'), d = e.target.closest('[data-bdel]');
+    if (s) { e.dogHandled = true; const b = state.books.find((x) => x.id === s.dataset.bstar); b.stars = b.stars === +s.dataset.n ? 0 : +s.dataset.n; save(); renderBooks(); }
+    if (d) {
+      e.dogHandled = true;
+      if (!d.classList.contains('armed')) { d.classList.add('armed'); d.textContent = 'Löschen?'; setTimeout(() => { if (d.isConnected) { d.classList.remove('armed'); d.textContent = '×'; } }, 3000); return; }
+      state.books = state.books.filter((x) => x.id !== d.dataset.bdel); save(); renderBooks();
+    }
+  });
+  try { $('bookDetails').open = localStorage.getItem('janas-woche.booksOpen') === '1'; } catch {}
+  $('bookDetails').addEventListener('toggle', () => { try { localStorage.setItem('janas-woche.booksOpen', $('bookDetails').open ? '1' : '0'); } catch {} });
+  $('bookForm').elements.date.value = todayKey();
+  renderStarPick();
+  renderBooks();
+
   // ---------- KW-Übersicht ----------
   const shortDate = (d) => d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
   function weekStats(mk) {
@@ -935,6 +1409,8 @@
     const water = Array.from({ length: 7 }, (_, i) => waterOf(key(addDays(mon, i))));
     return {
       mon, planned, done, perDay, waterGoals: water.filter((v) => v >= GOAL).length, waterSum: water.reduce((a, b) => a + b, 0),
+      study: Object.values(weekMinutes(mon)).reduce((a, b) => a + b, 0),
+      booksDone: (state.books || []).filter((b) => b.date >= key(mon) && b.date <= key(addDays(mon, 6))).length,
       note: (w?.note || '').trim(), top: Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 3),
       mood: (() => { const vs = Array.from({ length: 7 }, (_, i) => state.mood[key(addDays(mon, i))]?.v).filter(Boolean); return vs.length ? Math.round(vs.reduce((a, b) => a + b, 0) / vs.length) : 0; })(),
     };
@@ -956,8 +1432,10 @@
       const parts = [s.planned ? `✅\u00a0${s.done} von ${s.planned} erledigt` : 'Keine Gewohnheiten'];
       if (s.waterGoals) parts.push(`💧\u00a0${s.waterGoals}×\u00a02,5\u00a0l`); else if (s.waterSum) parts.push(`💧\u00a0${fmtL(s.waterSum).replace(' ', '\u00a0')}`);
       if (s.note) parts.push('📝 Notiz');
+      if (s.study) parts.push(`📚\u00a0${fmtMin(s.study).replace(/ /g, '\u00a0')}`);
+      if (s.booksDone) parts.push(`📖\u00a0${s.booksDone}\u00a0${s.booksDone === 1 ? 'Buch' : 'Bücher'}`);
       const maxD = Math.max(3, ...s.perDay);
-      const bars = s.perDay.map((n, i) => `<i style="height:${n ? Math.max(4, Math.round(n / maxD * 22)) : 2}px" title="${['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i]}: ${n} erledigt" class="${n ? 'on' : ''}"></i>`).join('');
+      const bars = s.perDay.map((n, i) => `<i data-style="height:${n ? Math.max(4, Math.round(n / maxD * 22)) : 2}px" title="${['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i]}: ${n} erledigt" class="${n ? 'on' : ''}"></i>`).join('');
       return `<button class="kw-row ${k === cur ? 'cur' : ''}" type="button" data-week="${k}">
         <span class="kw-badge">KW ${kw}<small>${mon.getFullYear()}</small></span>
         <span class="kw-info"><b>${s.mood ? `<img class="mood-mini" src="${FACES[s.mood]}" alt="Stimmung im Schnitt: ${MOODS[s.mood].label}">` : ''}${shortDate(mon)} – ${shortDate(sun)} ${tag}</b><span>${parts.join(' · ')}</span>${s.top.length ? `<small>Meist: ${s.top.map(([n, c]) => `${esc(n)} ${c}×`).join(', ')}</small>` : ''}</span>
@@ -1046,6 +1524,7 @@
 
   // Hundegarten: Hütte, Napf, Ball und Labrador auf einer Pixel-Leinwand (1 Pixel = 3 Bildschirmpunkte)
   const S = 3;
+  const $title = document.getElementById('pageTitle');
   const yard = document.getElementById('yard'), cv = document.getElementById('yardCanvas'), bubble = document.getElementById('bubble');
   const ctx = cv.getContext('2d');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1056,7 +1535,7 @@
   };
   const fill = (x, y, w, h, c) => { ctx.fillStyle = C[c]; ctx.fillRect(x, y, w, h); };
   const DOG_COL = { b: C.b, l: C.l, e: C.e }, WOLF_COL = { b: '#a3a8b6', l: '#dfe2e8', e: '#727889' };
-  C.wy = '#ffd84d';
+  C.wy = '#ffd84d'; C.ct = '#2a2330'; C.cy = '#ffd84d'; C.nt = '#b48ee0';
   function outlined(parts) {
     for (const [x, y, w, h] of parts) { ctx.fillStyle = C.o; ctx.fillRect(x - 1, y - 1, w + 2, h + 2); }
     for (const [x, y, w, h, c] of parts) fill(x, y, w, h, c);
@@ -1065,7 +1544,10 @@
   let W = 130, houseX = 1, bowlX = 23;
   let dogX = 40, dir = 1, frame = 0, stepAcc = 0;
   let mode = 'walk', target = 60, until = 0, kicks = 0, food = 3, nextZzz = 0, lastT = 0;
-  const ball = { x: 90, vx: 0, hop: 0 };
+  const ball = { x: 90, vx: 0, hop: 0, fly: 0, carried: false };
+  let dogTaps = [], houseTaps = [], titleTaps = [], trickT = 0, danceUntil = 0, discoUntil = 0, fetchHome = 60, cat = null, nextCat = 0;
+  const clampDog = (x) => Math.min(Math.max(x, houseX + 2), maxDog());
+  const egg = (id) => dispatchEvent(new CustomEvent('jana:egg', { detail: id }));
   const minDog = () => bowlX + 10, maxDog = () => W - 33;
 
   function resize() {
@@ -1114,8 +1596,8 @@
   function drawDog(t) {
     const showWolf = mode === 'transform' ? Math.floor(t / 150) % 2 === 0 : wolf;
     Object.assign(C, showWolf ? WOLF_COL : DOG_COL);
-    const pose = mode === 'happy' ? 'happy' : mode === 'eat' ? 'eat' : mode === 'howl' ? 'howl' : (mode === 'idle' || mode === 'transform') ? 'stand'
-      : (mode === 'play' || mode === 'goPlay') ? 'run' : 'walk';
+    const pose = (mode === 'happy' || mode === 'dance') ? 'happy' : mode === 'eat' ? 'eat' : (mode === 'howl' || mode === 'sing') ? 'howl' : (mode === 'idle' || mode === 'transform' || mode === 'trick') ? 'stand'
+      : (mode === 'play' || mode === 'goPlay' || mode === 'fetch' || mode === 'fetchBack') ? 'run' : 'walk';
     const happy = pose === 'happy', moving = pose === 'walk' || pose === 'run', eat = pose === 'eat';
     const f = frame % 4;
     const jump = happy && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : 0;
@@ -1125,6 +1607,10 @@
     const hd = eat ? (Math.floor(t / 220) % 2 ? 7 : 8) : howling ? -2 : 0, hx = eat ? 1 : 0;
     const H = (v) => Y(v) + hd;
     ctx.save();
+    if (mode === 'trick') {   // Kunststück: eine Rolle in der Luft
+      const pr = Math.min(1, (t - trickT) / 1200), cx = Math.round(dogX) + 16, lift = Math.round(Math.sin(pr * Math.PI) * 5);
+      ctx.translate(cx, 15 - lift); ctx.rotate(Math.round(pr * 4) / 4 * Math.PI * 2 * dir); ctx.translate(-cx, -15);   // Vierteldrehungen bleiben pixelscharf
+    }
     if (dir < 0) { ctx.translate(Math.round(dogX) + 32, 0); ctx.scale(-1, 1); } else ctx.translate(Math.round(dogX), 0);
     ctx.fillStyle = C.s; ctx.fillRect(8, 23, 16 - jump, 1);
     const lift = (i) => moving && ((f < 2) === (i % 2 === 0)) ? 1 : 0;
@@ -1256,6 +1742,7 @@
   }
   function decide(t) {
     if (reduce) { mode = 'idle'; until = t + 1e9; return; }
+    if (window.habitFocus && !wolf) { mode = 'idle'; until = t + 5000; return; }   // Lernzeit: ganz ruhig
     if (wolf) {
       if (Math.random() < 0.65) { mode = 'howl'; until = t + rand(4000, 7000); nextHowl = t + 400; }
       else { mode = 'walk'; target = rand(minDog(), maxDog()); }
@@ -1294,8 +1781,17 @@
   }
 
   function update(t, dt) {
-    // Ball rollt aus
-    if (Math.abs(ball.vx) > 0.5) {
+    // Ball: wird getragen, fliegt (geworfen) oder rollt aus
+    if (ball.carried && mode !== 'fetchBack') ball.carried = false;
+    if (ball.carried) { ball.x = dir > 0 ? dogX + 27 : dogX; ball.hop = 6; ball.vx = 0; }
+    else if (ball.fly > 0) {
+      ball.fly = Math.max(0, ball.fly - dt);
+      ball.x += ball.vx * dt;
+      ball.hop = 10 * Math.sin(Math.PI * (1 - ball.fly / 0.8));
+      if (ball.x < bowlX + 12) { ball.x = bowlX + 12; ball.vx = Math.abs(ball.vx); }
+      if (ball.x > W - 7) { ball.x = W - 7; ball.vx = -Math.abs(ball.vx); }
+      if (!ball.fly) ball.vx *= 0.45;
+    } else if (Math.abs(ball.vx) > 0.5) {
       ball.x += ball.vx * dt;
       ball.vx *= Math.max(0, 1 - 1.4 * dt);
       ball.hop = Math.min(3, Math.abs(ball.vx) / 14) * Math.abs(Math.sin(t / 90));
@@ -1307,12 +1803,13 @@
     const wantWolf = wolfTime();
     if (wantWolf !== wolf && mode !== 'transform' && mode !== 'happy') {
       if (mode === 'sleep') { dogX = houseX + 3; dir = 1; }
+      ball.carried = false; document.documentElement.classList.remove('disco'); discoUntil = window.janaDisco = 0;
       mode = 'transform'; until = t + 1800;
       say(wantWolf ? (forcedMsg ? 'Huch… was passiert mit mir?! 🌕' : 'Oh nein… Vollmond! 🌕') : 'Wuff? Was war denn los?', dogX + 16, 1800);
       forcedMsg = false;
     }
     // Bei Regen oder spät nachts sofort in die Hütte (der Wolf bleibt draußen)
-    if ((wet() || lateNight()) && !wolf && !['goSleep', 'sleep', 'happy', 'transform'].includes(mode)) {
+    if ((wet() || lateNight()) && !wolf && !['goSleep', 'sleep', 'happy', 'transform', 'fetch', 'fetchBack', 'trick', 'dance', 'sing'].includes(mode)) {
       mode = 'goSleep';
       if (wet() && !shelterSaid) { say(wxNow().kind === 'thunder' ? 'Gewitter! Schnell in die Hütte! 😰' : 'Brr, Regen! Ab in die Hütte! 🌧️', dogX + 16, 1900); shelterSaid = true; }
     }
@@ -1335,6 +1832,20 @@
         else moveTo(Math.min(Math.max(ballApproach(), houseX + 2), maxDog()), 26, dt);
         break;
       case 'happy': if (t > until) decide(t); break;
+      case 'fetch': {   // Ball holen
+        const there = moveTo(clampDog(ball.x > dogX + 16 ? ball.x - 27 : ball.x), 36, dt);
+        if (there && !ball.fly && Math.abs(ball.vx) < 20) { ball.carried = true; mode = 'fetchBack'; say('Hab ihn! 🎾', dogX + 16, 1200); }
+        break;
+      }
+      case 'fetchBack':   // … und zurückbringen
+        if (moveTo(fetchHome, 22, dt)) {
+          ball.carried = false; ball.hop = 0; ball.vx = 0;
+          mode = 'happy'; until = t + 1700; say(pick(['Nochmal! 🎾', 'Wuff! Hier, nochmal werfen! 🎾']), dogX + 16, 1700); bark(2); egg('fetch');
+        }
+        break;
+      case 'trick': if (t > until) { mode = 'happy'; until = t + 1500; say('Ta-da! 🎉', dogX + 16, 1600); bark(2); egg('trick'); } break;
+      case 'dance': if (t > danceUntil) decide(t); else dir = Math.floor(t / 350) % 4 < 2 ? 1 : -1; break;
+      case 'sing': dir = 1; if (t > until) decide(t); break;
       case 'transform': if (t > until) { wolf = wolfTime(); if (wolf) dispatchEvent(new Event('jana:wolf')); decide(t); } break;
       case 'howl':
         dir = 1;
@@ -1364,15 +1875,52 @@
     mode = 'play';
   }
 
+  function drawDisco(t) {
+    const cols = ['#f2a9c8', '#cdb7ef', '#ffd36e', '#a6dcc2', '#a9c8ec', '#ffffff'];
+    if (reduce) return;
+    for (let i = 0; i < 16; i++) {   // Lichtpunkte im Garten
+      const k = Math.floor(t / 220) + i * 7;
+      ctx.fillStyle = cols[(i + Math.floor(t / 220)) % cols.length];
+      ctx.fillRect((k * 29 + i * 13) % W, 2 + (k * 11 + i * 5) % 20, 1, 1);
+    }
+  }
+  function drawCat(t) {   // Freitag, der 13.: schwarze Katze, läuft nach links
+    const x = Math.round(cat.x), f = Math.floor(t / 160) % 2;
+    ctx.fillStyle = C.s; ctx.fillRect(x + 1, 23, 11, 1);
+    outlined([[x + 3, 17, 8, 4, 'ct'], [x, 14, 5, 4, 'ct'], [x, 13, 1, 1, 'ct'], [x + 4, 13, 1, 1, 'ct'], [x + 11, 13, 1, 5, 'ct'],
+      [x + 3, 21, 1, 2 - f, 'ct'], [x + 5, 21, 1, 1 + f, 'ct'], [x + 8, 21, 1, 2 - f, 'ct'], [x + 10, 21, 1, 1 + f, 'ct']]);
+    fill(x + 1, 15, 1, 1, 'cy'); fill(x + 3, 15, 1, 1, 'cy');
+  }
+  function updateCat(t, dt) {
+    if (!window.janaSpecial?.cat || reduce) { cat = null; return; }
+    if (!cat) { if (t > nextCat) { cat = { x: W + 2, v: -13, seen: false }; } return; }
+    cat.x += cat.v * dt;
+    if (!cat.seen && !wolf && mode === 'sleep' && Math.abs(cat.x - (houseX + 10)) < 30) {   // schläft: bellt aus der Hütte
+      cat.seen = true; cat.v = -32;
+      say('Wuff?! Eine Katze! 🐈‍⬛', houseX + 10, 1600); bark(2);
+    }
+    if (!cat.seen && !wolf && mode !== 'sleep' && mode !== 'transform' && Math.abs(cat.x - (dogX + 16)) < 34) {
+      cat.seen = true; cat.v = -32;
+      if (!['trick', 'fetch', 'fetchBack', 'sing'].includes(mode)) { mode = 'idle'; until = t + 1600; dir = cat.x > dogX + 16 ? 1 : -1; }
+      say(pick(['Wuff! Wuff! 🐈‍⬛', 'Wuff! Eine Katze! 🐈‍⬛', 'Grrr… Wuff! 🐈‍⬛']), dogX + 16, 1600); bark(2);
+    }
+    if (cat.x < -16) { cat = null; nextCat = t + rand(18000, 32000); }
+  }
   function loop(t) {
     const dt = Math.min(0.05, (t - (lastT || t)) / 1000); lastT = t;
-    if (!reduce) update(t, dt);
+    if (!reduce) { update(t, dt); updateCat(t, dt); }
     else if (mode === 'happy' && t > until) mode = 'idle';
     ctx.clearRect(0, 0, W, 24);
     drawHouse();
     drawBowl();
     drawDecor(t);
+    if (discoUntil && performance.now() < discoUntil) drawDisco(t);
+    if (cat) drawCat(t);
     if (mode !== 'sleep') drawDog(t);
+    if (mode === 'sing' && !reduce) for (let i = 0; i < 2; i++) {   // Noten steigen auf
+      const age = ((t / 900) + i * 0.5) % 1, nx = Math.round(dogX + 24 + i * 4 + Math.sin(t / 300 + i) * 2), ny = Math.round(9 - age * 9);
+      fill(nx + 2, ny, 1, 3, 'nt'); fill(nx, ny + 2, 2, 2, 'nt'); fill(nx + 3, ny, 1, 1, 'nt');
+    }
     drawBall();
     drawPrecip(t);
     requestAnimationFrame(loop);
@@ -1438,6 +1986,32 @@
       o.connect(g); g.connect(actx.destination); o.start(t0); lfo.start(t0); o.stop(t0 + 1.9); lfo.stop(t0 + 1.9);
     } catch {}
   }
+  function tone(t0, freq, dur, type = 'square', vol = 0.12) {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + dur + 0.02);
+    return o;
+  }
+  function audio() {
+    if (!soundOn) return null;
+    try { actx ||= new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); return actx; } catch { return null; }
+  }
+  function discoTune() {
+    if (!audio()) return;
+    try { const t0 = actx.currentTime + 0.02; [523, 659, 784, 1047, 784, 659, 523, 659, 784, 1047, 1319, 1047].forEach((f, i) => tone(t0 + i * 0.16, f, 0.14)); } catch {}
+  }
+  function choirTune() {   // kleines Heul-Lied
+    if (!audio()) return;
+    try {
+      const t0 = actx.currentTime + 0.02;
+      [[392, 0.45], [440, 0.45], [523, 0.7], [440, 0.4], [392, 0.4], [523, 0.5], [587, 0.9]].reduce((at, [f, d]) => {
+        const o = tone(t0 + at, f, d, 'triangle', 0.25), lfo = actx.createOscillator(), lg = actx.createGain();
+        lfo.frequency.value = 5.5; lg.gain.value = 7; lfo.connect(lg); lg.connect(o.frequency); lfo.start(t0 + at); lfo.stop(t0 + at + d + 0.05);
+        return at + d;
+      }, 0);
+    } catch {}
+  }
   function bark(times) {
     if (!soundOn) return;
     try {
@@ -1450,12 +2024,70 @@
 
   window.janaDog = { happy };
 
+  // ---------- Easter Eggs im Garten ----------
+  const wake = () => { if (mode === 'sleep') { dogX = houseX + 3; dir = 1; } };
+  function throwBall() {   // ⚽ Ball werfen: der Hund holt ihn und bringt ihn zurück
+    if (mode === 'transform' || mode === 'fetch' || mode === 'fetchBack' || ball.fly) return;
+    wake();
+    fetchHome = clampDog(dogX);
+    ball.vx = (ball.x > W / 2 ? -1 : 1) * rand(70, 95); ball.fly = 0.8;
+    mode = 'fetch'; say('Wuff! Ich hol ihn! 🎾', dogX + 16, 1300); bark(1);
+  }
+  function startTrick() {   // 🐕 10× schnell antippen: Kunststück
+    if (mode === 'transform') return;
+    wake();
+    mode = 'trick'; trickT = performance.now(); until = trickT + 1300;
+    say('Achtung, Kunststück! 🤸', dogX + 16, 1300);
+  }
+  function disco() {   // 🪩 5× auf den Titel: Disco
+    discoUntil = window.janaDisco = performance.now() + 12000;
+    document.documentElement.classList.add('disco');
+    setTimeout(() => { if (performance.now() >= discoUntil - 60) { document.documentElement.classList.remove('disco'); discoUntil = 0; } }, 12000);
+    if (mode !== 'transform') { wake(); mode = 'dance'; danceUntil = discoUntil; }
+    say('Disco-Zeit! 🪩', dogX + 16, 2000);
+    discoTune(); egg('disco');
+  }
+  function sing() {   // 🎵 nachts 3× auf die Hütte: Tierchor
+    if (mode === 'transform') return;
+    wake();
+    mode = 'sing'; until = performance.now() + 4300; howlUntil = until;
+    say('♪ Auuu-uu-uuuu ♪', dogX + 16, 2600);
+    choirTune(); egg('choir');
+  }
+  function feed() {   // 🥣 leeren Napf antippen: auffüllen
+    if (food >= 3) { say('Der Napf ist noch voll! 🐾', bowlX + 4, 1400); return; }
+    food = 3; egg('feed');
+    if (!wolf && !['transform', 'sleep', 'trick', 'fetch', 'fetchBack', 'sing'].includes(mode)) mode = 'goEat';
+    say(pick(['Danke! Lecker! 💕', 'Wuff! Futter! Danke! 💕']), bowlX + 4, 1600); bark(1);
+  }
+  $title?.addEventListener('click', () => {
+    const now = Date.now();
+    titleTaps = titleTaps.filter((x) => now - x < 3000); titleTaps.push(now);
+    if (titleTaps.length >= 5) { titleTaps = []; disco(); }
+  });
+  window.janaEggs = Object.assign(window.janaEggs || {}, { throwBall, trick: startTrick, disco, sing, feed,
+    emptyBowl: () => { food = 0; }, cat: () => { nextCat = 0; cat = null; } });
+
   document.addEventListener('click', (e) => {
     if (e.dogHandled) return;
     const r = yard.getBoundingClientRect();
     const onDog = mode !== 'sleep' && e.clientY >= r.top && e.clientY <= r.bottom && e.clientX >= dogX * S && e.clientX <= (dogX + 32) * S;
     const onHouse = e.clientY >= r.top && e.clientY <= r.bottom && e.clientX >= houseX * S && e.clientX <= (houseX + 20) * S;
-    if (onDog) dispatchEvent(new Event('jana:dogpat'));
+    const inYard = e.clientY >= r.top && e.clientY <= r.bottom;
+    const onBall = inYard && !ball.carried && e.clientX >= (ball.x - 2) * S && e.clientX <= (ball.x + 7) * S;
+    const onBowl = inYard && e.clientX >= bowlX * S && e.clientX <= (bowlX + 9) * S;
+    if (onBall && !e.target.closest('button, a, input, select, textarea, label')) { throwBall(); return; }
+    if (onBowl && (food < 3 || !onDog) && !e.target.closest('button, a, input, select, textarea, label')) { feed(); return; }
+    const now = Date.now();
+    if (onHouse && night() && soundOn) {
+      houseTaps = houseTaps.filter((x) => now - x < 2500); houseTaps.push(now);
+      if (houseTaps.length >= 3) { houseTaps = []; sing(); return; }
+    }
+    if (onDog) {
+      dispatchEvent(new Event('jana:dogpat'));
+      dogTaps = dogTaps.filter((x) => now - x < 4000); dogTaps.push(now);
+      if (dogTaps.length >= 10) { dogTaps = []; startTrick(); return; }
+    }
     const sp = window.janaSpecial;
     if (onDog || onHouse || e.target.closest('button')) happy(wolf ? pick(['Auuu! 🐺', 'Grrr… Wuff! 🌕', 'Wuff… äh, Auuu!']) : sp?.bark && Math.random() < 0.5 ? sp.bark : pick(BARKS));
   });
@@ -1635,6 +2267,16 @@
     state.data = data;
     const cur = data.current || {};
     const { text, kind } = describe(cur.code, cur.isDay);
+    // 🌈 Regenbogen: hat es in den letzten 3 Stunden geregnet und jetzt scheint die Sonne?
+    if (!window.JANA_DEMO) {
+      let lastWet = 0;
+      try { lastWet = +localStorage.getItem('janas-woche.lastWet') || 0; } catch {}
+      if (['rain', 'drizzle', 'thunder'].includes(kind)) { try { localStorage.setItem('janas-woche.lastWet', Date.now()); } catch {} }
+      else if (cur.isDay && ['clear', 'partly'].includes(kind) && lastWet && Date.now() - lastWet < 3 * 3600e3) {
+        try { localStorage.removeItem('janas-woche.lastWet'); } catch {}
+        showRainbow(120000);
+      }
+    }
     state.kind = kind; state.isDay = !!cur.isDay;
     window.janaWeather = { kind, isDay: !!cur.isDay, temp: cur.temp, code: cur.code };
     // nächster Sonnenauf- bzw. -untergang nach der Ortszeit der Wetterdaten
@@ -1712,6 +2354,49 @@
   addEventListener('resize', sizeSky);
   sizeSky();
   const birds = [];
+  const egg = (id) => dispatchEvent(new CustomEvent('jana:egg', { detail: id }));
+  // 🌠 Sternschnuppe (nachts, selten) und 🌈 Regenbogen
+  let shoot = null, nextShoot = performance.now() + 15000 + Math.random() * 45000, rainbowFrom = 0, rainbowUntil = 0;
+  const sparks = [];
+  function showRainbow(ms) { rainbowFrom = performance.now(); rainbowUntil = rainbowFrom + ms; egg('rainbow'); }
+  function shootPos(t) { const pr = Math.min(1, (t - shoot.born) / shoot.dur); return [shoot.x0 + shoot.dir * 24 * pr, shoot.y0 + 9 * pr, pr]; }
+  function drawShoot(t) {
+    if (state.isDay || reduce) { shoot = null; return; }
+    if (!shoot && t > nextShoot) shoot = { x0: 8 + Math.random() * Math.max(10, SW - 60), y0: 1 + Math.random() * 4, dir: Math.random() < 0.5 ? 1 : -1, born: t, dur: 1500 };
+    if (shoot) {
+      const [x, y, pr] = shootPos(t);
+      if (t - shoot.born > shoot.dur + 900) { shoot = null; nextShoot = t + 40000 + Math.random() * 110000; }
+      else if (pr < 1) {
+        for (let k = 5; k >= 0; k--) { sg.globalAlpha = 1 - k / 6; sg.fillStyle = k ? '#fff2b8' : '#ffffff'; sg.fillRect(Math.round(x - shoot.dir * k * 1.6), Math.round(y - k * 0.6), 1, 1); }
+        sg.globalAlpha = 1;
+      }
+    }
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i], age = (t - s.born) / 900;
+      if (age > 1) { sparks.splice(i, 1); continue; }
+      sg.fillStyle = ['#ffd36e', '#ffffff', '#f2a9c8'][i % 3];
+      for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, rr = age * 6; sg.fillRect(Math.round(s.x + Math.cos(a) * rr), Math.round(s.y + Math.sin(a) * rr), 1, 1); }
+    }
+  }
+  function catchStar() {
+    if (!shoot) return false;
+    const [x, y] = shootPos(performance.now());
+    sparks.push({ x, y, born: performance.now() }); shoot = null; nextShoot = performance.now() + 60000 + Math.random() * 90000;
+    window.janaDog?.happy('Wünsch dir was ✨'); egg('star');
+    return true;
+  }
+  function drawRainbow(t) {
+    const now = performance.now();
+    if (now > rainbowUntil || !state.isDay) return;
+    const fade = Math.min(1, (now - rainbowFrom) / 2500, (rainbowUntil - now) / 2500);
+    const cols = ['#f29a9a', '#f8c9a0', '#f6df96', '#c6e3a9', '#a9c8ec', '#cdb7ef'], cx = Math.round(SW * 0.4), cy = 30;
+    sg.globalAlpha = Math.max(0, fade) * 0.85;
+    cols.forEach((c, i) => {
+      const r = 26 - i; sg.fillStyle = c;
+      for (let a = 0; a <= Math.PI; a += 1 / (r * 1.6)) { const y = Math.round(cy - Math.sin(a) * r); if (y >= 0 && y < 24) sg.fillRect(Math.round(cx + Math.cos(a) * r), y, 1, 1); }
+    });
+    sg.globalAlpha = 1;
+  }
   let nextFlock = performance.now() + 3000, lastSky = 0;
   function spawnFlock(t) {
     const dir = Math.random() < 0.5 ? 1 : -1, n = 1 + Math.floor(Math.random() * 3);
@@ -1737,7 +2422,23 @@
       sg.fillStyle = dark ? P.star : '#c9b3ec';
       for (const [x, y, ph] of stars) if (reduce || Math.floor(t / 700 + ph) % 4) sg.fillRect(x, y, 1, 1);
     }
+    drawRainbow(t);
     sg.save(); sg.translate(SW - 26, 0); scene(sg, state.kind, state.isDay, moon(), t); sg.restore();
+    drawShoot(t);
+    if (performance.now() < (window.janaDisco || 0)) {   // 🪩 Discokugel
+      const x = Math.round(SW * 0.42), cols = ['#f2a9c8', '#cdb7ef', '#ffd36e', '#a6dcc2', '#a9c8ec'];
+      sg.fillStyle = dark ? '#cfc6db' : '#6b5f7a'; sg.fillRect(x + 3, 0, 1, 4);
+      for (let yy = 0; yy < 7; yy++) for (let xx = 0; xx < 7; xx++) {
+        if (Math.hypot(xx - 3, yy - 3) > 3.4) continue;
+        sg.fillStyle = (xx + yy + Math.floor(t / 180)) % 2 ? '#e3e6ee' : '#8f96a8'; sg.fillRect(x + xx, 4 + yy, 1, 1);
+      }
+      sg.fillStyle = '#ffffff'; sg.fillRect(x + 1 + Math.floor(t / 240) % 4, 5, 1, 1);
+      if (!reduce) for (let i = 0; i < 14; i++) {   // Lichtstrahlen
+        const k = Math.floor(t / 200) + i * 5;
+        sg.fillStyle = cols[(i + k) % cols.length];
+        sg.fillRect((k * 23 + i * 17) % Math.max(10, SW - 28), (k * 7 + i * 3) % 24, 1, 1);
+      }
+    }
     const batNight = window.janaSpecial?.sky === 'bats' && !state.isDay;
     if (!reduce && (state.isDay || batNight) && state.kind !== 'thunder' && t > nextFlock) { spawnFlock(t); nextFlock = t + 9000 + Math.random() * 16000; }
     const bc = dark ? '#cfc6db' : '#6b5f7a';
@@ -1756,6 +2457,12 @@
     if (moonTaps.length >= 3) { moonTaps = []; dispatchEvent(new Event('jana:forcewolf')); }
   }
   mCanvas.addEventListener('click', moonTap);
+  document.addEventListener('click', (e) => {   // Sternschnuppe antippen
+    if (!shoot) return;
+    const r = sky.getBoundingClientRect(), [x, y] = shootPos(performance.now());
+    if (Math.abs(e.clientX - (r.left + x * 3)) < 36 && Math.abs(e.clientY - (r.top + y * 3)) < 36) { e.dogHandled = true; catchStar(); }
+  }, true);
+  window.janaEggs = Object.assign(window.janaEggs || {}, { star: () => { nextShoot = 0; shoot = null; }, catchStar, rainbow: (ms = 15000) => showRainbow(ms) });
   document.addEventListener('click', (e) => {
     // Mond am Himmel: nur abends sichtbar (klar oder teilweise bewölkt)
     if (state.isDay || !['clear', 'partly'].includes(state.kind)) return;
@@ -1866,6 +2573,19 @@
     { label: '🎄 Weihnachten', hour: 18, wx: wx(71, false, 0), moon: 3, special: () => app.getSpecial(new Date(Y, 11, 24, 18)) },
     { label: '🎆 Silvester-Feuerwerk', hour: 22, wx: wx(0, false, 1), moon: 25, special: () => app.getSpecial(new Date(Y, 11, 31, 22)) },
     { label: '💖 Valentinstag', hour: 12, wx: wx(2, true, 6), special: () => app.getSpecial(new Date(Y, 1, 14, 12)) },
+    { label: '📖 Gelesene Bücher mit Bücherregal', hour: 20, wx: wx(1, false, 9), moon: 20, ms: 9000, run: () => { toEl('bookCard'); later(700, () => { $('bookDetails').open = true; }); later(2000, () => { const f = $('bookForm'); f.elements.title.value = 'Momo'; f.elements.author.value = 'Michael Ende'; document.querySelector('#bookStars [data-star="5"]')?.click(); }); later(4200, () => $('bookForm').requestSubmit()); }, after: () => { $('bookDetails').open = false; } },
+    { label: '⏱️ Lern-Timer: 25 Minuten lernen, Haustier bleibt still', hour: 15, wx: wx(1, true, 16), run: () => { toEl('timerCard'); later(1200, () => $('timerStart').click()); }, after: () => { if ($('timerStop') && !$('timerStop').hidden) $('timerStop').click(); } },
+    { label: '🎓 Uni: Lernzeit, Abgaben und Lernziele', hour: 16, wx: wx(1, true, 16), ms: 9000, run: () => { toEl('uniCard'); later(3500, () => document.querySelector('#goalList [data-gcheck]:not([aria-pressed="true"])')?.click()); } },
+    { label: '🌠 Sternschnuppe antippen: Wünsch dir was', hour: 23, wx: wx(0, false, 6), moon: 8, run: () => { toTop(); later(400, () => window.janaEggs.star()); later(1500, () => window.janaEggs.catchStar()); } },
+    { label: '🪩 5× auf „Janas Woche“ tippen: Disco!', hour: 20, wx: wx(0, false, 12), moon: 8, ms: 10000, run: () => { toTop(); [0, 1, 2, 3, 4].forEach((k) => later(800 + k * 220, () => $('pageTitle').click())); } },
+    { label: '🎾 Ball antippen: der Hund apportiert', hour: 11, wx: wx(0, true, 21), ms: 9000, run: () => later(900, () => window.janaEggs.throwBall()) },
+    { label: '🤸 Hund 10× schnell antippen: Kunststück', hour: 12, wx: wx(1, true, 19), run: () => later(900, () => window.janaEggs.trick()) },
+    { label: '🥣 Leeren Napf antippen: wird aufgefüllt', hour: 13, wx: wx(1, true, 19), run: () => { window.janaEggs.emptyBowl(); later(1500, () => window.janaEggs.feed()); } },
+    { label: '🌈 Regenbogen, wenn nach Regen die Sonne kommt', hour: 15, wx: wx(1, true, 17), run: () => { toTop(); window.janaEggs.rainbow(7600); } },
+    { label: '🐈‍⬛ Freitag, der 13.: eine schwarze Katze schleicht vorbei', hour: 16, wx: wx(2, true, 14), ms: 11000, special: () => { const d = new Date(); d.setDate(13); while (d.getDay() !== 5) d.setMonth(d.getMonth() + 1); return app.getSpecial(d); }, run: () => window.janaEggs.cat() },
+    { label: '💌 „Ich liebe dich“ eintragen: es regnet Herzen', hour: 18, wx: wx(1, true, 15), run: () => { toEl('todos'); later(1000, () => { $('todoInput').value = 'Ich liebe dich'; }); later(2400, () => $('todoForm').requestSubmit()); } },
+    { label: '🎵 Nachts 3× auf die Hütte (Ton an): der Hund singt', hour: 23, wx: wx(0, false, 7), moon: 8, run: () => later(900, () => window.janaEggs.sing()) },
+    { label: '🕚 Um 11:11 und 22:22: Wunschzeit', hour: 11, wx: wx(1, true, 16), run: () => { toTop(); later(800, () => window.janaEggs.wish('11:11')); } },
     { label: '📅 KW-Übersicht aller Wochen', hour: 18, wx: wx(2, true, 12), ms: 9000, run: () => { later(900, () => $('overviewBtn').click()); later(7600, () => { if (!$('kwOverlay').hidden) $('kwClose').click(); }); } },
     { label: '🏆 Erfolge zum Aufklappen', hour: 19, wx: wx(2, false, 10), run: () => { toEl('achCard'); later(1000, () => { $('achDetails').open = true; }); }, after: () => { $('achDetails').open = false; } },
     { label: '📝 Langfristige To-dos', hour: 17, wx: wx(1, true, 14), run: () => toEl('todos') },

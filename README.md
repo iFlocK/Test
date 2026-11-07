@@ -42,6 +42,14 @@ Benutzername, Passwort und Geheimschlüssel stehen nicht im Code, sondern als Ne
 Einträge werden nur im Browser des jeweiligen Geräts gespeichert (localStorage, Schlüssel `janas-woche.v2`).
 Bei Änderungen das Speicherformat beibehalten, damit vorhandene Einträge erhalten bleiben.
 
+Weitere Bereiche: 🎓 Uni (Lern-Timer, Fächer & Lernzeit, Abgaben, Lernziele pro Woche, Link zur Discord-Lerngruppe)
+und 📖 Gelesene Bücher (Regal, Autor:in, Sterne).
+
+Versteckte Überraschungen: Mond 3× antippen (Werwolf), Sternschnuppe nachts antippen, 5× auf „Janas Woche“ (Disco),
+Hund 10× schnell antippen (Kunststück), Ball antippen (apportieren), leeren Napf antippen, 11:11 und 22:22,
+Freitag der 13. (schwarze Katze), Regenbogen nach Regen, „Ich liebe dich“ als Gewohnheit oder To-do (Herzregen),
+nachts mit Ton 3× auf die Hütte (Hund singt). Jede gibt einen geheimen Erfolg.
+
 ## Änderungen testen, ohne Netlify-Guthaben zu verbrauchen
 1. Änderungen in `janas-woche/public/index.html` machen.
 2. Vorschau erzeugen: `python3 janas-woche/tools/make-preview.py vorschau.html` und als Claude-Artifact ansehen.
