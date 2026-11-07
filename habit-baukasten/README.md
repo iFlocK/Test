@@ -8,9 +8,11 @@ Die Seite liegt in `public/` (mit Icons und App-Manifest); zum Veröffentlichen 
   Gewohnheiten, Geburtstag, Jahrestag (optional) und Wohnort für das Wetter.
 - Alles lässt sich später über ⚙️ Einstellungen ändern. Dort sind die Bereiche Tabs, die man direkt anwählen kann.
 - Haustier wählbar: Hund (mit Hütte), Katze (mit Katzenhaus) oder Kaninchen (mit Stall).
-- Optionaler Bereich „🎓 Uni“: Lern-Timer (25/5, lange Pause nach 4 Runden), Fächer mit Lernzeit,
+- Optionaler Bereich „🎓 Uni“: Lern-Timer (25/5, lange Pause nach 4 Runden), Fächer mit Lernzeit (Einträge einzeln löschbar),
   Abgaben & Deadlines, Lernziele pro Woche.
 - „📖 Gelesene Bücher“: Titel, Autor:in, Genre (feste Farbe je Genre, Regal danach sortiert, mit Legende), 0,5–5 Sterne (halbe Sterne: links auf einen Stern) und Datum.
+  Beim Eintippen des Titels schlägt eine Buch-Datenbank passende Bücher vor (Apple Books, sonst Open Library); ein Vorschlag füllt
+  Titel, Autor:in, Genre (aus den Apple-Genres zugeordnet), Erscheinungsjahr und Cover aus. Erotik-Titel werden ausgefiltert.
   Beim Darüberfahren oder Antippen eines Buchrückens erscheint das Cover (Apple-Books-Suche, sonst Open Library; die Adresse wird beim Buch gespeichert).
 - „🐷 Sparziele“: Ziel mit Betrag und optionalem Datum, Einzahlen/Abheben, Pixel-Sparschwein füllt sich, Sparplan pro Monat.
 - „🌸 Zyklus“ (optional, im Assistenten wählbar): Periode starten/beenden, aktuelle Zyklusphase mit Farbstreifen, Schätzung der nächsten Periode und fruchtbaren Tage (lernt aus den Einträgen), Befinden-Chips, 🩸 in den Tageskarten. Bleibt nur auf dem Gerät; Schätzungen, nicht zur Verhütung.

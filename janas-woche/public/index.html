@@ -262,6 +262,11 @@
   .uni-form .pill { padding: 4px 12px; font-size: .82rem; }
   .uni-total { margin: 4px 0 0; font-weight: 800; font-size: .9rem; }
   .study-bars { display: grid; gap: 5px; }
+  .study-log summary { cursor: pointer; font-size: .8rem; font-weight: 800; color: var(--muted); }
+  .study-log ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 2px; }
+  .study-log li { display: flex; align-items: center; gap: 6px; font-size: .82rem; border-top: 1px solid var(--border); padding: 3px 0; }
+  .study-log li span { flex: 1; min-width: 0; }
+  .study-log .todo-del { padding: 2px 6px; font-size: 1rem; }
   .sb { display: grid; grid-template-columns: minmax(0, 7em) minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: .82rem; }
   .sb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .sb-bar { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
@@ -350,6 +355,17 @@
   .g-select { justify-self: start; width: auto; font: inherit; font-size: .75rem; color: var(--muted); background: none; border: none; padding: 0; max-width: 100%; }
   .book-stats { margin: 0; font-weight: 800; font-size: .88rem; }
   .book-form { display: grid; gap: 6px; }
+  .title-wrap { position: relative; display: grid; }
+  .book-sugg { position: absolute; z-index: 6; top: calc(100% + 4px); left: 0; right: 0; list-style: none; margin: 0; padding: 4px; background: var(--card);
+    border: 2px solid var(--accent); border-radius: 14px; box-shadow: 0 8px 24px rgba(60, 30, 60, .2); max-height: 340px; overflow: auto; }
+  .book-sugg li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 8px; align-items: center; padding: 5px 6px; border-radius: 10px; cursor: pointer; }
+  .book-sugg li[aria-selected="true"], .book-sugg li:hover { background: var(--soft); }
+  .book-sugg img, .book-sugg .noimg { width: 34px; height: 48px; object-fit: cover; border-radius: 3px; background: var(--border); }
+  .book-sugg b { display: block; font-size: .85rem; line-height: 1.2; overflow-wrap: break-word; }
+  .book-sugg small { color: var(--muted); font-size: .74rem; }
+  .book-sugg .src { cursor: default; display: block; text-align: right; font-size: .68rem; color: var(--muted); padding: 2px 6px; }
+  .book-picked { font-size: .78rem; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+  .book-picked img { width: 26px; height: 38px; object-fit: cover; border-radius: 3px; }
   .book-form select { font: inherit; font-size: .9rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; min-width: 0; }
   .book-form input { font: inherit; font-size: .9rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; min-width: 0; }
   .book-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
@@ -561,7 +577,7 @@
 </head>
 <body>
 
-<script>window.HB_CONFIG = {"single": true, "noGender": true, "serverWeather": true, "preset": {"name": "Jana", "gender": "w", "palette": "rosa", "animal": "dog", "fur": "golden", "pet": "", "uni": true, "cycle": false, "club": "", "clubName": "", "clubShort": "", "birthday": "2000-08-25", "together": {"date": "2025-09-18", "partner": ""}, "city": ""}, "changelog": [{"v": "0.10.1", "title": "Überall gleich und schönere Bücher", "notes": [["⭐", "Halbe Sterne", "Bücher kannst du jetzt auch mit halben Sternen bewerten: links auf einen Stern tippen."], ["📚", "Genres und Cover", "Jedes Buch bekommt ein Genre mit eigener Farbe, das Regal ist danach sortiert. Fahr mit der Maus über einen Buchrücken oder tipp ihn an, dann siehst du das Cover."], ["☁️", "MacBook und iPhone", "Was du am MacBook einträgst, ist auch auf dem iPhone da, und umgekehrt. Der Abgleich passiert automatisch beim Öffnen und nach jeder Änderung."], ["💾", "Datensicherung", "Unten rechts gibt es jetzt den 💾-Knopf: Speichere deine Einträge (Deadlines, Gewohnheiten, Bücher …) als Datei, zum Beispiel über „In Dateien sichern“, und stelle sie bei Bedarf wieder her. Ein roter Punkt erinnert dich, wenn die letzte Sicherung länger als zwei Wochen her ist."]]}, {"v": "0.10.0", "title": "Deine eigenen Einstellungen", "notes": [["⚙️", "Einstellungen mit Tabs", "Oben unter ⚙️ Einstellungen findest du alles als Tabs: Name, Farbe, Haustier, Gewohnheiten, Uni, Zyklus, Verein, besondere Tage und Wetter."], ["🐾", "Katze oder Kaninchen", "Statt des Hundes kannst du auch eine Katze oder ein Kaninchen haben, jeweils mit eigenem Häuschen und eigener Fellfarbe."], ["🎨", "Farben", "Such dir eine von fünf Pastellfarben für die ganze Seite aus."], ["🌸", "Zyklus-Tracker", "Wenn du möchtest: Periode eintragen, aktuelle Zyklusphase sehen und eine Schätzung für die nächste Periode. Bleibt nur auf deinem Handy."], ["⚽", "Lieblingsverein", "Wähle einen Verein und sieh den Countdown zum nächsten Spiel, mit Bundesliga, DFB-Pokal und Champions League."], ["🗂️", "Ein- und ausklappen", "Tippe auf eine Überschrift, um einen Bereich zuzuklappen. Die Seite merkt sich das."]]}, {"v": "0.9.0", "title": "Das große Herbst-Update", "notes": [["🎓", "Uni-Bereich", "Lern-Timer, Fächer mit Lernzeit, Abgaben und Deadlines und Lernziele für jede Woche. Beim Lernen ist der Hund ganz leise."], ["💬", "Discord-Lerngruppe", "Speichere den Einladungslink im Uni-Bereich und öffne deine Gruppe mit einem Tipp."], ["📖", "Gelesene Bücher", "Dein eigenes Bücherregal mit Titel, Autor:in und Sternen."], ["😊", "Stimmungsbarometer", "Trag jeden Tag ein, wie es dir geht. Der Hund reagiert darauf."], ["🔊", "Ton immer an", "Der Ton-Knopf ist weg: Der Hund bellt jetzt immer, sobald du einmal auf die Seite getippt hast."], ["🤫", "Geheimnisse", "Im Garten und am Himmel verstecken sich viele neue Überraschungen. Mehr wird nicht verraten!"]]}]};</script>
+<script>window.HB_CONFIG = {"single": true, "noGender": true, "serverWeather": true, "preset": {"name": "Jana", "gender": "w", "palette": "rosa", "animal": "dog", "fur": "golden", "pet": "", "uni": true, "cycle": false, "club": "", "clubName": "", "clubShort": "", "birthday": "2000-08-25", "together": {"date": "2025-09-18", "partner": ""}, "city": ""}, "changelog": [{"v": "0.11.0", "title": "Das Große Bücher & Cloud Sync Update", "notes": [["☁️", "MacBook und iPhone", "Was du am MacBook einträgst, ist auch auf dem iPhone da, und umgekehrt. Der Abgleich passiert automatisch beim Öffnen und nach jeder Änderung."], ["⭐", "Halbe Sterne", "Bücher kannst du jetzt auch mit halben Sternen bewerten: links auf einen Stern tippen."], ["🔎", "Buch-Datenbank", "Tipp einfach den Titel ein: Passende Bücher erscheinen mit Cover. Ein Tipp darauf füllt Titel, Autor:in, Genre und Cover aus."], ["📚", "Genres und Cover", "Jedes Buch bekommt ein Genre mit eigener Farbe, das Regal ist danach sortiert. Fahr mit der Maus über einen Buchrücken oder tipp ihn an, dann siehst du das Cover."], ["🎓", "Lernzeit löschen", "Im Uni-Bereich stehen unter der Lernzeit jetzt alle Einträge der Woche, jeder mit × zum Löschen."], ["💾", "Datensicherung", "Unten rechts gibt es jetzt den 💾-Knopf: Speichere deine Einträge (Deadlines, Gewohnheiten, Bücher …) als Datei, zum Beispiel über „In Dateien sichern“, und stelle sie bei Bedarf wieder her. Ein roter Punkt erinnert dich, wenn die letzte Sicherung länger als zwei Wochen her ist."]]}, {"v": "0.10.0", "title": "Deine eigenen Einstellungen", "notes": [["⚙️", "Einstellungen mit Tabs", "Oben unter ⚙️ Einstellungen findest du alles als Tabs: Name, Farbe, Haustier, Gewohnheiten, Uni, Zyklus, Verein, besondere Tage und Wetter."], ["🐾", "Katze oder Kaninchen", "Statt des Hundes kannst du auch eine Katze oder ein Kaninchen haben, jeweils mit eigenem Häuschen und eigener Fellfarbe."], ["🎨", "Farben", "Such dir eine von fünf Pastellfarben für die ganze Seite aus."], ["🌸", "Zyklus-Tracker", "Wenn du möchtest: Periode eintragen, aktuelle Zyklusphase sehen und eine Schätzung für die nächste Periode. Bleibt nur auf deinem Handy."], ["⚽", "Lieblingsverein", "Wähle einen Verein und sieh den Countdown zum nächsten Spiel, mit Bundesliga, DFB-Pokal und Champions League."], ["🗂️", "Ein- und ausklappen", "Tippe auf eine Überschrift, um einen Bereich zuzuklappen. Die Seite merkt sich das."]]}, {"v": "0.9.0", "title": "Das große Herbst-Update", "notes": [["🎓", "Uni-Bereich", "Lern-Timer, Fächer mit Lernzeit, Abgaben und Deadlines und Lernziele für jede Woche. Beim Lernen ist der Hund ganz leise."], ["💬", "Discord-Lerngruppe", "Speichere den Einladungslink im Uni-Bereich und öffne deine Gruppe mit einem Tipp."], ["📖", "Gelesene Bücher", "Dein eigenes Bücherregal mit Titel, Autor:in und Sternen."], ["😊", "Stimmungsbarometer", "Trag jeden Tag ein, wie es dir geht. Der Hund reagiert darauf."], ["🔊", "Ton immer an", "Der Ton-Knopf ist weg: Der Hund bellt jetzt immer, sobald du einmal auf die Seite getippt hast."], ["🤫", "Geheimnisse", "Im Garten und am Himmel verstecken sich viele neue Überraschungen. Mehr wird nicht verraten!"]]}]};</script>
 <script>
 (() => {
   // Farb- und Größenangaben aus data-style per CSSOM setzen: funktioniert auch dort, wo style-Attribute gesperrt sind
@@ -662,6 +678,7 @@
         <form class="uni-form" id="subjForm"><input name="name" placeholder="Neues Fach" aria-label="Neues Fach" autocomplete="off"><select name="color" id="subjColor" aria-label="Farbe des Fachs"></select><button class="pill" type="submit">+</button></form>
         <p class="uni-total" id="studyTotal"></p>
         <div class="study-bars" id="studyBars"></div>
+        <details class="study-log" id="studyLogWrap" hidden><summary>Einträge dieser Woche (<span id="studyLogCount">0</span>)</summary><ul id="studyLog"></ul></details>
         <form class="uni-form" id="studyForm"><select name="subj" id="studyAddSubj" aria-label="Fach"></select><input name="min" type="number" min="1" max="600" placeholder="Min." aria-label="Minuten" inputmode="numeric"><button class="pill" type="submit">Nachtragen</button></form>
       </div>
       <div class="uni-col">
@@ -687,7 +704,8 @@
         <div class="genre-legend" id="genreLegend"></div>
         <p class="book-stats" id="bookStats"></p>
         <form class="book-form" id="bookForm">
-          <input name="title" placeholder="Titel des Buchs" aria-label="Titel des Buchs" autocomplete="off">
+          <div class="title-wrap"><input name="title" id="bookTitle" placeholder="Titel des Buchs (Vorschläge beim Tippen)" aria-label="Titel des Buchs" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="bookSugg"><ul class="book-sugg" id="bookSugg" role="listbox" aria-label="Buchvorschläge" hidden></ul></div>
+          <div class="book-picked" id="bookPicked" hidden></div>
           <input name="author" placeholder="Autor:in" aria-label="Autor oder Autorin" autocomplete="off">
           <select name="genre" id="bookGenre" aria-label="Genre"></select>
           <div class="book-row"><span class="book-label">Bewertung</span><span class="stars-pick" id="bookStars" role="group" aria-label="Bewertung in Sternen"></span></div>
@@ -1814,6 +1832,10 @@
     const total = entries.reduce((a, [, v]) => a + v, 0), max = Math.max(1, ...entries.map(([, v]) => v));
     $('studyTotal').textContent = total ? `${fmtMin(total)} diese Woche` : 'Diese Woche noch keine Lernzeit';
     $('studyBars').innerHTML = entries.map(([id, v]) => `<div class="sb"><span class="sb-name">${esc(subjName(id))}</span><span class="sb-bar"><i data-style="width:${Math.max(4, Math.round(v / max * 100))}%;background:var(--c-${subjOf(id)?.color || 'eigen'})"></i></span><span class="sb-val">${fmtMin(v)}</span></div>`).join('');
+    const wkFrom = monday.getTime(), wkTo = addDays(monday, 7).getTime();
+    const wkSessions = U.sessions.filter((ss) => ss.at >= wkFrom && ss.at < wkTo).sort((a, b) => b.at - a.at);
+    $('studyLogWrap').hidden = !wkSessions.length; $('studyLogCount').textContent = wkSessions.length;
+    $('studyLog').innerHTML = wkSessions.map((ss) => `<li><span>${new Date(ss.at).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'numeric' })} · ${esc(subjName(ss.subject))} · ${fmtMin(ss.minutes)}${ss.full ? ' 🍅' : ''}</span><button class="todo-del" type="button" data-ssdel="${ss.id}" aria-label="Lernzeit ${fmtMin(ss.minutes)} ${esc(subjName(ss.subject))} löschen">×</button></li>`).join('');
     $('studyAddSubj').innerHTML = subjOptions($('studyAddSubj').value, true);
     // Abgaben
     const open = U.deadlines.filter((x) => !x.done).sort((a, b) => a.due.localeCompare(b.due));
@@ -1857,6 +1879,7 @@
       return;
     }
     if (d.dldel) { e.dogHandled = true; return twoClick(b, () => { U.deadlines = U.deadlines.filter((x) => x.id !== d.dldel); save(); renderUni(); }); }
+    if (d.ssdel) { e.dogHandled = true; return twoClick(b, () => { U.sessions = U.sessions.filter((x) => x.id !== d.ssdel); save(); renderUni(); }); }
     if (d.gcheck) {
       const g = U.goals[key(monday)].find((y) => y.id === d.gcheck); g.done = !g.done; g.doneAt = g.done ? Date.now() : null; save(); renderUni();
       if (g.done) { e.dogHandled = true; window.janaDog?.happy('Wuff! Lernziel geschafft! 🎯'); }
@@ -1987,6 +2010,76 @@
     book.cover = url || ''; save();
     if (peekId === b.id) showPeek(b.id);
   }
+  // Buch-Datenbank beim Eintippen: Apple Books (deutsche Titel, Genre, Cover), sonst Open Library
+  const GENRE_RULES = [   // Apple-Genres → unsere Genres, das Spezifischste gewinnt
+    ['comic', /comic|graphic novel|manga/i], ['kochen', /kochen|kochbuch|backen/i], ['horror', /horror/i], ['krimi', /krimi|thriller|spannung/i],
+    ['scifi', /^science-fiction$/i], ['fantasy', /fantasy/i], ['liebe', /liebesroman|romance/i], ['historisch', /historisch/i], ['lyrik', /lyrik|gedicht|poesie/i],
+    ['humor', /humor|satire/i], ['biografie', /biografie|biographie|memoiren/i], ['reise', /reise/i],
+    ['ratgeber', /selbstverwirklichung|ratgeber|psychologie|lebenshilfe|gesundheit|spiritualit|beziehung/i],
+    ['fachbuch', /lehrbuch|studium|medizin|recht|fachbuch|prüfung/i], ['sachbuch', /wissenschaft|sachbuch|geschichte|politik|business|wirtschaft|natur|biologie|technik|philosophie/i],
+    ['jugend', /jugend/i], ['kinder', /kinder/i], ['klassiker', /klassiker/i], ['roman', /belletristik|literatur|roman/i],
+  ];
+  const mapGenre = (list) => { for (const [k, re] of GENRE_RULES) if ((list || []).some((g) => re.test(g))) return k; return ''; };
+  const firstAuthor = (a) => String(a || '').split(/\s+&\s+|,\s+|\s+und\s+/)[0].trim();
+  let suggs = [], suggSel = -1, suggTimer = null, suggReq = 0, picked = null;
+  async function searchBooks(q) {
+    const out = [];
+    try {
+      const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=ebook&entity=ebook&country=de&lang=de_de&limit=12`);
+      if (r.ok) for (const x of (await r.json()).results || []) if (!(x.genres || []).some((g) => /erot/i.test(g))) out.push({ title: x.trackName, author: firstAuthor(x.artistName), year: (x.releaseDate || '').slice(0, 4), genre: mapGenre(x.genres),
+        cover: x.artworkUrl100 ? x.artworkUrl100.replace('100x100bb', '400x400bb') : '', thumb: x.artworkUrl100 || '', src: 'Apple Books' });
+    } catch {}
+    if (!out.length) try {
+      const r = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=8&fields=title,author_name,cover_i,first_publish_year,subject`);
+      if (r.ok) for (const x of (await r.json()).docs || []) out.push({ title: x.title, author: (x.author_name || [])[0] || '', year: String(x.first_publish_year || ''), genre: mapGenre(x.subject),
+        cover: x.cover_i ? `https://covers.openlibrary.org/b/id/${x.cover_i}-M.jpg` : '', thumb: x.cover_i ? `https://covers.openlibrary.org/b/id/${x.cover_i}-S.jpg` : '', src: 'Open Library' });
+    } catch {}
+    // doppelte Ausgaben (gleicher Titel und Autor) nur einmal zeigen
+    const seen = new Set();
+    return out.filter((b) => { const k = norm(b.title) + '|' + norm(b.author); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 7);
+  }
+  function renderSugg() {
+    const ul = $('bookSugg'), open = suggs.length > 0;
+    ul.hidden = !open; $('bookTitle').setAttribute('aria-expanded', String(open));
+    if (!open) { ul.innerHTML = ''; $('bookTitle').removeAttribute('aria-activedescendant'); return; }
+    ul.innerHTML = suggs.map((b, i) => `<li role="option" id="sugg${i}" data-sugg="${i}" aria-selected="${i === suggSel}">${b.thumb ? `<img src="${esc(b.thumb)}" alt="" referrerpolicy="no-referrer" loading="lazy">` : '<span class="noimg"></span>'}<span><b>${esc(b.title)}</b><small>${esc(b.author)}${b.year ? ' · ' + esc(b.year) : ''}${genreOf(b.genre) ? ' · ' + genreOf(b.genre)[1] : ''}</small></span></li>`).join('')
+      + `<li class="src" aria-hidden="true">Vorschläge: ${esc(suggs[0].src)}</li>`;
+    if (suggSel >= 0) $('bookTitle').setAttribute('aria-activedescendant', 'sugg' + suggSel); else $('bookTitle').removeAttribute('aria-activedescendant');
+  }
+  function closeSugg() { suggs = []; suggSel = -1; renderSugg(); }
+  function pickSugg(i) {
+    const b = suggs[i]; if (!b) return;
+    const f = $('bookForm');
+    f.elements.title.value = b.title; f.elements.author.value = b.author;
+    if (b.genre) f.elements.genre.value = b.genre;
+    picked = { title: b.title, cover: b.cover, year: b.year };
+    $('bookPicked').hidden = false;
+    $('bookPicked').innerHTML = `${b.cover ? `<img src="${esc(b.thumb || b.cover)}" alt="" referrerpolicy="no-referrer">` : ''}<span>✓ Aus der Buch-Datenbank übernommen${b.year ? ` · erschienen ${esc(b.year)}` : ''}</span>`;
+    closeSugg();
+  }
+  $('bookTitle').addEventListener('input', () => {
+    const t = $('bookTitle').value.trim();
+    if (picked && t !== picked.title) { picked = null; $('bookPicked').hidden = true; }
+    clearTimeout(suggTimer);
+    if (t.length < 3 || GUEST) { closeSugg(); return; }
+    suggTimer = setTimeout(async () => {
+      const id = ++suggReq, a = $('bookForm').elements.author.value.trim();
+      const res = await searchBooks(`${t} ${a}`.trim());
+      if (id !== suggReq || $('bookTitle').value.trim() !== t) return;   // inzwischen weitergetippt
+      suggs = res; suggSel = -1; renderSugg();
+    }, 350);
+  });
+  $('bookTitle').addEventListener('keydown', (e) => {
+    if (!suggs.length) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); suggSel = (suggSel + 1) % suggs.length; renderSugg(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); suggSel = (suggSel - 1 + suggs.length) % suggs.length; renderSugg(); }
+    else if (e.key === 'Enter' && suggSel >= 0) { e.preventDefault(); pickSugg(suggSel); }
+    else if (e.key === 'Escape') closeSugg();
+  });
+  $('bookSugg').addEventListener('mousedown', (e) => e.preventDefault());   // Fokus im Feld behalten
+  $('bookSugg').addEventListener('click', (e) => { const li = e.target.closest('[data-sugg]'); if (!li) return; e.dogHandled = true; pickSugg(+li.dataset.sugg); });
+  $('bookTitle').addEventListener('blur', () => setTimeout(closeSugg, 150));
+
   // Vorschau mit Cover beim Darüberfahren (Maus) oder Antippen (Handy)
   let peekId = null, peekAt = 0;
   function showPeek(id) {
@@ -1995,10 +2088,10 @@
     if (peekId !== id) peekAt = performance.now();
     peekId = id;
     $('bookShelf').querySelectorAll('.spine.on').forEach((x) => x.classList.remove('on')); btn.classList.add('on');
-    const g = genreOf(b.genre), stars = b.stars ? '★'.repeat(Math.floor(b.stars)) + (b.stars % 1 ? '½' : '') : '';
+    const g = genreOf(b.genre), yr = b.year ? ` · ${esc(b.year)}` : '', stars = b.stars ? '★'.repeat(Math.floor(b.stars)) + (b.stars % 1 ? '½' : '') : '';
     const pk = $('bookPeek');
     pk.innerHTML = (b.cover ? `<img class="cover" src="${esc(b.cover)}" alt="" referrerpolicy="no-referrer">` : `<div class="cover ph" data-style="background:${bookColor(b)}">${b.cover === undefined && !GUEST ? '…' : esc(b.title)}</div>`)
-      + `<b>${esc(b.title)}</b><small>${b.author ? esc(b.author) : ''}${g ? `${b.author ? ' · ' : ''}<span class="g-chip"><i data-style="background:${g[2]}"></i>${g[1]}</span>` : ''}${stars ? ` · ${stars}` : ''}</small>`;
+      + `<b>${esc(b.title)}</b><small>${b.author ? esc(b.author) : ''}${g ? `${b.author ? ' · ' : ''}<span class="g-chip"><i data-style="background:${g[2]}"></i>${g[1]}</span>` : ''}${yr}${stars ? ` · ${stars}` : ''}</small>`;
     pk.querySelector('img')?.addEventListener('error', () => { const i = pk.querySelector('img'); if (i) i.outerHTML = `<div class="cover ph" data-style="background:${bookColor(b)}">${esc(b.title)}</div>`; });
     pk.hidden = false;
     const wrap = $('bookShelf').parentElement.getBoundingClientRect(), r = btn.getBoundingClientRect();
@@ -2026,6 +2119,8 @@
     const f = e.target, title = f.elements.title.value.trim();
     if (!title) { f.elements.title.focus(); return; }
     const book = { id: uid(), title, author: f.elements.author.value.trim(), genre: f.elements.genre.value, stars: bookStars, date: f.elements.date.value || todayKey(), at: Date.now(), color: SPINES[state.books.length % SPINES.length] };
+    if (picked && picked.title === title) { if (picked.cover) book.cover = picked.cover; if (picked.year) book.year = picked.year; }
+    picked = null; $('bookPicked').hidden = true; closeSugg();
     state.books.push(book);
     f.elements.title.value = ''; f.elements.author.value = ''; f.elements.genre.value = ''; f.elements.date.value = todayKey(); bookStars = 0; renderStarPick();
     save(); renderBooks(); findCover(book);
@@ -2621,9 +2716,11 @@
   // ---------- Versionsnummer und Patch Notes ----------
   // Bei jedem Upload: Version erhöhen und oben einen neuen Eintrag ergänzen.
   const CHANGELOG = CFG.changelog || [
-    { v: '0.3.0', title: 'Datensicherung und schönere Bücher', notes: [
+    { v: '0.3.0', title: 'Das große Bücher-Update', notes: [
       ['💾', 'Datensicherung', 'Unten rechts gibt es jetzt den 💾-Knopf: Speichere deine Einträge als Datei und stelle sie bei Bedarf wieder her. Ein roter Punkt erinnert dich, wenn die letzte Sicherung länger als zwei Wochen her ist.'],
       ['⭐', 'Halbe Sterne', 'Bücher kannst du jetzt auch mit halben Sternen bewerten: links auf einen Stern tippen.'],
+      ['🔎', 'Buch-Datenbank', 'Tipp einfach den Titel ein: Passende Bücher erscheinen mit Cover. Ein Tipp darauf füllt Titel, Autor:in, Genre und Cover aus.'],
+      ['🎓', 'Lernzeit löschen', 'Im Uni-Bereich stehen unter der Lernzeit jetzt alle Einträge der Woche, jeder mit × zum Löschen.'],
       ['📚', 'Genres und Cover', 'Jedes Buch bekommt ein Genre mit eigener Farbe, das Regal ist danach sortiert. Fahr mit der Maus über einen Buchrücken oder tipp ihn an, dann siehst du das Cover.'],
     ] },
     { v: '0.2.0', title: 'Tabs und Live-Spielplan', notes: [
