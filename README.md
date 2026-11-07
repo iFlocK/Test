@@ -44,6 +44,8 @@ Bei Änderungen das Speicherformat beibehalten, damit vorhandene Einträge erhal
 
 Weitere Bereiche: 🎓 Uni (Lern-Timer, Fächer & Lernzeit, Abgaben, Lernziele pro Woche, Link zur Discord-Lerngruppe)
 und 📖 Gelesene Bücher (Regal, Autor:in, Sterne).
+Unter ⚙️ Einstellungen lässt sich das Haustier wählen (Hund, Katze oder Kaninchen, je mit eigenem Häuschen) und die Fellfarbe ändern.
+Uni, Lern-Timer, Gewohnheiten, Wochen-Notiz und To-dos sind ein- und ausklappbar.
 
 Versteckte Überraschungen: Mond 3× antippen (Werwolf), Sternschnuppe nachts antippen, 5× auf „Janas Woche“ (Disco),
 Hund 10× schnell antippen (Kunststück), Ball antippen (apportieren), leeren Napf antippen, 11:11 und 22:22,

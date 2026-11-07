@@ -302,6 +302,28 @@
   @keyframes heartFall { to { transform: translateY(calc(100vh + 80px)) rotate(25deg); } }
   @media (prefers-reduced-motion: reduce) { html.disco main { animation: none; filter: hue-rotate(140deg); } .heart-rain { display: none; } }
 
+  /* Ein- und ausklappbare Bereiche */
+  .c-head { display: flex; align-items: baseline; gap: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .c-head .c-sum { font-size: .8rem; font-weight: 700; }
+  .c-toggle { margin-left: auto; border: none; background: none; padding: 2px 6px; color: var(--muted); font-size: 1rem; line-height: 1; transition: transform .2s; }
+  .card:not(.collapsed) > .c-head .c-toggle { transform: rotate(180deg); }
+  .card.collapsed > :not(.c-head) { display: none !important; }
+  .card.collapsed > .c-head h2 { margin-bottom: 0; }
+  @media (prefers-reduced-motion: reduce) { .c-toggle { transition: none; } }
+
+  /* Einstellungen */
+  #setOverlay { z-index: 18; place-items: start center; background: rgba(40, 25, 45, .3);
+    padding-top: calc(88px + env(safe-area-inset-top, 0px)); padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .settings { max-width: 440px; display: grid; gap: 10px; }
+  .settings h3 { font-size: 1rem; margin-top: 4px; }
+  .set-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .set-opt { display: grid; justify-items: center; gap: 2px; min-width: 84px; padding: 8px 10px; border-radius: 14px; border: 2px solid var(--border); background: var(--card); font-weight: 800; font-size: .85rem; }
+  .set-opt[aria-pressed="true"] { border-color: var(--accent); background: var(--soft); }
+  .set-emoji { font-size: 1.6rem; line-height: 1.1; }
+  .set-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(60, 40, 60, .3); }
+  .set-hint { margin: 0; color: var(--muted); font-size: .82rem; }
+  .settings .pill.primary { justify-self: center; padding: 8px 22px; }
+
   /* Patch Notes */
   .news { max-width: 460px; display: grid; gap: 10px; position: relative; z-index: 1; }
   #newsOverlay { background: rgba(30, 18, 40, .62); place-items: end center; }
@@ -421,6 +443,7 @@
       <button class="pill primary" id="today">Heute</button>
       <button class="pill" id="next" aria-label="Nächste Woche">Woche →</button>
       <button class="pill" id="overviewBtn" type="button">📅 KW-Übersicht</button>
+      <button class="pill" id="setBtn" type="button">⚙️ Einstellungen</button>
     </div>
   </header>
 
@@ -472,7 +495,7 @@
   <section class="days" id="days"></section>
 
   <section class="card uni" id="uniCard">
-    <div class="todos-head"><h2>🎓 Uni</h2></div>
+    <div class="todos-head"><h2>🎓 Uni</h2><span class="muted c-sum" id="uniSum"></span></div>
     <div class="uni-discord" id="discordRow"></div>
     <div class="uni-grid">
       <div class="uni-col">
@@ -516,7 +539,7 @@
   </section>
 
   <div class="two">
-    <section class="card manage">
+    <section class="card manage" id="manageCard">
       <h2>Meine Gewohnheiten</h2>
       <p class="hint">Deine Gewohnheiten erscheinen bei jedem Tag unter „+ Tag“. Eigene kannst du hier oder direkt bei einem Tag anlegen.</p>
       <div class="row" id="tagList"></div>
@@ -526,7 +549,7 @@
         <button class="pill primary" type="submit">Anlegen</button>
       </form>
     </section>
-    <section class="card">
+    <section class="card" id="noteCard">
       <h2>Wochen-Notiz</h2>
       <textarea id="note" placeholder="Was lief gut? Worauf achte ich nächste Woche?"></textarea>
     </section>
@@ -551,6 +574,13 @@
   <button class="version" id="versionBtn" type="button"></button>
 </main>
 
+<div class="overlay" id="setOverlay" hidden>
+  <div class="sheet settings" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+    <div class="sheet-head"><h2 id="setTitle">⚙️ Einstellungen</h2><button class="pill" id="setClose" type="button" aria-label="Einstellungen schließen">✕</button></div>
+    <div id="setBody"></div>
+    <button class="pill primary" id="setOk" type="button">Fertig</button>
+  </div>
+</div>
 <div class="overlay" id="newsOverlay" hidden>
   <canvas id="newsFx" aria-hidden="true"></canvas>
   <div class="sheet news" role="dialog" aria-modal="true" aria-labelledby="newsTitle">
@@ -602,6 +632,19 @@
 
   let state = { tags: DEFAULT_TAGS, weeks: {} };
   try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.tags) state = s; } catch {}
+  // Haustier (Hund, Katze oder Kaninchen) mit Fellfarbe
+  state.pet ||= { animal: 'dog', fur: 'golden' };
+  window.janaPet = state.pet;
+  const PET_WORDS = {
+    cat: [[/Wuff/g, 'Miau'], [/wuff/g, 'miau'], [/Grrr/g, 'Fauch'], [/Den Labrador/g, 'Die Katze'], [/Hundeflüsterin/g, 'Katzenflüsterin'], [/Der Hund/g, 'Die Katze'], [/der Hund/g, 'die Katze'],
+      [/den Hund/g, 'die Katze'], [/dem Hund/g, 'der Katze'], [/Den Hund/g, 'Die Katze'], [/Labrador/g, 'Katze'], [/Hütte/g, 'Katzenhaus'], [/Hechel hechel/g, 'Schnurr…'],
+      [/Werwolf/g, 'Werkatze'], [/als Wolf/g, 'als Werkatze'], [/zum Wolf/g, 'zur Werkatze'], [/🐺/g, '🐈‍⬛'], [/🐶/g, '🐱']],
+    rabbit: [[/Wuff/g, 'Hopp'], [/wuff/g, 'hopp'], [/Grrr/g, '*klopf klopf*'], [/Den Labrador/g, 'Das Kaninchen'], [/Hundeflüsterin/g, 'Kaninchenflüsterin'], [/Der Hund/g, 'Das Kaninchen'],
+      [/der Hund/g, 'das Kaninchen'], [/den Hund/g, 'das Kaninchen'], [/dem Hund/g, 'dem Kaninchen'], [/Den Hund/g, 'Das Kaninchen'], [/Labrador/g, 'Kaninchen'], [/Hütte/g, 'Stall'],
+      [/Hechel hechel/g, '*mümmel mümmel*'], [/Werwolf-Gefahr/g, 'Mondhasen-Zeit'], [/Werwolf gesichtet/g, 'Mondhase gesichtet'], [/zum Werwolf/g, 'zum Mondhasen'], [/als Wolf/g, 'als Mondhase'],
+      [/Werwolf/g, 'Mondhase'], [/🐺/g, '🐇'], [/🐶/g, '🐰']],
+  };
+  window.P = (t) => { let out = String(t); for (const [re, w] of PET_WORDS[window.janaPet?.animal] || []) out = out.replace(re, w); return out; };
   const persist = () => { if (GUEST) return; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
   const save = () => { persist(); checkAchievements(); };
 
@@ -1025,14 +1068,14 @@
     $('achGrid').innerHTML = ACH.map(([id, icon, name, desc]) => {
       const got = state.ach[id];
       const when = got ? new Date(got + 'T12:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-      return `<div class="ach ${got ? '' : 'locked'}"><div class="ic" aria-hidden="true">${icon}</div><div><b>${name}</b><span>${desc}${got ? ` · ${when}` : ''}</span></div></div>`;
+      return `<div class="ach ${got ? '' : 'locked'}"><div class="ic" aria-hidden="true">${window.P(icon)}</div><div><b>${window.P(name)}</b><span>${window.P(desc)}${got ? ` · ${when}` : ''}</span></div></div>`;
     }).join('');
   }
   let toastTimer;
   function toast(fresh) {
     const el = $('toast');
     const [icon, name] = fresh[0];
-    el.innerHTML = `${icon} Erfolg freigeschaltet: ${name}${fresh.length > 1 ? `<small>und ${fresh.length - 1} weitere</small>` : ''}`;
+    el.innerHTML = `${window.P(icon)} Erfolg freigeschaltet: ${window.P(name)}${fresh.length > 1 ? `<small>und ${fresh.length - 1} weitere</small>` : ''}`;
     el.hidden = false;
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { el.hidden = true; }, 4000);
@@ -1083,7 +1126,7 @@
     const sp = window.janaSpecial = window.JANA_DEMO_SPECIAL !== undefined ? window.JANA_DEMO_SPECIAL : getSpecial();
     const el = $('specialLine');
     el.hidden = !sp?.line;
-    if (sp?.line) el.textContent = sp.line;
+    if (sp?.line) el.textContent = window.P(sp.line);
     if (sp && ['birthday', 'christmas', 'easter', 'nye', 'newyear', 'anniversary', 'fri13'].includes(sp.id) && !state.flags[sp.id]) { state.flags[sp.id] = true; save(); }
   }
   // ---------- Zusammen seit 18.09.2025 ----------
@@ -1216,7 +1259,7 @@
     const left = timeLeft(), mm = String(Math.floor(left / 60)).padStart(2, '0'), ss = String(left % 60).padStart(2, '0');
     $('timerTime').textContent = `${mm}:${ss}`;
     const paused = T.pausedLeft != null && T.phase !== 'idle';
-    $('timerPhase').textContent = paused ? 'Angehalten' : phaseLabel[T.phase];
+    $('timerPhase').textContent = paused ? `Angehalten · ${mm}:${ss}` : T.phase === 'idle' ? phaseLabel.idle : `${phaseLabel[T.phase]} · ${mm}:${ss}`;
     $('timerCard').dataset.phase = T.phase;
     $('timerStart').textContent = T.phase === 'idle' ? '▶ Start' : paused ? '▶ Weiter' : '⏸ Pause';
     $('timerStop').hidden = T.phase === 'idle';
@@ -1278,6 +1321,7 @@
         <span class="todo-text"><span class="t">${esc(x.title)}</span><small>${x.subject ? `<b class="subj-dot" data-style="background:var(--c-${subjOf(x.subject)?.color || 'eigen'})"></b>${esc(subjName(x.subject))} · ` : ''}${date}${x.done ? '' : ` · <em class="due ${r.cls}">${r.t}</em>`}</small></span>
         <span></span><button class="todo-del" type="button" data-dldel="${x.id}" aria-label="${esc(x.title)} löschen">×</button></li>`;
     };
+    { const tot = Object.values(weekMinutes(monday)).reduce((a, b) => a + b, 0); $('uniSum').textContent = [open.length ? `${open.length} ${open.length === 1 ? 'Abgabe' : 'Abgaben'} offen` : '', tot ? `${fmtMin(tot)} gelernt` : ''].filter(Boolean).join(' · '); }
     $('dlOpen').innerHTML = open.length ? open.map(dlRow).join('') : '<li class="empty">Keine offenen Abgaben 🎉</li>';
     $('dlDoneWrap').hidden = !done.length; $('dlDoneCount').textContent = done.length; $('dlDone').innerHTML = done.map(dlRow).join('');
     $('dlSubj').innerHTML = subjOptions($('dlSubj').value, true);
@@ -1496,11 +1540,70 @@
   });
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('kwOverlay').hidden) closeOverview(); });
 
+  // ---------- Bereiche ein- und ausklappen ----------
+  const COLLAPSE_KEY = 'janas-woche.collapsed';
+  let collapsed = [];
+  try { collapsed = JSON.parse(localStorage.getItem(COLLAPSE_KEY)) || []; } catch {}
+  for (const id of ['timerCard', 'uniCard', 'manageCard', 'noteCard', 'todos']) {
+    const card = $(id);
+    let head = card.querySelector(':scope > .todos-head, :scope > .mood-head');
+    if (!head) { const h2 = card.querySelector(':scope > h2'); head = document.createElement('div'); h2.before(head); head.append(h2); }
+    head.classList.add('c-head');
+    const title = head.querySelector('h2').textContent.trim();
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'c-toggle'; btn.textContent = '▾';
+    head.append(btn);
+    const sync = () => { const c = card.classList.contains('collapsed'); btn.setAttribute('aria-expanded', String(!c)); btn.setAttribute('aria-label', `${title} ${c ? 'aufklappen' : 'zuklappen'}`); };
+    card.classList.toggle('collapsed', collapsed.includes(id)); sync();
+    head.addEventListener('click', (e) => {
+      if (e.target.closest('a, input, select, textarea') || (e.target.closest('button') && e.target.closest('button') !== btn)) return;
+      e.dogHandled = true;
+      card.classList.toggle('collapsed'); sync();
+      collapsed = [...card.parentElement.ownerDocument.querySelectorAll('.card.collapsed[id]')].map((c) => c.id);
+      try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed)); } catch {}
+    });
+  }
+  window.janaOpenCard = (id) => $(id)?.classList.remove('collapsed');
+
+  // ---------- Einstellungen: Haustier und Fellfarbe ----------
+  const ANIMALS = [['dog', 'Hund', '🐶'], ['cat', 'Katze', '🐱'], ['rabbit', 'Kaninchen', '🐰']];
+  const FUR_OPTS = [['golden', 'Golden', '#ecc173'], ['schoko', 'Schoko', '#a8714a'], ['schwarz', 'Schwarz', '#4a4250'], ['weiss', 'Weiß', '#f4efe9']];
+  const HELLO = { dog: 'Wuff! Da bin ich wieder! 🐶', cat: 'Miau! Ich bin jetzt deine Katze! 🐱', rabbit: 'Hopp hopp! Ich bin jetzt dein Kaninchen! 🐰' };
+  function renderSettings() {
+    const pt = state.pet;
+    $('setBody').innerHTML = `<h3>Haustier</h3><div class="set-row" role="group" aria-label="Haustier">${ANIMALS.map(([k, n, e]) => `<button type="button" class="set-opt" data-animal="${k}" aria-pressed="${pt.animal === k}"><span class="set-emoji" aria-hidden="true">${e}</span>${n}</button>`).join('')}</div>
+      <h3>Fellfarbe</h3><div class="set-row" role="group" aria-label="Fellfarbe">${FUR_OPTS.map(([k, n, c]) => `<button type="button" class="set-opt" data-fur="${k}" aria-pressed="${pt.fur === k}"><span class="set-dot" data-style="background:${c}" aria-hidden="true"></span>${n}</button>`).join('')}</div>
+      <p class="set-hint">Unten im Garten siehst du die Änderung sofort.</p>`;
+  }
+  function petChanged() {
+    window.janaPet = state.pet; save();
+    dispatchEvent(new Event('jana:pet'));
+    renderAch(); renderSpecial(); renderSettings();
+  }
+  let setReturnFocus = null;
+  function openSettings() { renderSettings(); setReturnFocus = document.activeElement; $('setOverlay').hidden = false; $('setClose').focus(); }
+  function closeSettings(e) { if (e) e.dogHandled = true; $('setOverlay').hidden = true; setReturnFocus?.focus?.(); }
+  $('setBtn').addEventListener('click', (e) => { e.dogHandled = true; openSettings(); });
+  $('setOk').addEventListener('click', closeSettings);
+  $('setClose').addEventListener('click', closeSettings);
+  $('setOverlay').addEventListener('click', (e) => { if (e.target === $('setOverlay')) closeSettings(e); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('setOverlay').hidden) closeSettings(); });
+  $('setBody').addEventListener('click', (e) => {
+    const a = e.target.closest('[data-animal]'), f = e.target.closest('[data-fur]');
+    if (!a && !f) return;
+    e.dogHandled = true;
+    if (a && state.pet.animal !== a.dataset.animal) { state.pet = { ...state.pet, animal: a.dataset.animal }; petChanged(); window.janaDog?.happy(HELLO[state.pet.animal]); }
+    if (f && state.pet.fur !== f.dataset.fur) { state.pet = { ...state.pet, fur: f.dataset.fur }; petChanged(); window.janaDog?.happy('Wie gefällt dir mein neues Fell? ✨'); }
+  });
+  window.janaSettings = { open: openSettings, close: closeSettings, pet: (animal, fur) => { state.pet = { animal, fur: fur || state.pet.fur }; petChanged(); } };
+
   // ---------- Versionsnummer und Patch Notes ----------
   // Bei jedem Upload: Version erhöhen und oben einen neuen Eintrag ergänzen.
   const CHANGELOG = [
-    { v: '0.9.1', title: 'Kleiner Feinschliff', notes: [
-      ['🐶', 'Mehr Platz im Garten', 'Der Hundegarten sitzt wieder ganz unten am Bildschirm.'],
+    { v: '0.9.1', title: 'Katze, Kaninchen und mehr Ordnung', notes: [
+      ['⚙️', 'Einstellungen', 'Oben gibt es jetzt Einstellungen. Dort kannst du statt des Hundes eine Katze oder ein Kaninchen wählen, jeweils mit eigenem Häuschen, und die Fellfarbe ändern.'],
+      ['🗂️', 'Ein- und ausklappen', 'Uni, Lern-Timer, Gewohnheiten, Wochen-Notiz und To-dos lassen sich mit einem Tipp auf die Überschrift zuklappen. Die Seite merkt sich das.'],
+      ['🐾', 'Mehr Platz im Garten', 'Der Garten sitzt wieder ganz unten am Bildschirm.'],
     ] },
     { v: '0.9.0', title: 'Das große Herbst-Update', notes: [
       ['🎓', 'Uni-Bereich', 'Lern-Timer, Fächer mit Lernzeit, Abgaben und Deadlines und Lernziele für jede Woche. Beim Lernen ist der Hund ganz leise.'],
@@ -1656,7 +1759,13 @@
   };
   const fill = (x, y, w, h, c) => { ctx.fillStyle = C[c]; ctx.fillRect(x, y, w, h); };
   const DOG_COL = { b: C.b, l: C.l, e: C.e }, WOLF_COL = { b: '#a3a8b6', l: '#dfe2e8', e: '#727889' };
-  C.wy = '#ffd84d'; C.ct = '#2a2330'; C.cy = '#ffd84d'; C.nt = '#b48ee0';
+  const FURS = { golden: { ...DOG_COL }, schoko: { b: '#a8714a', l: '#d6a57c', e: '#7d5133' }, schwarz: { b: '#4a4250', l: '#7a7180', e: '#2f2934' }, weiss: { b: '#f4efe9', l: '#ffffff', e: '#ddd2c6' } };
+  const WERE = { dog: { ...WOLF_COL }, cat: { b: '#2f2934', l: '#4a4250', e: '#1f1a24' }, rabbit: { b: '#e6ebf7', l: '#ffffff', e: '#c3cbe4' } };
+  const animal = () => window.janaPet?.animal || 'dog';
+  function applyFur() { const f = FURS[window.janaPet?.fur] || FURS.golden; Object.assign(C, f); Object.assign(DOG_COL, f); Object.assign(WOLF_COL, WERE[animal()] || WERE.dog); }
+  applyFur();
+  addEventListener('jana:pet', applyFur);
+  C.hy = '#ffd36e'; C.wy = '#ffd84d'; C.ct = '#2a2330'; C.cy = '#ffd84d'; C.nt = '#b48ee0';
   function outlined(parts) {
     for (const [x, y, w, h] of parts) { ctx.fillStyle = C.o; ctx.fillRect(x - 1, y - 1, w + 2, h + 2); }
     for (const [x, y, w, h, c] of parts) fill(x, y, w, h, c);
@@ -1687,6 +1796,8 @@
 
   // ---------- Zeichnen ----------
   function drawHouse() {
+    if (animal() === 'cat') return drawCatHouse();
+    if (animal() === 'rabbit') return drawHutch();
     const x0 = houseX, parts = [[x0 + 2, 12, 16, 11, 'w']];
     for (let r = 0; r < 8; r++) parts.push([x0 + 9 - r, 4 + r, 2 + 2 * r, 1, 'r']);
     parts.push([x0 + 1, 12, 18, 1, 'r']);
@@ -1698,6 +1809,32 @@
     if (mode === 'sleep') {                                                       // schlafender Kopf in der Tür
       fill(x0 + 8, 18, 4, 4, 'b'); fill(x0 + 8, 18, 1, 3, 'e');
       fill(x0 + 9, 19, 1, 1, 'n'); fill(x0 + 11, 19, 1, 1, 'n'); fill(x0 + 9, 21, 3, 1, 'l');
+    }
+  }
+  function drawCatHouse() {   // Katzenhaus mit rundem Eingang und Kissen obendrauf
+    const x0 = houseX;
+    ctx.fillStyle = C.s; ctx.fillRect(x0 + 1, 23, 19, 1);
+    outlined([[x0 + 2, 10, 16, 13, 'w'], [x0 + 1, 8, 18, 2, 'r'], [x0 + 3, 6, 14, 2, 'p2']]);
+    fill(x0 + 2, 14, 16, 1, 'wd'); fill(x0 + 2, 19, 5, 1, 'wd'); fill(x0 + 14, 19, 4, 1, 'wd');
+    for (let y = 13; y <= 22; y++) for (let x = x0 + 5; x <= x0 + 15; x++) if ((x + 0.5 - (x0 + 10)) ** 2 + (y + 0.5 - 18.5) ** 2 <= 13) fill(x, y, 1, 1, 'd');
+    fill(x0 + 3, 11, 1, 1, 'hp'); fill(x0 + 5, 11, 1, 1, 'hp'); fill(x0 + 4, 12, 1, 1, 'hp');   // Pfötchen
+    if (mode === 'sleep') {   // schlafende Katze im Eingang
+      fill(x0 + 8, 18, 5, 3, 'b'); fill(x0 + 8, 17, 1, 1, 'b'); fill(x0 + 12, 17, 1, 1, 'b');
+      fill(x0 + 9, 19, 1, 1, 'n'); fill(x0 + 11, 19, 1, 1, 'n'); fill(x0 + 10, 20, 1, 1, 't');
+    }
+  }
+  function drawHutch() {   // Kaninchenstall auf Beinen mit Gitterfenster und Heu
+    const x0 = houseX;
+    ctx.fillStyle = C.s; ctx.fillRect(x0 + 1, 23, 19, 1);
+    outlined([[x0 + 3, 19, 2, 4, 'wd'], [x0 + 15, 19, 2, 4, 'wd'], [x0 + 2, 10, 16, 9, 'w'], [x0 + 1, 8, 18, 2, 'r'], [x0 + 3, 7, 14, 1, 'r']]);
+    fill(x0 + 4, 12, 6, 5, 'd');
+    for (let i = 0; i < 3; i++) fill(x0 + 5 + i * 2, 12, 1, 5, 'wd');
+    fill(x0 + 4, 14, 6, 1, 'wd');
+    fill(x0 + 11, 12, 5, 7, 'd');
+    fill(x0 + 2, 18, 16, 1, 'hy');   // Heu
+    if (mode === 'sleep') {   // schlafendes Kaninchen in der Tür
+      fill(x0 + 12, 15, 3, 3, 'b'); fill(x0 + 12, 12, 1, 3, 'b'); fill(x0 + 14, 12, 1, 3, 'b');
+      fill(x0 + 12, 16, 1, 1, 'n'); fill(x0 + 14, 16, 1, 1, 'n');
     }
   }
   function drawBowl() {
@@ -1759,10 +1896,89 @@
     Object.assign(C, DOG_COL);
   }
 
+  function petPose(t) {
+    const pose = (mode === 'happy' || mode === 'dance') ? 'happy' : mode === 'eat' ? 'eat' : (mode === 'idle' || mode === 'transform' || mode === 'howl' || mode === 'sing' || mode === 'trick') ? 'stand'
+      : (mode === 'play' || mode === 'goPlay' || mode === 'fetch' || mode === 'fetchBack') ? 'run' : 'walk';
+    return { pose, happy: pose === 'happy', moving: pose === 'walk' || pose === 'run', eat: pose === 'eat', f: frame % 4 };
+  }
+  function petFlip(t) {
+    ctx.save();
+    if (mode === 'trick') {   // Kunststück: eine Rolle in der Luft
+      const pr = Math.min(1, (t - trickT) / 1200), cx = Math.round(dogX) + 16, lift = Math.round(Math.sin(pr * Math.PI) * 5);
+      ctx.translate(cx, 15 - lift); ctx.rotate(Math.round(pr * 4) / 4 * Math.PI * 2 * dir); ctx.translate(-cx, -15);
+    }
+    if (dir < 0) { ctx.translate(Math.round(dogX) + 32, 0); ctx.scale(-1, 1); } else ctx.translate(Math.round(dogX), 0);
+  }
+  function drawCat(t, were) {
+    const { happy, moving, eat, f } = petPose(t);
+    const jump = happy && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : 0;
+    const bob = moving && (f === 1 || f === 3) ? -1 : 0;
+    const Y = (v) => v - jump + bob;
+    const howling = (mode === 'howl' || mode === 'sing') && t < howlUntil;
+    const hd = eat ? (Math.floor(t / 220) % 2 ? 5 : 6) : howling ? -2 : 0, hx = eat ? 1 : 0;
+    const H = (v) => Y(v) + hd;
+    petFlip(t);
+    ctx.fillStyle = C.s; ctx.fillRect(9, 23, 15 - jump, 1);
+    const lift = (i) => moving && ((f < 2) === (i % 2 === 0)) ? 1 : 0;
+    const sway = Math.floor(t / (happy ? 120 : 420)) % 2;
+    const parts = [];
+    [10, 13, 19, 22].forEach((lx, i) => parts.push([lx, Y(18), 2, 4 - lift(i), 'b']));
+    parts.push([7, Y(8), 2, 7, 'b'], [sway ? 5 : 8, Y(6), 2, 2, 'b']);               // Schwanz nach oben
+    parts.push([9, Y(12), 14, 6, 'b'], [21 + hx, H(7), 7, 6, 'b'], [21 + hx, H(5), 2, 2, 'b'], [26 + hx, H(5), 2, 2, 'b']);
+    outlined(parts);
+    fill(21 + hx, H(6), 1, 1, 't'); fill(27 + hx, H(6), 1, 1, 't');                     // Ohren innen
+    [12, 15, 18].forEach((x) => fill(x, Y(12), 1, 3, 'e'));                              // Streifen
+    fill(11, Y(16), 10, 2, 'l');
+    fill(20, Y(12), 2, 3, 'c');                                                           // Halsband
+    if (happy) { fill(23 + hx, H(9), 1, 1, 'n'); fill(24 + hx, H(8), 1, 1, 'n'); fill(25 + hx, H(9), 1, 1, 'n'); }
+    else if (eat) fill(24 + hx, H(9), 2, 1, 'n');
+    else { fill(24 + hx, H(8), 1, 2, were ? 'wy' : 'n'); fill(26 + hx, H(8), 1, 2, were ? 'wy' : 'n'); }
+    fill(27 + hx, H(10), 1, 1, 't');                                                     // Näschen
+    ctx.fillStyle = '#cfc6db'; ctx.fillRect(28 + hx, H(10), 2, 1); ctx.fillRect(28 + hx, H(11), 2, 1);   // Schnurrhaare
+    if (howling || (happy && Math.floor(t / 140) % 2 === 0)) fill(25 + hx, H(11), 2, 1, 'n');
+    drawHat(H, hx, 2);
+    ctx.restore();
+  }
+  function drawRabbit(t, were) {
+    const { happy, moving, eat } = petPose(t);
+    const hop = moving && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : 0;
+    const jump = happy && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : hop;
+    const Y = (v) => v - jump;
+    const howling = (mode === 'howl' || mode === 'sing') && t < howlUntil;
+    const hd = eat ? (Math.floor(t / 220) % 2 ? 3 : 4) : howling ? -2 : 0, hx = eat ? 1 : 0;
+    const H = (v) => Y(v) + hd;
+    petFlip(t);
+    ctx.fillStyle = C.s; ctx.fillRect(10, 23, 13 - jump, 1);
+    outlined([[11, Y(19), 6, 3, 'b'], [19, Y(19), 2, 3, 'b'], [10, Y(13), 12, 7, 'b'], [20 + hx, H(10), 7, 6, 'b'],
+      [21 + hx, H(3), 2, 7, 'b'], [24 + hx, H(2), 2, 8, 'b'], [8, Y(14), 3, 3, 'l']]);
+    fill(22 + hx, H(4), 1, 5, 't'); fill(25 + hx, H(3), 1, 6, 't');                     // Ohren innen
+    fill(12, Y(17), 8, 2, 'l');
+    fill(19, Y(13), 2, 3, 'c');                                                           // Halsband
+    if (happy) { fill(23 + hx, H(12), 1, 1, 'n'); fill(24 + hx, H(11), 1, 1, 'n'); fill(25 + hx, H(12), 1, 1, 'n'); }
+    else if (eat) fill(24 + hx, H(12), 2, 1, 'n');
+    else fill(24 + hx, H(11), 1, 2, 'n');
+    fill(26 + hx, H(13), 1, 1, 't');                                                     // Näschen
+    if (happy || eat || howling) fill(25 + hx, H(14), 1, 1, 'n');
+    if (were) {   // Mondhase: Glitzer rundherum
+      ctx.fillStyle = '#fff6c9';
+      for (let i = 0; i < 6; i++) if (reduce || Math.floor(t / 260 + i) % 3) ctx.fillRect((3 + i * 5) % 30, Y((2 + i * 7) % 16), 1, 1);
+    }
+    if (window.janaSpecial?.hat !== 'bunny') drawHat(H, hx, 5);   // Hasenohren hat es schon
+    ctx.restore();
+  }
+  function drawPet(t) {
+    const a = animal();
+    if (a === 'dog') return drawDog(t);
+    const were = mode === 'transform' ? Math.floor(t / 150) % 2 === 0 : wolf;
+    Object.assign(C, were ? WOLF_COL : DOG_COL);
+    if (a === 'cat') drawCat(t, were); else drawRabbit(t, were);
+    Object.assign(C, DOG_COL);
+  }
+
   // ---------- Sprechblase ----------
   let hideTimer;
   function say(text, centerArt, ms = 1700) {
-    bubble.textContent = text;
+    bubble.textContent = window.P ? window.P(text) : text;
     const bw = bubble.offsetWidth, vw = document.documentElement.clientWidth, center = centerArt * S;
     const left = Math.min(Math.max(8, center - bw / 2), vw - bw - 8);
     bubble.style.left = left + 'px';
@@ -1780,7 +1996,8 @@
     for (const [x, y, w, h] of parts) { ctx.fillStyle = C.o; ctx.fillRect(x - 1, y - 1, w + 2, h + 2); }
     for (const [x, y, w, h, c] of parts) sfill(x, y, w, h, c);
   }
-  function drawHat(H, hx) {
+  function drawHat(H0, hx, dy = 0) {
+    const H = (v) => H0(v + dy);
     const sp = window.janaSpecial;
     if (!sp?.hat) return;
     if (sp.hat === 'party') soutlined([[22 + hx, H(4), 5, 1, 'hp2'], [22 + hx, H(3), 4, 1, 'hp1'], [23 + hx, H(2), 3, 1, 'hp2'], [23 + hx, H(1), 2, 1, 'hp1'], [24 + hx, H(0), 1, 1, 'hy']]);
@@ -1794,7 +2011,11 @@
     const sp = window.janaSpecial;
     if (!sp) return;
     const x = bowlX + 12;
-    if (sp.lights) {                                   // Lichterkette am Dach
+    if (sp.lights && animal() !== 'dog') {   // Lichterkette an Katzenhaus und Stall
+      const cols = ['#ff6b6b', '#ffd36e', '#7fd18b', '#7fb2ec'];
+      for (let i = 0; i < 9; i++) { ctx.fillStyle = cols[(i + Math.floor(t / 500)) % 4]; ctx.fillRect(houseX + 2 + i * 2, animal() === 'cat' ? 9 : 10, 1, 1); }
+    }
+    if (sp.lights && animal() === 'dog') {                                   // Lichterkette am Dach
       const cols = ['#ff6b6b', '#ffd36e', '#7fd18b', '#7fb2ec'];
       for (let r = 1; r < 8; r += 2) {
         const ci = (r + Math.floor(t / 500)) % 4;
@@ -1926,7 +2147,8 @@
       if (mode === 'sleep') { dogX = houseX + 3; dir = 1; }
       ball.carried = false; document.documentElement.classList.remove('disco'); discoUntil = window.janaDisco = 0;
       mode = 'transform'; until = t + 1800;
-      say(wantWolf ? (forcedMsg ? 'Huch… was passiert mit mir?! 🌕' : 'Oh nein… Vollmond! 🌕') : 'Wuff? Was war denn los?', dogX + 16, 1800);
+      const inMsg = { dog: 'Oh nein… Vollmond! 🌕', cat: 'Der Vollmond ruft… ich werde zur Werkatze! 🌕', rabbit: 'Vollmond! Zeit, den Mondhasen zu besuchen! 🌕✨' }[animal()];
+      say(wantWolf ? (forcedMsg ? 'Huch… was passiert mit mir?! 🌕' : inMsg) : 'Wuff? Was war denn los?', dogX + 16, 1800);
       forcedMsg = false;
     }
     // Bei Regen oder spät nachts sofort in die Hütte (der Wolf bleibt draußen)
@@ -1970,7 +2192,7 @@
       case 'transform': if (t > until) { wolf = wolfTime(); if (wolf) dispatchEvent(new Event('jana:wolf')); decide(t); } break;
       case 'howl':
         dir = 1;
-        if (t > nextHowl) { howlUntil = t + 1800; nextHowl = t + 3800; say(pick(['Auuuuuu! 🌕', 'Auuuu-uuuu! 🐺', 'Ahuuuuu! 🌕']), dogX + 16, 1800); howlSound(); }
+        if (t > nextHowl) { howlUntil = t + 1800; nextHowl = t + 3800; say(pick({ dog: ['Auuuuuu! 🌕', 'Auuuu-uuuu! 🐺', 'Ahuuuuu! 🌕'], cat: ['Miauuuuu! 🌕', 'Mrrraaauuu~ 🐈‍⬛', 'Miau-uuu! 🌕'], rabbit: ['✨ Hallo Mondhase! 🌕', '*klopf klopf* 🌕', 'Hopp hopp, zum Mond! ✨'] }[animal()]), dogX + 16, 1800); howlSound(); }
         if (t > until && t > howlUntil) decide(t);
         break;
     }
@@ -2005,7 +2227,7 @@
       ctx.fillRect((k * 29 + i * 13) % W, 2 + (k * 11 + i * 5) % 20, 1, 1);
     }
   }
-  function drawCat(t) {   // Freitag, der 13.: schwarze Katze, läuft nach links
+  function drawStrayCat(t) {   // Freitag, der 13.: schwarze Katze, läuft nach links
     const x = Math.round(cat.x), f = Math.floor(t / 160) % 2;
     ctx.fillStyle = C.s; ctx.fillRect(x + 1, 23, 11, 1);
     outlined([[x + 3, 17, 8, 4, 'ct'], [x, 14, 5, 4, 'ct'], [x, 13, 1, 1, 'ct'], [x + 4, 13, 1, 1, 'ct'], [x + 11, 13, 1, 5, 'ct'],
@@ -2036,8 +2258,8 @@
     drawBowl();
     drawDecor(t);
     if (discoUntil && performance.now() < discoUntil) drawDisco(t);
-    if (cat) drawCat(t);
-    if (mode !== 'sleep') drawDog(t);
+    if (cat) drawStrayCat(t);
+    if (mode !== 'sleep') drawPet(t);
     if (mode === 'sing' && !reduce) for (let i = 0; i < 2; i++) {   // Noten steigen auf
       const age = ((t / 900) + i * 0.5) % 1, nx = Math.round(dogX + 24 + i * 4 + Math.sin(t / 300 + i) * 2), ny = Math.round(9 - age * 9);
       fill(nx + 2, ny, 1, 3, 'nt'); fill(nx, ny + 2, 2, 2, 'nt'); fill(nx + 3, ny, 1, 1, 'nt');
@@ -2087,6 +2309,15 @@
   // Heulen bei Vollmond (sobald einmal getippt wurde)
   function howlSound() {
     if (!soundOn || !actx) return;
+    if (animal() !== 'dog') {
+      try {
+        if (actx.state === 'suspended') actx.resume();
+        const t0 = actx.currentTime + 0.02;
+        if (animal() === 'cat') { meow(t0); meow(t0 + 0.55); }
+        else [880, 1175, 1568, 1175].forEach((fr, i) => tone(t0 + i * 0.13, fr, 0.4, 'sine', 0.18));
+      } catch {}
+      return;
+    }
     try {
       if (actx.state === 'suspended') actx.resume();
       const t0 = actx.currentTime + 0.02, o = actx.createOscillator(), g = actx.createGain(), lfo = actx.createOscillator(), lg = actx.createGain();
@@ -2098,6 +2329,20 @@
       g.gain.setValueAtTime(0.35, t0 + 1.3); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.85);
       o.connect(g); g.connect(actx.destination); o.start(t0); lfo.start(t0); o.stop(t0 + 1.9); lfo.stop(t0 + 1.9);
     } catch {}
+  }
+  function meow(t0) {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(520, t0); o.frequency.linearRampToValueAtTime(820, t0 + 0.18); o.frequency.linearRampToValueAtTime(480, t0 + 0.5);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.3, t0 + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.55);
+    o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + 0.6);
+  }
+  function squeak(t0) {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(1500, t0); o.frequency.exponentialRampToValueAtTime(1100, t0 + 0.07);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.15, t0 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
+    o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + 0.1);
   }
   function tone(t0, freq, dur, type = 'square', vol = 0.12) {
     const o = actx.createOscillator(), g = actx.createGain();
@@ -2131,7 +2376,8 @@
       actx ||= new (window.AudioContext || window.webkitAudioContext)();
       if (actx.state === 'suspended') actx.resume();
       const now = actx.currentTime + 0.01;
-      for (let i = 0; i < times; i++) woof(now + i * 0.24);
+      const a = animal();
+      for (let i = 0; i < times; i++) (a === 'cat' ? meow : a === 'rabbit' ? squeak : woof)(now + i * (a === 'cat' ? 0.6 : 0.24));
     } catch {}
   }
 
@@ -2202,7 +2448,7 @@
       if (dogTaps.length >= 10) { dogTaps = []; startTrick(); return; }
     }
     const sp = window.janaSpecial;
-    if (onDog || onHouse || e.target.closest('button')) happy(wolf ? pick(['Auuu! 🐺', 'Grrr… Wuff! 🌕', 'Wuff… äh, Auuu!']) : sp?.bark && Math.random() < 0.5 ? sp.bark : pick(BARKS));
+    if (onDog || onHouse || e.target.closest('button')) happy(wolf ? pick({ dog: ['Auuu! 🐺', 'Grrr… Wuff! 🌕', 'Wuff… äh, Auuu!'], cat: ['Mrrrau! 🌕', 'Fauch… äh, Miau!'], rabbit: ['✨ Psst, ich bin beim Mondhasen!', 'Hopp! 🌕'] }[animal()]) : sp?.bark && Math.random() < 0.5 ? sp.bark : pick(BARKS));
   });
 
   requestAnimationFrame(loop);
@@ -2373,7 +2619,7 @@
     else if (m.name === 'Neumond') extra = ' · Heute ist Neumond';
     else if (m.p < 0.5) extra = ` · Vollmond in ${Math.max(1, Math.round(m.toFull))} ${Math.round(m.toFull) === 1 ? 'Tag' : 'Tagen'}`;
     else extra = ` · Neumond in ${Math.max(1, Math.round(m.toNew))} ${Math.round(m.toNew) === 1 ? 'Tag' : 'Tagen'}`;
-    $('moonLine').textContent = `${m.name} · ${Math.round(m.illum * 100)} % beleuchtet${extra}`;
+    $('moonLine').textContent = (window.P || String)(`${m.name} · ${Math.round(m.illum * 100)} % beleuchtet${extra}`);
   }
 
   function renderWeather(data) {
@@ -2629,6 +2875,7 @@
 
   fallbackScene();
   renderStatic();
+  addEventListener('jana:pet', renderStatic);
   load();
   const still = () => drawSky(0);
   if (reduce) { still(); setInterval(still, 60000); }
@@ -2664,7 +2911,7 @@
   const wx = (code, isDay, temp) => ({ source: 'precise', city: 'Hamburg', region: 'Hamburg', time: '',
     current: { temp, feels: temp - 2, code, isDay }, today: { max: temp + 3, min: temp - 4 }, sunrise: [], sunset: [] });
   const toTop = () => scrollTo({ top: 0, behavior });
-  const toEl = (id) => $(id)?.scrollIntoView({ behavior, block: 'center' });
+  const toEl = (id) => { window.janaOpenCard?.(id); $(id)?.scrollIntoView({ behavior, block: 'center' }); };
   const later = (ms, fn) => { timers.push(setTimeout(fn, ms)); };
   let timers = [];
 
@@ -2699,6 +2946,8 @@
     { label: '💌 „Ich liebe dich“ eintragen: es regnet Herzen', hour: 18, wx: wx(1, true, 15), run: () => { toEl('todos'); later(1000, () => { $('todoInput').value = 'Ich liebe dich'; }); later(2400, () => $('todoForm').requestSubmit()); } },
     { label: '🎵 Nachts 3× auf die Hütte: der Hund singt', hour: 23, wx: wx(0, false, 7), moon: 8, run: () => later(900, () => window.janaEggs.sing()) },
     { label: '🕚 Um 11:11 und 22:22: Wunschzeit', hour: 11, wx: wx(1, true, 16), run: () => { toTop(); later(800, () => window.janaEggs.wish('11:11')); } },
+    { label: '⚙️ Einstellungen: Katze oder Kaninchen statt Hund', hour: 12, wx: wx(1, true, 18), ms: 10000, run: () => { toTop(); later(600, () => window.janaSettings.open()); later(2200, () => document.querySelector('#setBody [data-animal="cat"]')?.click()); later(5200, () => document.querySelector('#setBody [data-animal="rabbit"]')?.click()); later(7800, () => document.querySelector('#setBody [data-fur="weiss"]')?.click()); }, after: () => { window.janaSettings.pet('dog', 'golden'); window.janaSettings.close(); } },
+    { label: '🗂️ Bereiche ein- und ausklappen', hour: 16, wx: wx(1, true, 16), run: () => { toEl('uniCard'); later(1500, () => $('uniCard').querySelector('.c-toggle').click()); later(4500, () => $('uniCard').querySelector('.c-toggle').click()); } },
     { label: '📅 KW-Übersicht aller Wochen', hour: 18, wx: wx(2, true, 12), ms: 9000, run: () => { later(900, () => $('overviewBtn').click()); later(7600, () => { if (!$('kwOverlay').hidden) $('kwClose').click(); }); } },
     { label: '🏆 Erfolge zum Aufklappen', hour: 19, wx: wx(2, false, 10), run: () => { toEl('achCard'); later(1000, () => { $('achDetails').open = true; }); }, after: () => { $('achDetails').open = false; } },
     { label: '📝 Langfristige To-dos', hour: 17, wx: wx(1, true, 14), run: () => toEl('todos') },
@@ -2717,7 +2966,7 @@
     wxApi.show(sc.wx);
     if (!sc.run) toTop();
     sc.run?.();
-    $('demoLabel').textContent = sc.label;
+    $('demoLabel').textContent = window.P ? window.P(sc.label) : sc.label;
     $('demoStep').textContent = `${i + 1}/${SCENES.length}`;
     schedule();
   }
