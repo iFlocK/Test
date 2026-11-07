@@ -30,4 +30,6 @@ Vorschau erzeugen:
   Bundesliga `bl1`, DFB-Pokal `dfb`, Champions League `ucl` (falls das Kürzel wechselt, wird es in `getavailableleagues` gesucht).
   Die Vereinsliste kommt aus `getavailableteams/bl1/<Saison>` und passt sich Auf- und Absteigern an.
   Spielplan höchstens alle 6 Stunden, während eines Spiels alle 5 Minuten (Spielstand). Spiele lassen sich auch selbst eintragen.
+  Claude-Vorschauen dürfen keine fremden Seiten abrufen. Für die Vorschau den Spielplan deshalb mit einbetten:
+  `python3 janas-woche/tools/make-preview.py vorschau.html habit-baukasten/index.html && python3 habit-baukasten/tools/fixture-snapshot.py vorschau.html`
 - Dazu alle Funktionen von Janas Seite: Easter Eggs, Patch Notes mit Feuerwerk, einklappbare Tabs, Discord-Lerngruppe, Ton immer an.

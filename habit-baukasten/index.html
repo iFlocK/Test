@@ -2138,8 +2138,10 @@
     try {
       const r = await fetch(`https://api.openligadb.de/getavailableteams/bl1/${season}`);
       const data = r.ok ? await r.json() : [];
-      if (Array.isArray(data) && data.length >= 16) { olTeams = { season, at: Date.now(), teams: data.map((t) => ({ name: t.teamName, short: t.shortName })) }; try { localStorage.setItem(TEAMS_KEY, JSON.stringify(olTeams)); } catch {} window.habitRefreshClubs?.(); }
+      if (Array.isArray(data) && data.length >= 16) { olTeams = { season, at: Date.now(), teams: data.map((t) => ({ name: t.teamName, short: t.shortName })) }; try { localStorage.setItem(TEAMS_KEY, JSON.stringify(olTeams)); } catch {} window.habitRefreshClubs?.(); return; }
     } catch {}
+    const snap = window.HB_FIXTURE_SNAPSHOT;   // Vorschau: Vereinsliste aus dem mitgelieferten Spielplan
+    if (snap?.teams?.length >= 16) { olTeams = { season: snap.season, at: snap.at, teams: snap.teams.map(([name, short]) => ({ name, short })) }; window.habitRefreshClubs?.(); }
   }
   window.habitClubChoices = clubChoices;
   state.football ||= { manual: [] };
@@ -2194,7 +2196,17 @@
         } else break;
       }
     }
-    if (okAny) { fxCache = { club: clubId(c), at: Date.now(), matches: out }; fxStatus = ''; try { localStorage.setItem(FX_KEY, JSON.stringify(fxCache)); } catch {} }
+    let snapAt = 0;
+    if (!okAny && window.HB_FIXTURE_SNAPSHOT) {   // Claude-Vorschau darf nichts abrufen: mitgelieferter Spielplan
+      const snap = window.HB_FIXTURE_SNAPSHOT;
+      for (const [comp, rows] of Object.entries(snap.comps || {})) for (const [id, utc, h, a, group, fin, s1, s2] of rows) {
+        const home = isClub(h, c);
+        if (!home && !isClub(a, c)) continue;
+        out.push({ id: 'o' + id, comp, when: Date.parse(utc), opp: home ? a : h, isHome: home, round: group, done: !!fin, score: s1 == null ? '' : (home ? `${s1}:${s2}` : `${s2}:${s1}`) });
+      }
+      okAny = true; snapAt = snap.at;
+    }
+    if (okAny) { fxCache = { club: clubId(c), at: Date.now(), matches: out, snap: snapAt }; fxStatus = ''; try { localStorage.setItem(FX_KEY, JSON.stringify(fxCache)); } catch {} }
     else fxStatus = 'offline';
     fxLoading = false;
     renderFuss();
@@ -2223,7 +2235,8 @@
     $('fussLast').textContent = last ? `Letztes Spiel: ${last.score} ${last.isHome ? 'gegen' : 'bei'} ${last.opp}` : '';
     $('fussList').innerHTML = coming.slice(1, 4).map((m) => `<li><span aria-hidden="true">${COMP_ICON[m.comp] || '⚽'}</span>${m.isHome ? 'gegen' : 'bei'} ${esc(m.opp)}<small>${fmtKick(m.when)}</small>${m.id.startsWith('m') ? `<button class="todo-del" type="button" data-fdel="${m.id}" aria-label="Spiel gegen ${esc(m.opp)} löschen">×</button>` : ''}</li>`).join('');
     $('fussSrc').textContent = GUEST ? 'Beispiel-Spielplan' : fxStatus === 'offline' ? 'Der Spielplan ist gerade nicht erreichbar. Selbst eingetragene Spiele werden angezeigt.'
-      : fxCache?.club === clubId(c) ? `Spielplan: OpenLigaDB · Stand ${new Date(fxCache.at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr` : 'Spielplan wird geladen…';
+      : fxCache?.club === clubId(c) ? (fxCache.snap ? `Spielplan: OpenLigaDB · Stand ${new Date(fxCache.snap).toLocaleString('de-DE', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })} Uhr (in der Vorschau fest, auf der Webseite live)`
+        : `Spielplan: OpenLigaDB · Stand ${new Date(fxCache.at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`) : 'Spielplan wird geladen…';
     window.fussNext = next || null;
     tickFuss();
     // Am Spieltag freut sich das Haustier einmal
