@@ -2517,7 +2517,7 @@
   if (!GUEST) {
     let seen = null, ok = true;
     try { seen = localStorage.getItem(SEEN_KEY); } catch { ok = false; }
-    if (ok && !seen) { try { localStorage.setItem(SEEN_KEY, APP_VERSION); } catch {} }
+    if (ok && !seen && !CFG.single) { try { localStorage.setItem(SEEN_KEY, APP_VERSION); } catch {} }   // neue Konten: Begrüßung kommt nach der Einrichtung
     else if (ok && seen !== APP_VERSION && !window.HB_LOCKED) setTimeout(() => openNews(seen), 700);
   }
 
