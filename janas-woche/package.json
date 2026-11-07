@@ -3,6 +3,6 @@
   "private": true,
   "description": "Janas Woche: Seite, Login und Geräte-Abgleich (Netlify)",
   "dependencies": {
-    "@netlify/blobs": "^11.1.8"
+    "@netlify/blobs": "^10.7.13"
   }
 }
