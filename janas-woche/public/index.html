@@ -167,6 +167,25 @@
     width: max-content; max-width: calc(100% - 32px); text-align: center; }
   .toast small { display: block; font-weight: 600; color: var(--muted); }
 
+  /* Stimmungsbarometer */
+  .mood { display: grid; gap: 6px; }
+  .mood-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .mood h2 { font-size: 1rem; }
+  .mood-head .muted { font-size: .78rem; font-weight: 700; }
+  .mood-row { display: flex; gap: 4px; }
+  .mood-btn { border: 2px solid transparent; background: none; border-radius: 12px; padding: 3px; line-height: 0; transition: transform .12s; }
+  .mood-btn img { width: 32px; height: 32px; image-rendering: pixelated; }
+  .mood-btn:hover { transform: scale(1.08); }
+  .mood-btn[aria-checked="true"] { background: var(--soft); border-color: var(--accent); transform: scale(1.1); }
+  .mood-week { display: flex; gap: 7px; }
+  .mw { display: grid; justify-items: center; gap: 1px; font-size: .64rem; color: var(--muted); }
+  .mw img, .mw .dot { width: 18px; height: 18px; image-rendering: pixelated; }
+  .mw .dot { display: grid; place-items: center; }
+  .mw .dot::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+  .mw.today { color: var(--accent-ink); font-weight: 800; }
+  .mood-mini { width: 16px; height: 16px; image-rendering: pixelated; vertical-align: -3px; margin-right: 4px; }
+  @media (prefers-reduced-motion: reduce) { .mood-btn { transition: none; } }
+
   /* Zusammen-Zähler */
   .love { display: grid; gap: 2px; }
   .love-head { font-size: .82rem; color: var(--muted); font-weight: 700; }
@@ -315,6 +334,11 @@
       <div class="water-week" id="waterWeek" aria-label="Wasser diese Woche"></div>
     </div>
   </section>
+  <section class="card mood" id="moodCard">
+    <div class="mood-head"><h2>Stimmung heute</h2><span class="muted" id="moodLabel">Wie geht’s dir?</span></div>
+    <div class="mood-row" id="moodRow" role="radiogroup" aria-label="Stimmung heute"></div>
+    <div class="mood-week" id="moodWeek" aria-label="Stimmung diese Woche"></div>
+  </section>
   <section class="card love" id="loveCard">
     <div class="love-head"><span class="heart" aria-hidden="true">💕</span> Zusammen seit 18. September 2025</div>
     <div class="love-big" id="loveYmd"></div>
@@ -434,6 +458,7 @@
       ],
       water, ach: { first: key(new Date()), five: key(new Date()), sip: key(new Date()), water: key(last), todo1: key(new Date()) }, flags: {},
       achResetId: 'reset-2026-11-06', achSince: 0,
+      mood: Object.fromEntries([5, 4, 3, 4, 2, 5, 4, 3, 5, 4, 1, 4, 5].map((v, i) => [key(addDays(new Date(), -i - 1)), { v, at: Date.now() }])),
     };
   }
   if (GUEST) state = demoState();
@@ -462,7 +487,7 @@
       const d = addDays(monday, i), items = w.days[i], isToday = key(d) === todayKey, open = openDay === i;
       const used = new Set(items.map(it => it.tag).filter(Boolean));
       return `<article class="card day ${isToday ? 'today' : ''}" data-day="${i}">
-        <div class="day-head"><h3>${name}${isToday ? '<span class="badge">heute</span>' : ''}</h3><span class="date">${fmt(d, { day: 'numeric', month: 'short' })}</span></div>
+        <div class="day-head"><h3>${name}${isToday ? '<span class="badge">heute</span>' : ''}</h3><span class="date">${moodImg(key(d))}${fmt(d, { day: 'numeric', month: 'short' })}</span></div>
         <ul class="items">${items.length ? items.map(it => `
           <li class="item ${it.done ? 'done' : ''}" style="--c: var(--c-${areaOf(it)})">
             <button class="toggle" data-toggle="${it.id}" aria-pressed="${!!it.done}" title="Erledigt umschalten">${esc(labelOf(it))}</button>
@@ -731,6 +756,7 @@
     ['anniv', '💞', 'Jahrestag', 'Am Jahrestag vorbeigeschaut', () => !!state.flags.anniversary],
     ['wolf', '🐺', 'Werwolf gesichtet', 'Den Hund bei Vollmond als Wolf erlebt', () => !!state.flags.wolf],
     ['moonclick', '🌝', 'Mondsüchtig', 'Ein Geheimnis entdeckt', () => !!state.flags.moonclick],
+    ['mood7', '🎭', 'Gefühlsprofi', 'An 7 Tagen die Stimmung eingetragen', (s) => s.moodDays >= 7],
   ];
   function runLength(dates) {
     let best = 0, run = 0, prev = null;
@@ -774,6 +800,7 @@
       done, perfectDay, fullWeek, best: runLength(doneDates), bew: areaDone('bew'), lesen: tagDone.lesen || 0,
       anyWater: Object.keys(state.water).some((k) => waterSince(k) > 0), waterGoal: waterDays.length, wBest: runLength(waterDays),
       todosDone: (state.todos || []).filter((t) => t.done && (t.doneAt || 0) >= since).length,
+      moodDays: Object.values(state.mood || {}).filter((m) => (m.at || 0) >= since).length,
       custom: state.tags.some((t) => t.id.startsWith('t') && created(t) >= since),
     };
   }
@@ -842,6 +869,54 @@
   renderLove();
   setInterval(renderLove, 1000);
 
+  // ---------- Stimmungsbarometer ----------
+  state.mood ||= {};
+  const MOODS = [null,
+    { label: 'Wütend', c: '#f29a9a', dog: 'Grrr… soll ich jemanden anbellen? 🐾' },
+    { label: 'Traurig', c: '#f8c9a0', dog: 'Komm her, ich kuschel dich! 🐶💕' },
+    { label: 'Geht so', c: '#f6df96', dog: 'Ein kleiner Spaziergang hilft vielleicht? 🐾' },
+    { label: 'Gut', c: '#c6e3a9', dog: 'Wuff! Schön! 😊' },
+    { label: 'Super', c: '#9fd8c0', dog: 'Wuff wuff! Ich freu mich mit dir! 🎉' }];
+  function faceURL(v, color) {
+    const c = document.createElement('canvas'); c.width = c.height = 12;
+    const g = c.getContext('2d'), k = '#4a3f55';
+    const px = (x, y, col) => { g.fillStyle = col; g.fillRect(x, y, 1, 1); };
+    for (let y = 0; y < 12; y++) for (let x = 0; x < 12; x++) {
+      const d = Math.hypot(x + 0.5 - 6, y + 0.5 - 6);
+      if (d <= 5.6) px(x, y, d > 4.7 ? k : color);
+    }
+    if (v === 1) [[3, 3], [4, 4], [8, 3], [7, 4], [4, 5], [7, 5]].forEach(([x, y]) => px(x, y, k));   // böse Augenbrauen
+    else [[4, 4], [4, 5], [7, 4], [7, 5]].forEach(([x, y]) => px(x, y, k));
+    ({ 1: [[4, 8], [5, 8], [6, 8], [7, 8], [3, 9], [8, 9]], 2: [[5, 7], [6, 7], [4, 8], [7, 8]], 3: [[4, 8], [5, 8], [6, 8], [7, 8]],
+      4: [[4, 7], [7, 7], [5, 8], [6, 8]], 5: [[3, 7], [8, 7], [4, 8], [5, 8], [6, 8], [7, 8]] })[v].forEach(([x, y]) => px(x, y, k));
+    if (v === 2) px(8, 6, '#7fb2ec');                       // Träne
+    if (v === 5) { px(2, 6, '#f292ad'); px(9, 6, '#f292ad'); }   // rosa Bäckchen
+    return c.toDataURL();
+  }
+  const FACES = MOODS.map((m, v) => (m ? faceURL(v, m.c) : null));
+  const moodImg = (k) => { const m = state.mood[k]; return m ? `<img class="mood-mini" src="${FACES[m.v]}" alt="Stimmung: ${MOODS[m.v].label}">` : ''; };
+  function renderMood() {
+    const tk = todayKey(), cur = state.mood[tk]?.v;
+    $('moodLabel').textContent = cur ? MOODS[cur].label : 'Wie geht’s dir?';
+    $('moodRow').innerHTML = MOODS.map((m, v) => (m ? `<button class="mood-btn" type="button" role="radio" aria-checked="${cur === v}" data-mood="${v}" aria-label="${m.label}"><img src="${FACES[v]}" alt=""></button>` : '')).join('');
+    const mon = startOfWeek(new Date());
+    $('moodWeek').innerHTML = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((n, i) => {
+      const k = key(addDays(mon, i)), m = state.mood[k];
+      return `<div class="mw ${k === tk ? 'today' : ''}">${m ? `<img src="${FACES[m.v]}" alt="${n}: ${MOODS[m.v].label}">` : '<span class="dot" aria-hidden="true"></span>'}${n}</div>`;
+    }).join('');
+  }
+  $('moodRow').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-mood]');
+    if (!b) return;
+    e.dogHandled = true;
+    const v = +b.dataset.mood, tk = todayKey();
+    if (state.mood[tk]?.v === v) delete state.mood[tk];
+    else { state.mood[tk] = { v, at: Date.now() }; window.janaDog?.happy(MOODS[v].dog); }
+    save(); renderMood(); render();
+  });
+  renderMood();
+  setInterval(renderMood, 10 * 60 * 1000);
+
   // ---------- KW-Übersicht ----------
   const shortDate = (d) => d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
   function weekStats(mk) {
@@ -861,6 +936,7 @@
     return {
       mon, planned, done, perDay, waterGoals: water.filter((v) => v >= GOAL).length, waterSum: water.reduce((a, b) => a + b, 0),
       note: (w?.note || '').trim(), top: Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 3),
+      mood: (() => { const vs = Array.from({ length: 7 }, (_, i) => state.mood[key(addDays(mon, i))]?.v).filter(Boolean); return vs.length ? Math.round(vs.reduce((a, b) => a + b, 0) / vs.length) : 0; })(),
     };
   }
   function renderOverview() {
@@ -884,7 +960,7 @@
       const bars = s.perDay.map((n, i) => `<i style="height:${n ? Math.max(4, Math.round(n / maxD * 22)) : 2}px" title="${['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i]}: ${n} erledigt" class="${n ? 'on' : ''}"></i>`).join('');
       return `<button class="kw-row ${k === cur ? 'cur' : ''}" type="button" data-week="${k}">
         <span class="kw-badge">KW ${kw}<small>${mon.getFullYear()}</small></span>
-        <span class="kw-info"><b>${shortDate(mon)} – ${shortDate(sun)} ${tag}</b><span>${parts.join(' · ')}</span>${s.top.length ? `<small>Meist: ${s.top.map(([n, c]) => `${esc(n)} ${c}×`).join(', ')}</small>` : ''}</span>
+        <span class="kw-info"><b>${s.mood ? `<img class="mood-mini" src="${FACES[s.mood]}" alt="Stimmung im Schnitt: ${MOODS[s.mood].label}">` : ''}${shortDate(mon)} – ${shortDate(sun)} ${tag}</b><span>${parts.join(' · ')}</span>${s.top.length ? `<small>Meist: ${s.top.map(([n, c]) => `${esc(n)} ${c}×`).join(', ')}</small>` : ''}</span>
         <span class="kw-days" aria-hidden="true">${bars}</span>
       </button>`;
     });
@@ -1760,6 +1836,7 @@
 
   const SCENES = [
     { label: '☀️ Sonniger Tag: der Hund spielt, Vögel fliegen', hour: 11, wx: wx(0, true, 23), moon: 20 },
+    { label: '😊 Stimmung eintragen', hour: 10, wx: wx(1, true, 18), run: () => { toEl('moodCard'); later(1300, () => document.querySelector('[data-mood="2"]')?.click()); later(4200, () => document.querySelector('[data-mood="5"]')?.click()); } },
     { label: '💧 Wasser trinken mit der Pixel-Flasche', hour: 10, wx: wx(1, true, 18), run: () => { toEl('waterCard'); later(1500, () => $('addGlass').click()); later(3500, () => $('addHalf').click()); } },
     { label: '✅ Gewohnheit abhaken: der Hund lobt', hour: 9, wx: wx(1, true, 17), run: () => { toEl('days'); later(1600, () => document.querySelector('.item:not(.done) .toggle')?.click()); } },
     { label: '🌧️ Regen: ab in die Hütte!', hour: 15, wx: wx(63, true, 9) },
