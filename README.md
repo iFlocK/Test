@@ -48,7 +48,7 @@ und 📖 Gelesene Bücher (Regal, Autor:in, Sterne).
 Versteckte Überraschungen: Mond 3× antippen (Werwolf), Sternschnuppe nachts antippen, 5× auf „Janas Woche“ (Disco),
 Hund 10× schnell antippen (Kunststück), Ball antippen (apportieren), leeren Napf antippen, 11:11 und 22:22,
 Freitag der 13. (schwarze Katze), Regenbogen nach Regen, „Ich liebe dich“ als Gewohnheit oder To-do (Herzregen),
-nachts mit Ton 3× auf die Hütte (Hund singt). Jede gibt einen geheimen Erfolg.
+nachts 3× auf die Hütte (Hund singt). Jede gibt einen geheimen Erfolg.
 
 ## Änderungen testen, ohne Netlify-Guthaben zu verbrauchen
 1. Änderungen in `janas-woche/public/index.html` machen.
