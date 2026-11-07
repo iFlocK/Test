@@ -52,6 +52,12 @@ Hund 10× schnell antippen (Kunststück), Ball antippen (apportieren), leeren Na
 Freitag der 13. (schwarze Katze), Regenbogen nach Regen, „Ich liebe dich“ als Gewohnheit oder To-do (Herzregen),
 nachts 3× auf die Hütte (Hund singt). Jede gibt einen geheimen Erfolg.
 
+**Abgleich zwischen Janas Geräten (ab 0.10.1):** Die Login-Funktion (`netlify/edge-functions/login.ts`) bietet hinter dem Login
+`/api/data` an: ein JSON-Dokument mit allen Einträgen in Netlify Blobs (Store `janas-woche`, Schlüssel `state`, mit Versionszähler).
+`janas-woche/tools/sync.js` wird beim Bauen in Janas Seite eingefügt: Änderungen werden hochgeladen, beim Öffnen und alle 30 Sekunden
+wird abgeglichen, bei gleichzeitigen Änderungen werden die Einträge zusammengeführt. `?test=1` nutzt einen Test-Schlüssel.
+Die Abhängigkeit `@netlify/blobs` steht in `janas-woche/package.json`.
+
 **Seit Version 0.10.0 wird Janas Seite aus der allgemeinen Version gebaut** (`habit-baukasten/public/index.html`):
 `python3 janas-woche/tools/build-from-template.py` erzeugt `janas-woche/public/index.html` mit Janas festem Profil
 (ohne Mann/Frau-Frage, ohne eigene Konten, ohne Sparziele, Wetter ohne Ort über `/api/weather`), ihren Speicher-Schlüsseln `janas-woche.*`

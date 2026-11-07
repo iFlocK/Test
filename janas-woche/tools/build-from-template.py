@@ -19,7 +19,8 @@ CONFIG = {
     'preset': {'name': 'Jana', 'gender': 'w', 'palette': 'rosa', 'animal': 'dog', 'fur': 'golden', 'pet': '', 'uni': True, 'cycle': False,
                'club': '', 'clubName': '', 'clubShort': '', 'birthday': '2000-08-25', 'together': {'date': '2025-09-18', 'partner': ''}, 'city': ''},
     'changelog': [
-        {'v': '0.10.1', 'title': 'Datensicherung', 'notes': [
+        {'v': '0.10.1', 'title': 'Auf allen Geräten gleich', 'notes': [
+            ['☁️', 'MacBook und iPhone', 'Was du am MacBook einträgst, ist auch auf dem iPhone da, und umgekehrt. Der Abgleich passiert automatisch beim Öffnen und nach jeder Änderung.'],
             ['💾', 'Datensicherung', 'Unten rechts gibt es jetzt den 💾-Knopf: Speichere deine Einträge (Deadlines, Gewohnheiten, Bücher …) als Datei, zum Beispiel über „In Dateien sichern“, und stelle sie bei Bedarf wieder her. Ein roter Punkt erinnert dich, wenn die letzte Sicherung länger als zwei Wochen her ist.'],
         ]},
         {'v': '0.10.0', 'title': 'Deine eigenen Einstellungen', 'notes': [
@@ -90,6 +91,10 @@ for a, b in [('<title>Mein Wochenplaner</title>', '<title>Janas Woche</title>'),
     assert s.count(a) == 1, a
     s = s.replace(a, b)
 assert "const KEY = 'janas-woche.v2'" in s
+# Geräte-Abgleich (nur Janas Seite)
+sync_js = (ROOT / 'janas-woche/tools/sync.js').read_text(encoding='utf-8')
+assert s.endswith('</script>\n</body>\n</html>\n')
+s = s[:-len('</body>\n</html>\n')] + '<script>\n' + sync_js + '</script>\n</body>\n</html>\n'
 cfg = '<script>window.HB_CONFIG = ' + json.dumps(CONFIG, ensure_ascii=False) + ';</script>\n'
 s = s.replace('<script>', cfg + '<script>', 1)
 out_path.write_text(s, encoding='utf-8')

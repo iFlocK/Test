@@ -2,6 +2,7 @@
 // Zugangsdaten kommen aus den Netlify-Umgebungsvariablen JANA_USER, JANA_PASS und AUTH_SECRET
 // (Scope "Functions"), nicht aus dem Code.
 import type { Config, Context } from "@netlify/edge-functions";
+import { getStore } from "@netlify/blobs";
 
 const COOKIE = "jw_session";
 const MAX_AGE = 60 * 60 * 24 * 365; // ein Jahr angemeldet bleiben
@@ -65,9 +66,56 @@ export default async (req: Request, context: Context) => {
     return weather(url, context);
   }
 
+  if (url.pathname === "/api/data") {
+    if (!loggedIn) return json({ error: "Nicht angemeldet" }, 401);
+    return data(req, url);
+  }
+
   if (loggedIn) return; // weiter zur eigentlichen Seite
   return loginPage(false);
 };
+
+// ---------- Abgleich zwischen Janas Geräten (MacBook, iPhone …) ----------
+// Ein JSON-Dokument mit allen Einträgen in Netlify Blobs, mit Versionszähler (rev).
+// Ein Gerät darf nur speichern, wenn es den aktuellen Stand kennt (baseRev = rev),
+// sonst bekommt es den neuen Stand zurück (409) und führt die Einträge zusammen.
+const MAX_BYTES = 4 * 1024 * 1024;
+async function data(req: Request, url: URL): Promise<Response> {
+  const key = url.searchParams.get("test") === "1" ? "state-test" : "state";   // test=1: zum Prüfen, ohne Janas Daten anzufassen
+  let store: ReturnType<typeof getStore>;
+  try { store = getStore({ name: "janas-woche", consistency: "strong" }); }
+  catch (e) { console.error("Speicher nicht verfügbar", e); return json({ error: "Speicher gerade nicht erreichbar" }, 503); }
+  const current = async () => {
+    const entry = await store.getWithMetadata(key, { type: "json", consistency: "strong" });
+    if (entry === null) return { rev: 0, at: 0, state: null, etag: null as string | null };
+    const meta = (entry.metadata ?? {}) as { rev?: number; at?: number };
+    return { rev: meta.rev ?? 0, at: meta.at ?? 0, state: entry.data, etag: entry.etag ?? null };
+  };
+  try {
+    if (req.method === "GET") {
+      const c = await current();
+      return json({ rev: c.rev, at: c.at, state: c.state });
+    }
+    if (req.method === "PUT") {
+      const text = await req.text();
+      if (text.length > MAX_BYTES) return json({ error: "Zu groß" }, 413);
+      let body: { baseRev?: unknown; state?: unknown };
+      try { body = JSON.parse(text); } catch { return json({ error: "Kein JSON" }, 400); }
+      const st = body.state as { tags?: unknown; weeks?: unknown } | null;
+      if (!st || typeof st !== "object" || !Array.isArray(st.tags) || typeof st.weeks !== "object") return json({ error: "Ungültige Daten" }, 400);
+      const c = await current();
+      if (body.baseRev !== c.rev) return json({ conflict: true, rev: c.rev, at: c.at, state: c.state }, 409);
+      const rev = c.rev + 1, at = Date.now();
+      const res = await store.setJSON(key, st, { metadata: { rev, at }, ...(c.etag ? { onlyIfMatch: c.etag } : { onlyIfNew: true }) });
+      if (!res.modified) { const n = await current(); return json({ conflict: true, rev: n.rev, at: n.at, state: n.state }, 409); }
+      return json({ rev, at });
+    }
+    return json({ error: "Methode nicht erlaubt" }, 405);
+  } catch (e) {
+    console.error("Abgleich fehlgeschlagen", e);
+    return json({ error: "Speicher gerade nicht erreichbar" }, 503);
+  }
+}
 
 // ---------- Wetter & Ort ----------
 function json(data: unknown, status = 200, extra: Record<string, string> = {}): Response {
