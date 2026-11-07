@@ -47,7 +47,7 @@
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font-body); }
-  main { max-width: 1280px; margin: 0 auto; padding-block: 84px 180px;
+  main { max-width: 1280px; margin: 0 auto; padding-block: 84px 120px;
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
     display: grid; gap: 18px; }
   @media (min-width: 1560px) { main { max-width: 1560px; } }
@@ -208,7 +208,7 @@
   @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
 
   /* Gast-Vorschau */
-  .demo-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 140px); z-index: 25;
+  .demo-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 86px); z-index: 25;
     width: max-content; max-width: calc(100% - 24px); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 10px;
     background: var(--card); border: 2px solid var(--accent); border-radius: 16px; padding: 8px 12px; box-shadow: 0 6px 24px rgba(120, 80, 110, .2); font-size: .85rem; }
   .demo-tag { font-weight: 800; color: var(--accent-ink); }
@@ -378,11 +378,10 @@
   .sky canvas { position: absolute; left: 0; top: calc(4px + env(safe-area-inset-top, 0px)); height: 72px; image-rendering: pixelated; display: block; }
 
   /* Hundegarten mit Labrador */
-  /* Netlify blendet im kostenlosen Tarif unten rechts ein Schild ein; der Garten steht deshalb darüber. */
-  .yard { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 58px); height: 72px; pointer-events: none; z-index: 20; }
-  .yard-clip { position: absolute; inset: -12px 0 calc(-58px - env(safe-area-inset-bottom, 0px)); overflow: hidden;
+  .yard { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 4px); height: 72px; pointer-events: none; z-index: 20; }
+  .yard-clip { position: absolute; inset: -12px 0 calc(-4px - env(safe-area-inset-bottom, 0px)); overflow: hidden;
     background: linear-gradient(to top, var(--bg) 55%, transparent); }
-  .yard canvas { bottom: calc(58px + env(safe-area-inset-bottom, 0px)); }
+  .yard canvas { bottom: calc(4px + env(safe-area-inset-bottom, 0px)); }
   .yard canvas { position: absolute; left: 0; height: 72px; image-rendering: pixelated; display: block; }
   .bubble { position: absolute; bottom: 70px; left: 0; background: var(--card); color: var(--text); border: 2px solid var(--accent);
     border-radius: 12px; padding: 3px 10px; font: 800 .85rem var(--font-body); white-space: nowrap; opacity: 0; transition: opacity .15s, transform .15s; }
@@ -1500,6 +1499,9 @@
   // ---------- Versionsnummer und Patch Notes ----------
   // Bei jedem Upload: Version erhöhen und oben einen neuen Eintrag ergänzen.
   const CHANGELOG = [
+    { v: '0.9.1', title: 'Kleiner Feinschliff', notes: [
+      ['🐶', 'Mehr Platz im Garten', 'Der Hundegarten sitzt wieder ganz unten am Bildschirm.'],
+    ] },
     { v: '0.9.0', title: 'Das große Herbst-Update', notes: [
       ['🎓', 'Uni-Bereich', 'Lern-Timer, Fächer mit Lernzeit, Abgaben und Deadlines und Lernziele für jede Woche. Beim Lernen ist der Hund ganz leise.'],
       ['💬', 'Discord-Lerngruppe', 'Speichere den Einladungslink im Uni-Bereich und öffne deine Gruppe mit einem Tipp.'],
