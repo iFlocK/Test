@@ -56,7 +56,7 @@ nachts 3× auf die Hütte (Hund singt). Jede gibt einen geheimen Erfolg.
 `/api/data` an: ein JSON-Dokument mit allen Einträgen in Netlify Blobs (Store `janas-woche`, Schlüssel `state`, mit Versionszähler).
 `janas-woche/tools/sync.js` wird beim Bauen in Janas Seite eingefügt: Änderungen werden hochgeladen, beim Öffnen und alle 30 Sekunden
 wird abgeglichen, bei gleichzeitigen Änderungen werden die Einträge zusammengeführt. `?test=1` nutzt einen Test-Schlüssel.
-Die Abhängigkeit `@netlify/blobs` steht in `janas-woche/package.json`.
+Die Abhängigkeit `@netlify/blobs` (Version 10, läuft ab Node 16; Version 11 braucht Node 22.12 und ließ den Build scheitern) steht in `janas-woche/package.json` mit `package-lock.json`.
 
 **Seit Version 0.10.0 wird Janas Seite aus der allgemeinen Version gebaut** (`habit-baukasten/public/index.html`):
 `python3 janas-woche/tools/build-from-template.py` erzeugt `janas-woche/public/index.html` mit Janas festem Profil
