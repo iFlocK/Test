@@ -434,6 +434,18 @@
   .su-club { font-size: .78rem; gap: 4px; }
   .su-club .club-badge { width: 20px; height: 22px; }
 
+  /* 🛠️ Admin */
+  .admin { max-width: 560px; display: grid; gap: 10px; }
+  .admin-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .admin-list li { display: grid; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 10px 12px; }
+  .admin-list b { display: block; }
+  .admin-list small { color: var(--muted); font-size: .8rem; }
+  .admin-act { display: flex; flex-wrap: wrap; gap: 6px; }
+  .admin-act .pill { font-size: .82rem; padding: 4px 12px; }
+  .admin-act .pill.armed { border-color: #c2453a; color: #c2453a; }
+  .admin-reset { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+  .admin-reset .su-input { margin: 0; flex: 1 1 180px; }
+
   /* 👤 Anmelden */
   #authOverlay { z-index: 100; background: var(--bg); }
   .auth-sheet { max-width: 380px; display: grid; gap: 10px; }
@@ -755,6 +767,12 @@
     <p class="auth-note">🔒 Dein Konto und deine Einträge werden nur auf diesem Gerät gespeichert.</p>
   </div>
 </div>
+<div class="overlay" id="adminOverlay" hidden>
+  <div class="sheet admin" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+    <div class="sheet-head"><h2 id="adminTitle">🛠️ Konten verwalten</h2><button class="pill" id="adminClose" type="button" aria-label="Schließen">✕</button></div>
+    <div id="adminBody"></div>
+  </div>
+</div>
 <div class="overlay" id="kwOverlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="kwTitle">
     <div class="sheet-head"><h2 id="kwTitle">Alle Kalenderwochen</h2><button class="pill" id="kwClose" type="button" aria-label="Übersicht schließen">✕</button></div>
@@ -783,9 +801,11 @@
   const ACC_KEY = 'habit-baukasten.accounts', SES_KEY = 'habit-baukasten.session';
   let accounts = {};
   try { accounts = JSON.parse(localStorage.getItem(ACC_KEY)) || {}; } catch {}
+  const ADMIN = { salt: 'aGFiaXQtYmF1a2FzdGVuLWFkbWluLXYx', hash: 'WJNJfBAtqvD1xTt2ifOJ/smYK2tlbSwbKXyU5cSKM58=' };   // Benutzer „admin“, Passwort als PBKDF2-Hash
   let hbUser = null;
   try { hbUser = localStorage.getItem(SES_KEY); } catch {}
-  if (!hbUser || !accounts[hbUser]) hbUser = null;
+  if (!hbUser || (!accounts[hbUser] && hbUser !== 'admin')) hbUser = null;
+  window.HB_ADMIN = hbUser === 'admin' && !window.JANA_GUEST;
   window.HB_USER = window.JANA_GUEST ? null : hbUser;
   window.HB_LOCKED = !window.JANA_GUEST && !hbUser;
   const KEY = 'habit-baukasten.v2' + (window.HB_LOCKED ? ':__gesperrt' : window.HB_USER ? ':' + window.HB_USER : '');
@@ -1615,7 +1635,7 @@
   $('setupClose').addEventListener('click', (e) => { e.dogHandled = true; closeSetup(); });
   $('setupBtn').addEventListener('click', openSetup);
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('setupOverlay').hidden && state.profile) closeSetup(); });
-  if (!GUEST && !window.HB_LOCKED && !state.profile) setTimeout(openSetup, 400);
+  if (!GUEST && !window.HB_LOCKED && !window.HB_ADMIN && !state.profile) setTimeout(openSetup, 400);
 
   // ---------- 🎓 Uni: Lern-Timer, Fächer & Lernzeit, Abgaben, Lernziele ----------
   state.uni ||= { subjects: [], sessions: [], deadlines: [], goals: {}, timer: { phase: 'idle', round: 0 } };
@@ -2477,6 +2497,13 @@
     $('authForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const u = $('authUser').value.trim().toLowerCase(), pw = $('authPass').value;
+      if (u === 'admin') {
+        if (authMode === 'create') return err('Der Benutzername „admin“ ist reserviert.');
+        if (!crypto?.subtle) return err('Dieser Browser unterstützt das sichere Prüfen von Passwörtern nicht.');
+        if ((await hashPw(pw, ADMIN.salt)) !== ADMIN.hash) return err('Benutzername oder Passwort stimmt nicht.');
+        try { localStorage.setItem(SES_KEY, 'admin'); } catch {}
+        return location.reload();
+      }
       if (!/^[a-z0-9äöüß._-]{3,20}$/.test(u)) return err('Der Benutzername braucht 3 bis 20 Zeichen (Buchstaben, Zahlen, Punkt, Strich).');
       if (pw.length < 6) return err('Das Passwort braucht mindestens 6 Zeichen.');
       if (!crypto?.subtle) return err('Dieser Browser unterstützt das sichere Speichern von Passwörtern nicht.');
@@ -2511,6 +2538,61 @@
     document.body.style.overflow = 'hidden';
     setTimeout(() => $('authUser').focus(), 50);
   } else if (window.HB_USER) {
+    if (window.HB_ADMIN) {
+      const ab = document.createElement('button');
+      ab.type = 'button'; ab.className = 'pill'; ab.id = 'adminBtn'; ab.textContent = '🛠️ Konten verwalten';
+      document.querySelector('header .nav').append(ab);
+      const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+      async function hashPw2(pw, saltB64) {
+        const salt = Uint8Array.from(atob(saltB64), (c) => c.charCodeAt(0));
+        const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+        return b64(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 150000, hash: 'SHA-256' }, k, 256));
+      }
+      const saveAcc = () => { try { localStorage.setItem(ACC_KEY, JSON.stringify(accounts)); } catch {} };
+      const info = (u) => {
+        let d = null; try { d = JSON.parse(localStorage.getItem('habit-baukasten.v2:' + u)); } catch {}
+        const days = d ? Object.values(d.weeks || {}).reduce((a, w) => a + w.days.filter((x) => x.length).length, 0) : 0;
+        return { name: d?.profile?.name || '–', days };
+      };
+      let resetFor = '';
+      function renderAdmin() {
+        const list = Object.entries(accounts).sort((a, b) => a[0].localeCompare(b[0]));
+        $('adminBody').innerHTML = list.length ? `<ul class="admin-list">${list.map(([u, a]) => {
+          const i = info(u);
+          return `<li><div><b>👤 ${esc(u)}</b><small>Name: ${esc(i.name)} · angelegt ${new Date(a.created || 0).toLocaleDateString('de-DE')} · ${i.days} Tage mit Einträgen</small></div>
+            <div class="admin-act">${resetFor === u ? `<form class="admin-reset" data-reset="${esc(u)}"><input type="password" class="su-input" placeholder="Neues Passwort (mind. 6 Zeichen)" aria-label="Neues Passwort für ${esc(u)}" autocomplete="new-password"><button class="pill primary" type="submit">Speichern</button><button class="pill" type="button" data-cancel>Abbrechen</button></form>`
+              : `<button class="pill" type="button" data-pw="${esc(u)}">🔑 Passwort zurücksetzen</button><button class="pill" type="button" data-adel="${esc(u)}">🗑️ Löschen</button>`}</div></li>`;
+        }).join('')}</ul>` : '<p class="muted">Auf diesem Gerät gibt es noch keine Konten.</p>';
+        $('adminBody').insertAdjacentHTML('beforeend', '<p class="auth-note">Die Einträge der Konten bleiben privat. Du siehst nur Name, Datum und Anzahl der Tage. Konten gibt es nur auf diesem Gerät.</p><p class="su-err" id="adminMsg" hidden></p>');
+      }
+      const msg = (t) => { const m = $('adminMsg'); if (m) { m.textContent = t; m.hidden = !t; } };
+      ab.addEventListener('click', (e) => { e.dogHandled = true; resetFor = ''; renderAdmin(); $('adminOverlay').hidden = false; $('adminClose').focus(); });
+      $('adminClose').addEventListener('click', (e) => { e.dogHandled = true; $('adminOverlay').hidden = true; ab.focus(); });
+      $('adminOverlay').addEventListener('click', (e) => {
+        if (e.target === $('adminOverlay')) { $('adminOverlay').hidden = true; return; }
+        const b = e.target.closest('button'); if (!b) return;
+        e.dogHandled = true;
+        if (b.dataset.pw) { resetFor = b.dataset.pw; renderAdmin(); $('adminBody').querySelector('.admin-reset input')?.focus(); }
+        if (b.hasAttribute('data-cancel')) { resetFor = ''; renderAdmin(); }
+        if (b.dataset.adel) {
+          if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = 'Wirklich löschen?'; setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = '🗑️ Löschen'; } }, 3000); return; }
+          const u = b.dataset.adel;
+          delete accounts[u]; saveAcc();
+          try { localStorage.removeItem('habit-baukasten.v2:' + u); } catch {}
+          renderAdmin(); msg(`Konto „${u}“ und seine Einträge wurden gelöscht.`);
+        }
+      });
+      $('adminOverlay').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const f = e.target.closest('[data-reset]'); if (!f) return;
+        const u = f.dataset.reset, pw = f.querySelector('input').value;
+        if (pw.length < 6) return msg('Das neue Passwort braucht mindestens 6 Zeichen.');
+        const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
+        accounts[u] = { ...accounts[u], salt, hash: await hashPw2(pw, salt) }; saveAcc();
+        resetFor = ''; renderAdmin(); msg(`Neues Passwort für „${u}“ gespeichert.`);
+      });
+      addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('adminOverlay').hidden) $('adminOverlay').hidden = true; });
+    }
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'pill'; b.id = 'logoutBtn'; b.textContent = `👤 ${window.HB_USER} · Abmelden`;
     b.addEventListener('click', (e) => { e.dogHandled = true; try { localStorage.removeItem(SES_KEY); } catch {} location.reload(); });

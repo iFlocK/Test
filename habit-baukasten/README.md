@@ -22,6 +22,8 @@ Vorschau erzeugen:
 - „👤 Konto“: Jede Person legt sich Benutzername und Passwort selbst an. Passwörter werden nur als PBKDF2-Hash gespeichert.
   Konten und Einträge liegen bisher nur im Browser des Geräts (localStorage, je Konto ein eigener Schlüssel `habit-baukasten.v2:<name>`).
   Für eine echte Online-Version mit Anmeldung von überall braucht es noch einen Server (z. B. Netlify-Funktion mit Speicher).
+- Admin-Zugang: Benutzer `admin`, Passwort `admin` (im Code nur als PBKDF2-Hash, aber leicht zu erraten; vor einer echten Veröffentlichung ändern).
+  Der Admin sieht unter „🛠️ Konten verwalten“ die Konten auf dem Gerät, kann Passwörter zurücksetzen und Konten löschen. Einträge bleiben privat.
 - Im Assistenten „Über dich“: Frau oder Mann. Den Zyklus-Tracker gibt es nur für Frauen.
 - „⚽ Lieblingsverein“: Bundesliga-Verein wählen (oder „Anderer Verein“). Countdown zum nächsten Spiel, automatisch aus OpenLigaDB
   (api.openligadb.de, kostenlos, ohne Schlüssel, Abruf direkt aus dem Browser erlaubt):
