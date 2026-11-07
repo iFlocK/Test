@@ -804,7 +804,7 @@
   const ACC_KEY = 'habit-baukasten.accounts', SES_KEY = 'habit-baukasten.session';
   let accounts = {};
   try { accounts = JSON.parse(localStorage.getItem(ACC_KEY)) || {}; } catch {}
-  const ADMIN = { salt: 'aGFiaXQtYmF1a2FzdGVuLWFkbWluLXYx', hash: 'WJNJfBAtqvD1xTt2ifOJ/smYK2tlbSwbKXyU5cSKM58=' };   // Benutzer „admin“, Passwort als PBKDF2-Hash
+  const ADMIN = { salt: '086g7oOAik+Jud/z+S3R3Q==', hash: 'egzPCX4o29zZEH7EVzwG1jYJQyitJy46ZxS9a/FIwPg=' };   // Benutzer „admin“, Passwort nur als PBKDF2-Hash
   let hbUser = null;
   try { hbUser = localStorage.getItem(SES_KEY); } catch {}
   if (!hbUser || (!accounts[hbUser] && hbUser !== 'admin')) hbUser = null;
