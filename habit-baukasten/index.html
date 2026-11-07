@@ -276,6 +276,30 @@
   .uni .todo { padding: 6px 2px; }
   .su-x { border: none; background: none; padding: 0 0 0 4px; color: var(--muted); font-weight: 800; }
 
+  /* 📖 Gelesene Bücher */
+  .book-mini { display: flex; gap: 2px; align-items: flex-end; height: 18px; }
+  .book-mini i { width: 4px; height: 16px; border-radius: 1px; border: 1px solid rgba(60, 40, 60, .25); }
+  .book-body { display: grid; gap: 10px; margin-top: 12px; }
+  .book-shelf { display: flex; flex-wrap: wrap; gap: 2px; align-items: flex-end; min-height: 40px; padding: 6px 8px 0; border-bottom: 5px solid #c99a6b; border-radius: 4px; }
+  .book-shelf i { width: 10px; border-radius: 2px 2px 0 0; border: 1px solid rgba(60, 40, 60, .3); box-shadow: inset 0 3px 0 rgba(255, 255, 255, .35); }
+  .book-stats { margin: 0; font-weight: 800; font-size: .88rem; }
+  .book-form { display: grid; gap: 6px; }
+  .book-form input { font: inherit; font-size: .9rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; min-width: 0; }
+  .book-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .book-label { font-size: .82rem; font-weight: 800; color: var(--muted); }
+  .stars-pick { display: flex; }
+  .star, .book-stars button { border: none; background: none; padding: 0 2px; font-size: 1.35rem; line-height: 1; color: #e8b84a; cursor: pointer; }
+  .star:not(.on) { color: var(--muted); opacity: .6; }
+  .book-list { list-style: none; margin: 0; padding: 0; display: grid; }
+  .book { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 2px; border-top: 1px solid var(--border); }
+  .book-spine { width: 8px; height: 30px; border-radius: 2px; border: 1px solid rgba(60, 40, 60, .3); }
+  .book-info { display: grid; min-width: 0; }
+  .book-info b { overflow-wrap: break-word; }
+  .book-info small { color: var(--muted); font-size: .78rem; }
+  .book-stars { display: flex; }
+  .book-stars button { font-size: 1rem; padding: 0 1px; }
+  @media (max-width: 420px) { .book { grid-template-columns: auto minmax(0, 1fr) auto; } .book-stars { grid-column: 2; } }
+
   /* Einrichtungs-Assistent */
   .setup p { margin: 0 0 10px; }
   .setup-dots { display: flex; gap: 6px; margin: 0 0 14px; }
@@ -476,6 +500,23 @@
     </div>
   </section>
 
+  <section class="card books" id="bookCard">
+    <details id="bookDetails">
+      <summary class="ach-summary"><h2>📖 Gelesene Bücher</h2><span class="book-mini" id="bookMini" aria-hidden="true"></span><span class="muted" id="bookCount"></span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="book-body">
+        <div class="book-shelf" id="bookShelf" aria-label="Bücherregal"></div>
+        <p class="book-stats" id="bookStats"></p>
+        <form class="book-form" id="bookForm">
+          <input name="title" placeholder="Titel des Buchs" aria-label="Titel des Buchs" autocomplete="off">
+          <input name="author" placeholder="Autor:in" aria-label="Autor oder Autorin" autocomplete="off">
+          <div class="book-row"><span class="book-label">Bewertung</span><span class="stars-pick" id="bookStars" role="radiogroup" aria-label="Bewertung in Sternen"></span></div>
+          <div class="book-row"><label class="book-label" for="bookDate">Beendet am</label><input name="date" id="bookDate" type="date"><button class="pill primary" type="submit">+ Ins Regal</button></div>
+        </form>
+        <ul class="book-list" id="bookList"></ul>
+      </div>
+    </details>
+  </section>
+
   <div class="two">
     <section class="card manage">
       <h2>Meine Gewohnheiten</h2>
@@ -593,6 +634,10 @@
       ],
       water, ach: { first: key(new Date()), five: key(new Date()), sip: key(new Date()), water: key(last), todo1: key(new Date()) }, flags: {},
       achResetId: 'reset-2026-11-06', achSince: 0,
+      books: [
+        ['Der kleine Prinz', 'Antoine de Saint-Exupéry', 5, 40], ['Atomic Habits', 'James Clear', 4, 30], ['Die Mitternachtsbibliothek', 'Matt Haig', 5, 18],
+        ['Das Café am Rande der Welt', 'John Strelecky', 3, 9], ['Eine kurze Geschichte der Menschheit', 'Yuval Noah Harari', 4, 2],
+      ].map(([title, author, stars, ago], i) => ({ id: 'b' + i, title, author, stars, date: key(addDays(new Date(), -ago)), at: Date.now(), color: ['#f4a7b9', '#a9c8ec', '#a6dcc2', '#f8cfa0', '#cdb4e8'][i] })),
       uni: {
         subjects: [{ id: 's1', name: 'Statistik', color: 'gehirn' }, { id: 's2', name: 'Anatomie', color: 'sozial' }, { id: 's3', name: 'Englisch', color: 'ern' }],
         sessions: [0, 1, 1, 2, 3, 3, 4, 8, 9, 10].map((dd, i) => ({ id: 'ss' + i, subject: ['s1', 's2', 's3'][i % 3], minutes: i % 4 ? 25 : 50, at: addDays(new Date(), -dd).getTime(), full: true })),
@@ -946,6 +991,8 @@
     ['mood7', '🎭', 'Gefühlsprofi', 'An 7 Tagen die Stimmung eingetragen', (s) => s.moodDays >= 7],
     ['focus10', '🍅', 'Fokus-Profi', '10 Lernrunden à 25 Minuten geschafft', (s) => s.focusRounds >= 10],
     ['deadline5', '📬', 'Fristgerecht', '5 Abgaben erledigt', (s) => s.deadlinesDone >= 5],
+    ['book5', '🐭', 'Lesemaus', '5 Bücher gelesen und ins Regal gestellt', (s) => s.books >= 5],
+    ['book25', '🏛️', 'Bibliothek', '25 Bücher gelesen', (s) => s.books >= 25],
   ];
   function runLength(dates) {
     let best = 0, run = 0, prev = null;
@@ -992,6 +1039,7 @@
       moodDays: Object.values(state.mood || {}).filter((m) => (m.at || 0) >= since).length,
       focusRounds: (state.uni?.sessions || []).filter((x) => x.full && x.at >= since).length,
       deadlinesDone: (state.uni?.deadlines || []).filter((x) => x.done && (x.doneAt || 0) >= since).length,
+      books: (state.books || []).filter((b) => (b.at || 0) >= since).length,
       custom: state.tags.some((t) => t.id.startsWith('t') && created(t) >= since),
     };
   }
@@ -1424,6 +1472,62 @@
   $('subjColor').innerHTML = SUBJ_COLORS.map(([k, n]) => `<option value="${k}">${n}</option>`).join('');
   window.renderUni = renderUni;
 
+  // ---------- 📖 Gelesene Bücher ----------
+  state.books ||= [];
+  const SPINES = ['#f4a7b9', '#a9c8ec', '#a6dcc2', '#f8cfa0', '#cdb4e8', '#c6e3a9', '#f6df96', '#b9d3db'];
+  let bookStars = 0;
+  const starStr = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
+  function renderStarPick() {
+    $('bookStars').innerHTML = [1, 2, 3, 4, 5].map((n) => `<button type="button" class="star ${n <= bookStars ? 'on' : ''}" data-star="${n}" role="radio" aria-checked="${n === bookStars}" aria-label="${n} ${n === 1 ? 'Stern' : 'Sterne'}">${n <= bookStars ? '★' : '☆'}</button>`).join('');
+  }
+  function renderBooks() {
+    const list = [...state.books].sort((a, b) => b.date.localeCompare(a.date) || b.at - a.at);
+    const y = String(new Date().getFullYear()), thisYear = list.filter((b) => b.date.startsWith(y));
+    const rated = list.filter((b) => b.stars), avg = rated.length ? rated.reduce((a, b) => a + b.stars, 0) / rated.length : 0;
+    $('bookCount').textContent = list.length ? `${list.length} ${list.length === 1 ? 'Buch' : 'Bücher'}` : 'noch keins';
+    $('bookStats').textContent = list.length ? `Dieses Jahr ${thisYear.length} ${thisYear.length === 1 ? 'Buch' : 'Bücher'}${rated.length ? ` · Ø ${avg.toLocaleString('de-DE', { maximumFractionDigits: 1 })} ★` : ''}` : '';
+    // Bücherregal: ein Buchrücken pro Buch (älteste links)
+    const shelf = [...list].reverse().slice(-40);
+    $('bookShelf').innerHTML = shelf.length ? shelf.map((b, i) => `<i title="${esc(b.title)}" data-style="background:${b.color};height:${22 + ((b.title.length * 7 + i * 3) % 12)}px"></i>`).join('') : '<span class="muted">Dein Regal wartet auf das erste Buch 📚</span>';
+    $('bookMini').innerHTML = list.slice(0, 8).map((b) => `<i data-style="background:${b.color}"></i>`).join('');
+    $('bookList').innerHTML = list.map((b) => {
+      const d = new Date(b.date + 'T12:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' });
+      return `<li class="book"><span class="book-spine" data-style="background:${b.color}"></span>
+        <span class="book-info"><b>${esc(b.title)}</b><small>${b.author ? esc(b.author) + ' · ' : ''}beendet am ${d}</small></span>
+        <span class="book-stars" role="group" aria-label="Bewertung ${b.stars || 0} von 5">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-bstar="${b.id}" data-n="${n}" aria-label="${n} ${n === 1 ? 'Stern' : 'Sterne'}">${n <= (b.stars || 0) ? '★' : '☆'}</button>`).join('')}</span>
+        <button class="todo-del" type="button" data-bdel="${b.id}" aria-label="${esc(b.title)} löschen">×</button></li>`;
+    }).join('');
+  }
+  $('bookStars').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-star]'); if (!b) return;
+    e.dogHandled = true; bookStars = +b.dataset.star === bookStars ? 0 : +b.dataset.star; renderStarPick();
+  });
+  $('bookForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target, title = f.elements.title.value.trim();
+    if (!title) { f.elements.title.focus(); return; }
+    state.books.push({ id: uid(), title, author: f.elements.author.value.trim(), stars: bookStars, date: f.elements.date.value || todayKey(), at: Date.now(), color: SPINES[state.books.length % SPINES.length] });
+    f.elements.title.value = ''; f.elements.author.value = ''; f.elements.date.value = todayKey(); bookStars = 0; renderStarPick();
+    save(); renderBooks();
+    const n = state.books.length;
+    e.dogHandled = true;
+    window.janaDog?.happy(n === 1 ? 'Wuff! Dein erstes Buch im Regal! 📖' : `Wuff! Schon ${n} Bücher! 📚`);
+  });
+  $('bookList').addEventListener('click', (e) => {
+    const s = e.target.closest('[data-bstar]'), d = e.target.closest('[data-bdel]');
+    if (s) { e.dogHandled = true; const b = state.books.find((x) => x.id === s.dataset.bstar); b.stars = b.stars === +s.dataset.n ? 0 : +s.dataset.n; save(); renderBooks(); }
+    if (d) {
+      e.dogHandled = true;
+      if (!d.classList.contains('armed')) { d.classList.add('armed'); d.textContent = 'Löschen?'; setTimeout(() => { if (d.isConnected) { d.classList.remove('armed'); d.textContent = '×'; } }, 3000); return; }
+      state.books = state.books.filter((x) => x.id !== d.dataset.bdel); save(); renderBooks();
+    }
+  });
+  try { $('bookDetails').open = localStorage.getItem('habit-baukasten.booksOpen') === '1'; } catch {}
+  $('bookDetails').addEventListener('toggle', () => { try { localStorage.setItem('habit-baukasten.booksOpen', $('bookDetails').open ? '1' : '0'); } catch {} });
+  $('bookForm').elements.date.value = todayKey();
+  renderStarPick();
+  renderBooks();
+
   // ---------- KW-Übersicht ----------
   const shortDate = (d) => d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
   function weekStats(mk) {
@@ -1443,6 +1547,7 @@
     return {
       mon, planned, done, perDay, waterGoals: water.filter((v) => v >= GOAL).length, waterSum: water.reduce((a, b) => a + b, 0),
       note: (w?.note || '').trim(), top: Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 3),
+      booksDone: (state.books || []).filter((b) => b.date >= key(mon) && b.date <= key(addDays(mon, 6))).length,
       study: (state.uni?.sessions || []).filter((x) => x.at >= mon.getTime() && x.at < addDays(mon, 7).getTime()).reduce((a, x) => a + x.minutes, 0),
       mood: (() => { const vs = Array.from({ length: 7 }, (_, i) => state.mood[key(addDays(mon, i))]?.v).filter(Boolean); return vs.length ? Math.round(vs.reduce((a, b) => a + b, 0) / vs.length) : 0; })(),
     };
@@ -1464,6 +1569,7 @@
       const parts = [s.planned ? `✅\u00a0${s.done} von ${s.planned} erledigt` : 'Keine Gewohnheiten'];
       if (s.waterGoals) parts.push(`💧\u00a0${s.waterGoals}×\u00a02,5\u00a0l`); else if (s.waterSum) parts.push(`💧\u00a0${fmtL(s.waterSum).replace(' ', '\u00a0')}`);
       if (s.note) parts.push('📝 Notiz');
+      if (s.booksDone) parts.push(`📖\u00a0${s.booksDone}\u00a0${s.booksDone === 1 ? 'Buch' : 'Bücher'}`);
       if (s.study) parts.push(`📚\u00a0${fmtMin(s.study).replace(/ /g, '\u00a0')}`);
       const maxD = Math.max(3, ...s.perDay);
       const bars = s.perDay.map((n, i) => `<i data-style="height:${n ? Math.max(4, Math.round(n / maxD * 22)) : 2}px" title="${['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i]}: ${n} erledigt" class="${n ? 'on' : ''}"></i>`).join('');
@@ -2541,6 +2647,7 @@
     { label: '🎄 Weihnachten', hour: 18, wx: wx(71, false, 0), moon: 3, special: () => app.getSpecial(new Date(Y, 11, 24, 18)) },
     { label: '🎆 Silvester-Feuerwerk', hour: 22, wx: wx(0, false, 1), moon: 25, special: () => app.getSpecial(new Date(Y, 11, 31, 22)) },
     { label: '💖 Valentinstag', hour: 12, wx: wx(2, true, 6), special: () => app.getSpecial(new Date(Y, 1, 14, 12)) },
+    { label: '📖 Gelesene Bücher mit Bücherregal', hour: 20, wx: wx(1, false, 9), moon: 20, ms: 9000, run: () => { toEl('bookCard'); later(700, () => { $('bookDetails').open = true; }); later(2000, () => { const f = $('bookForm'); f.elements.title.value = 'Momo'; f.elements.author.value = 'Michael Ende'; document.querySelector('#bookStars [data-star="5"]')?.click(); }); later(4200, () => $('bookForm').requestSubmit()); }, after: () => { $('bookDetails').open = false; } },
     { label: '⏱️ Lern-Timer: 25 Minuten lernen, Haustier bleibt still', hour: 15, wx: wx(1, true, 16), run: () => { toEl('timerCard'); later(1200, () => $('timerStart').click()); }, after: () => { if ($('timerStop') && !$('timerStop').hidden) $('timerStop').click(); } },
     { label: '🎓 Uni: Lernzeit, Abgaben und Lernziele', hour: 16, wx: wx(1, true, 16), ms: 9000, run: () => { toEl('uniCard'); later(3500, () => document.querySelector('#goalList [data-gcheck]:not([aria-pressed="true"])')?.click()); } },
     { label: '📅 KW-Übersicht aller Wochen', hour: 18, wx: wx(2, true, 12), ms: 9000, run: () => { later(900, () => $('overviewBtn').click()); later(7600, () => { if (!$('kwOverlay').hidden) $('kwClose').click(); }); } },

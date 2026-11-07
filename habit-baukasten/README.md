@@ -8,6 +8,7 @@ Test-Version von „Janas Woche“ als Vorlage für jeden. Janas Seite (`janas-w
 - Haustier wählbar: Hund (mit Hütte), Katze (mit Katzenhaus) oder Kaninchen (mit Stall).
 - Optionaler Bereich „🎓 Uni“: Lern-Timer (25/5, lange Pause nach 4 Runden), Fächer mit Lernzeit,
   Abgaben & Deadlines, Lernziele pro Woche.
+- „📖 Gelesene Bücher“: Titel, Autor:in, 1–5 Sterne und Datum, mit Pixel-Bücherregal und Jahresstatistik.
 - Kein eigener Server nötig: Das Wetter kommt direkt von Open-Meteo, Daten liegen im Browser
   (Speicher-Präfix `habit-baukasten.`).
 
