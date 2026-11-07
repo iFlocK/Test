@@ -868,13 +868,20 @@
   let accounts = {};
   try { accounts = JSON.parse(localStorage.getItem(ACC_KEY)) || {}; } catch {}
   const ADMIN = { salt: '086g7oOAik+Jud/z+S3R3Q==', hash: 'egzPCX4o29zZEH7EVzwG1jYJQyitJy46ZxS9a/FIwPg=' };   // Benutzer „admin“, Passwort nur als PBKDF2-Hash
+  const CLOUD = !window.JANA_PREVIEW;   // Konten und Einträge auf dem Server (Netlify); in der Claude-Vorschau nur auf diesem Gerät
   let hbUser = null;
   try { hbUser = localStorage.getItem(SES_KEY); } catch {}
-  if (!hbUser || (!accounts[hbUser] && hbUser !== 'admin')) hbUser = null;
+  if (!hbUser || (!CLOUD && !accounts[hbUser] && hbUser !== 'admin')) hbUser = null;
   window.HB_ADMIN = hbUser === 'admin' && !window.JANA_GUEST;
   window.HB_USER = window.JANA_GUEST ? null : hbUser;
   window.HB_LOCKED = !window.JANA_GUEST && !hbUser;
   const KEY = 'habit-baukasten.v2' + (window.HB_LOCKED ? ':__gesperrt' : window.HB_USER ? ':' + window.HB_USER : '');
+  if (CLOUD && window.HB_USER && !window.JANA_GUEST) {
+    window.HB_SYNC = { key: KEY, meta: KEY + '.sync' };   // Abgleich zwischen den Geräten dieses Kontos
+    fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' }).then((r) => {   // Anmeldung abgelaufen oder Passwort geändert?
+      if (r.status === 401) { try { localStorage.removeItem(SES_KEY); } catch {} location.reload(); }
+    }).catch(() => {});
+  }
   const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
   const AREAS = { bew: 'Bewegung', ern: 'Ernährung', schlaf: 'Schlaf', gehirn: 'Gehirn', sozial: 'Soziales', psyche: 'Erholung', allg: 'Gesundheit', eigen: 'Eigenes' };
   const DEFAULT_TAGS = [
@@ -1723,7 +1730,14 @@
   $('setupClose').addEventListener('click', (e) => { e.dogHandled = true; closeSetup(); });
   $('setupBtn').addEventListener('click', openSetup);
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('setupOverlay').hidden && state.profile) closeSetup(); });
-  if (!GUEST && !window.HB_LOCKED && !window.HB_ADMIN && !state.profile) setTimeout(openSetup, 400);
+  if (!GUEST && !window.HB_LOCKED && !window.HB_ADMIN && !state.profile) {
+    if (window.HB_SYNC) {   // neues Gerät: erst schauen, ob das Konto schon Einträge in der Cloud hat
+      let opened = false;
+      const go = () => { if (!opened && !state.profile) { opened = true; openSetup(); } };
+      addEventListener('hb:synced', go, { once: true });
+      setTimeout(go, 6000);   // offline: nach kurzer Zeit trotzdem einrichten
+    } else setTimeout(openSetup, 400);
+  }
 
   // ---------- 🎓 Uni: Lern-Timer, Fächer & Lernzeit, Abgaben, Lernziele ----------
   state.uni ||= { subjects: [], sessions: [], deadlines: [], goals: {}, timer: { phase: 'idle', round: 0 } };
@@ -2669,7 +2683,7 @@
   $('backupSave').addEventListener('click', async (e) => {
     e.dogHandled = true;
     const prefs = {};
-    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith(APP_ID + '.') && !/\.(v2|accounts|session|previewMode|fixtures|teams|weather)(:|$)/.test(k)) prefs[k.slice(APP_ID.length + 1)] = localStorage.getItem(k); } } catch {}
+    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith(APP_ID + '.') && !/\.(v2|accounts|session|previewMode|fixtures|teams|weather|sync)(:|$)/.test(k)) prefs[k.slice(APP_ID.length + 1)] = localStorage.getItem(k); } } catch {}
     const data = { app: APP_ID, version: typeof APP_VERSION !== 'undefined' ? APP_VERSION : '', created: new Date().toISOString(), user: window.HB_USER || null, state, prefs };
     const name = `${APP_ID}-sicherung-${key(new Date())}.json`;
     const file = new File([JSON.stringify(data, null, 1)], name, { type: 'application/json' });
@@ -2713,7 +2727,8 @@
   // ---------- Versionsnummer und Patch Notes ----------
   // Bei jedem Upload: Version erhöhen und oben einen neuen Eintrag ergänzen.
   const CHANGELOG = [
-    { v: '0.3.0', title: 'Das große Bücher-Update', notes: [
+    { v: '0.3.0', title: 'Das Große Bücher & Cloud Sync Update', notes: [
+      ['☁️', 'Dein Konto in der Cloud', 'Melde dich auf jedem Gerät mit deinem Konto an. Was du am Laptop einträgst, ist auch auf dem Handy da, und umgekehrt.'],
       ['💾', 'Datensicherung', 'Unten rechts gibt es jetzt den 💾-Knopf: Speichere deine Einträge als Datei und stelle sie bei Bedarf wieder her. Ein roter Punkt erinnert dich, wenn die letzte Sicherung länger als zwei Wochen her ist.'],
       ['⭐', 'Halbe Sterne', 'Bücher kannst du jetzt auch mit halben Sternen bewerten: links auf einen Stern tippen.'],
       ['🔎', 'Buch-Datenbank', 'Tipp einfach den Titel ein: Passende Bücher erscheinen mit Cover. Ein Tipp darauf füllt Titel, Autor:in, Genre und Cover aus.'],
@@ -2836,9 +2851,29 @@
       const b = e.target.closest('[data-auth]'); if (!b) return;
       e.dogHandled = true; authMode = b.dataset.auth; renderAuth(); $('authUser').focus();
     });
+    async function cloudAuth(u, pw) {
+      if (authMode === 'create' && pw !== $('authPass2').value) return err('Die beiden Passwörter stimmen nicht überein.');
+      $('authSubmit').disabled = true;
+      try {
+        const call = (path) => fetch(path, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: u, password: pw }) })
+          .then(async (r) => ({ status: r.status, data: await r.json().catch(() => ({})) }));
+        let r = await call(authMode === 'create' ? '/api/register' : '/api/login');
+        // Konto gab es bisher nur auf diesem Gerät? Dann jetzt mit demselben Passwort in die Cloud übernehmen
+        if (authMode === 'login' && r.status === 404 && accounts[u] && crypto?.subtle && (await hashPw(pw, accounts[u].salt)) === accounts[u].hash) r = await call('/api/register');
+        if (r.status === 429) return err('Zu viele Versuche. Bitte warte eine Minute.');
+        if (r.status !== 200) return err(r.data.error || 'Das hat leider nicht geklappt. Bitte versuch es noch einmal.');
+        const legacy = localStorage.getItem('habit-baukasten.v2');   // Einträge aus der Zeit vor den Konten
+        if (authMode === 'create' && legacy && !Object.keys(accounts).length) { localStorage.setItem('habit-baukasten.v2:' + r.data.user, legacy); localStorage.removeItem('habit-baukasten.v2'); }
+        localStorage.setItem(SES_KEY, r.data.user);
+        location.reload();
+      } catch { err('Der Server ist gerade nicht erreichbar. Bitte prüf deine Internetverbindung.'); }
+      finally { $('authSubmit').disabled = false; }
+    }
+    if (CLOUD) document.querySelector('.auth-note').textContent = '🔒 Dein Passwort wird nur verschlüsselt gespeichert. Deine Einträge liegen in deinem Konto und sind auf all deinen Geräten gleich.';
     $('authForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const u = $('authUser').value.trim().toLowerCase(), pw = $('authPass').value;
+      if (CLOUD) return cloudAuth(u, pw);
       if (u === 'admin') {
         if (authMode === 'create') return err('Der Benutzername „admin“ ist reserviert.');
         if (!crypto?.subtle) return err('Dieser Browser unterstützt das sichere Prüfen von Passwörtern nicht.');
@@ -2896,19 +2931,27 @@
         const days = d ? Object.values(d.weeks || {}).reduce((a, w) => a + w.days.filter((x) => x.length).length, 0) : 0;
         return { name: d?.profile?.name || '–', days };
       };
-      let resetFor = '';
+      let resetFor = '', cloudList = null;
+      const adminApi = (path, body) => fetch(path, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) })
+        .then(async (r) => ({ status: r.status, data: await r.json().catch(() => ({})) }));
+      async function loadCloud() {
+        try { const r = await adminApi('/api/admin/users'); cloudList = r.status === 200 ? r.data.users : null; if (r.status !== 200) msg(r.data.error || 'Konten konnten nicht geladen werden.'); }
+        catch { cloudList = null; msg('Server gerade nicht erreichbar.'); }
+      }
       function renderAdmin() {
-        const list = Object.entries(accounts).sort((a, b) => a[0].localeCompare(b[0]));
+        const list = CLOUD ? (cloudList || []).map((x) => [x.user, x]) : Object.entries(accounts).sort((a, b) => a[0].localeCompare(b[0]));
         $('adminBody').innerHTML = list.length ? `<ul class="admin-list">${list.map(([u, a]) => {
-          const i = info(u);
-          return `<li><div><b>👤 ${esc(u)}</b><small>Name: ${esc(i.name)} · angelegt ${new Date(a.created || 0).toLocaleDateString('de-DE')} · ${i.days} Tage mit Einträgen</small></div>
+          const i = CLOUD ? null : info(u);
+          const line = CLOUD ? `angelegt ${new Date(a.created || 0).toLocaleDateString('de-DE')} · ${a.lastSync ? 'zuletzt abgeglichen ' + new Date(a.lastSync).toLocaleString('de-DE', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'noch keine Einträge in der Cloud'}`
+            : `Name: ${esc(i.name)} · angelegt ${new Date(a.created || 0).toLocaleDateString('de-DE')} · ${i.days} Tage mit Einträgen`;
+          return `<li><div><b>👤 ${esc(u)}</b><small>${line}</small></div>
             <div class="admin-act">${resetFor === u ? `<form class="admin-reset" data-reset="${esc(u)}"><input type="password" class="su-input" placeholder="Neues Passwort (mind. 6 Zeichen)" aria-label="Neues Passwort für ${esc(u)}" autocomplete="new-password"><button class="pill primary" type="submit">Speichern</button><button class="pill" type="button" data-cancel>Abbrechen</button></form>`
               : `<button class="pill" type="button" data-pw="${esc(u)}">🔑 Passwort zurücksetzen</button><button class="pill" type="button" data-adel="${esc(u)}">🗑️ Löschen</button>`}</div></li>`;
-        }).join('')}</ul>` : '<p class="muted">Auf diesem Gerät gibt es noch keine Konten.</p>';
-        $('adminBody').insertAdjacentHTML('beforeend', '<p class="auth-note">Die Einträge der Konten bleiben privat. Du siehst nur Name, Datum und Anzahl der Tage. Konten gibt es nur auf diesem Gerät.</p><p class="su-err" id="adminMsg" hidden></p>');
+        }).join('')}</ul>` : `<p class="muted">${CLOUD ? (cloudList ? 'Es gibt noch keine Konten.' : 'Konten werden geladen …') : 'Auf diesem Gerät gibt es noch keine Konten.'}</p>`;
+        $('adminBody').insertAdjacentHTML('beforeend', `<p class="auth-note">Die Einträge der Konten bleiben privat. ${CLOUD ? 'Du siehst nur Name und Datum.' : 'Du siehst nur Name, Datum und Anzahl der Tage. Konten gibt es nur auf diesem Gerät.'}</p><p class="su-err" id="adminMsg" hidden></p>`);
       }
       const msg = (t) => { const m = $('adminMsg'); if (m) { m.textContent = t; m.hidden = !t; } };
-      ab.addEventListener('click', (e) => { e.dogHandled = true; resetFor = ''; renderAdmin(); $('adminOverlay').hidden = false; $('adminClose').focus(); });
+      ab.addEventListener('click', async (e) => { e.dogHandled = true; resetFor = ''; renderAdmin(); $('adminOverlay').hidden = false; $('adminClose').focus(); if (CLOUD) { await loadCloud(); renderAdmin(); } });
       $('adminClose').addEventListener('click', (e) => { e.dogHandled = true; $('adminOverlay').hidden = true; ab.focus(); });
       $('adminOverlay').addEventListener('click', (e) => {
         if (e.target === $('adminOverlay')) { $('adminOverlay').hidden = true; return; }
@@ -2919,6 +2962,10 @@
         if (b.dataset.adel) {
           if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = 'Wirklich löschen?'; setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = '🗑️ Löschen'; } }, 3000); return; }
           const u = b.dataset.adel;
+          if (CLOUD) {
+            adminApi('/api/admin/delete', { user: u }).then(async (r) => { await loadCloud(); renderAdmin(); msg(r.status === 200 ? `Konto „${u}“ und seine Einträge wurden gelöscht.` : (r.data.error || 'Löschen hat nicht geklappt.')); }).catch(() => msg('Server gerade nicht erreichbar.'));
+            return;
+          }
           delete accounts[u]; saveAcc();
           try { localStorage.removeItem('habit-baukasten.v2:' + u); } catch {}
           renderAdmin(); msg(`Konto „${u}“ und seine Einträge wurden gelöscht.`);
@@ -2929,6 +2976,11 @@
         const f = e.target.closest('[data-reset]'); if (!f) return;
         const u = f.dataset.reset, pw = f.querySelector('input').value;
         if (pw.length < 6) return msg('Das neue Passwort braucht mindestens 6 Zeichen.');
+        if (CLOUD) {
+          try { const r = await adminApi('/api/admin/reset', { user: u, password: pw }); resetFor = ''; await loadCloud(); renderAdmin(); msg(r.status === 200 ? `Neues Passwort für „${u}“ gespeichert. Alte Anmeldungen auf anderen Geräten sind jetzt abgemeldet.` : (r.data.error || 'Hat nicht geklappt.')); }
+          catch { msg('Server gerade nicht erreichbar.'); }
+          return;
+        }
         const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
         accounts[u] = { ...accounts[u], salt, hash: await hashPw2(pw, salt) }; saveAcc();
         resetFor = ''; renderAdmin(); msg(`Neues Passwort für „${u}“ gespeichert.`);
@@ -2937,7 +2989,18 @@
     }
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'pill'; b.id = 'logoutBtn'; b.textContent = `👤 ${window.HB_USER} · Abmelden`;
-    b.addEventListener('click', (e) => { e.dogHandled = true; try { localStorage.removeItem(SES_KEY); } catch {} location.reload(); });
+    b.addEventListener('click', async (e) => {
+      e.dogHandled = true;
+      if (CLOUD) {
+        b.disabled = true;
+        try { await window.janaSync?.push?.(); } catch {}
+        const synced = !window.janaSync || !window.janaSync.meta().dirty;
+        try { await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }); } catch {}
+        if (synced) { try { localStorage.removeItem(KEY); localStorage.removeItem(KEY + '.sync'); } catch {} }   // liegt sicher in der Cloud
+      }
+      try { localStorage.removeItem(SES_KEY); } catch {}
+      location.reload();
+    });
     document.querySelector('header .nav').append(b);
   }
 
@@ -4249,6 +4312,129 @@
   $('demoNext').addEventListener('click', (e) => { e.dogHandled = true; show(i + 1); });
   $('demoPrev').addEventListener('click', (e) => { e.dogHandled = true; show(i - 1); });
   setTimeout(() => show(0), 600);
+})();
+</script>
+<script>
+// ---------- ☁️ Abgleich zwischen den Geräten eines Kontos (window.HB_SYNC = { key, meta }) ----------
+// Die Seite speichert wie immer im Browser (localStorage). Dieses Skript lädt Änderungen zusätzlich
+// nach /api/data hoch (Netlify Blobs hinter Janas Login) und holt beim Öffnen, beim Zurückkehren in die App
+// und alle 30 Sekunden den neuesten Stand. Haben zwei Geräte gleichzeitig etwas geändert, werden die
+// Einträge zusammengeführt (nichts wird überschrieben).
+(() => {
+  if (!window.HB_SYNC || window.JANA_PREVIEW || window.JANA_GUEST || !window.fetch) return;
+  const KEY = window.HB_SYNC.key, META = window.HB_SYNC.meta;
+  const rawSet = Storage.prototype.setItem;
+  let meta = { rev: 0, dirty: false, at: 0 };
+  try { meta = { ...meta, ...JSON.parse(localStorage.getItem(META) || '{}') }; } catch {}
+  const saveMeta = () => { try { rawSet.call(localStorage, META, JSON.stringify(meta)); } catch {} };
+  const local = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } };
+  const hasData = (s) => !!s && (Object.values(s.weeks || {}).some((w) => (w.days || []).some((d) => d.length)) || (s.todos || []).length > 0
+    || (s.uni?.deadlines || []).length > 0 || (s.books || []).length > 0 || Object.keys(s.mood || {}).length > 0);
+
+  // Zusammenführen: Listen mit IDs werden vereinigt, Tabellen (Wochen, Wasser, Stimmung …) schlüsselweise, sonst gewinnt b.
+  function merge(a, b) {
+    if (b === undefined) return a;
+    if (a === undefined || a === null) return b;
+    if (Array.isArray(a) && Array.isArray(b)) {
+      if ([...a, ...b].every((x) => x && typeof x === 'object' && !Array.isArray(x) && 'id' in x)) {
+        const out = a.map((x) => ({ ...x })), idx = new Map(out.map((x, i) => [x.id, i]));
+        for (const y of b) if (idx.has(y.id)) out[idx.get(y.id)] = merge(out[idx.get(y.id)], y); else { idx.set(y.id, out.length); out.push(y); }
+        return out;
+      }
+      if ([...a, ...b].every(Array.isArray)) return Array.from({ length: Math.max(a.length, b.length) }, (_, i) => merge(a[i], b[i]));
+      if ([...a, ...b].every((x) => typeof x === 'number')) return b.length >= a.length ? b : a;   // z. B. Wasser-Gläser eines Tages
+      return b;
+    }
+    if (a && b && typeof a === 'object' && typeof b === 'object' && !Array.isArray(a) && !Array.isArray(b)) {
+      const out = { ...a };
+      for (const k of Object.keys(b)) out[k] = merge(a[k], b[k]);
+      return out;
+    }
+    return b;
+  }
+
+  // Statusanzeige im 💾-Fenster
+  const line = document.createElement('p');
+  line.className = 'muted'; line.id = 'syncLine';
+  document.getElementById('backupLast')?.after(line);
+  const fmt = (ts) => new Date(ts).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  const show = (t) => { line.textContent = t; };
+  const okLine = () => show(`☁️ Auf allen deinen Geräten gleich · zuletzt abgeglichen ${fmt(meta.at || Date.now())} Uhr`);
+
+  const api = async (method, body) => {
+    const r = await fetch('/api/data', { method, credentials: 'same-origin', cache: 'no-store',
+      headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+    let data = null; try { data = await r.json(); } catch {}
+    return { status: r.status, data };
+  };
+  // Nur übernehmen, wenn gerade nichts eingetippt wird und kein Fenster offen ist (sonst später)
+  const idle = () => !document.activeElement?.matches?.('input, textarea, select') && !document.querySelector('.overlay:not([hidden])');
+  let busy = false, pushTimer = null, applying = false;
+
+  function writeLocal(state) { applying = true; try { rawSet.call(localStorage, KEY, JSON.stringify(state)); } finally { applying = false; } }
+
+  async function push() {
+    if (busy) { schedulePush(); return; }
+    if (!meta.dirty) return;
+    busy = true;
+    try {
+      const st = local();
+      if (!st || (meta.rev === 0 && !hasData(st))) { meta.dirty = false; saveMeta(); return; }   // leerer neuer Browser: nichts hochladen
+      const r = await api('PUT', { baseRev: meta.rev, state: st });
+      if (r.status === 200) { meta = { rev: r.data.rev, at: r.data.at || Date.now(), dirty: false }; saveMeta(); okLine(); return; }
+      if (r.status === 409) { busy = false; await reconcile(r.data); return; }
+      show(r.status === 401 ? '☁️ Abgleich pausiert: bitte neu anmelden.' : '☁️ Abgleich gerade nicht möglich, ich versuche es gleich wieder.');
+    } catch { show('☁️ Offline: Änderungen werden abgeglichen, sobald du wieder Internet hast.'); }
+    finally { busy = false; }
+  }
+  function schedulePush() { clearTimeout(pushTimer); pushTimer = setTimeout(push, 1500); }
+
+  // Server ist weiter als dieses Gerät: übernehmen oder (bei eigenen Änderungen) zusammenführen
+  async function reconcile(srv) {
+    if (!srv || !srv.rev) return;
+    if (!idle()) { setTimeout(pull, 3000); return; }
+    const st = local();
+    if ((meta.dirty || meta.rev === 0) && hasData(st)) {
+      writeLocal(merge(srv.state, st));
+      meta = { rev: srv.rev, at: srv.at, dirty: true }; saveMeta();
+      await push();
+    } else {
+      writeLocal(srv.state);
+      meta = { rev: srv.rev, at: srv.at || Date.now(), dirty: false }; saveMeta();
+    }
+    location.reload();
+  }
+
+  async function pull() {
+    if (busy) return;
+    busy = true;
+    let srv = null;
+    try {
+      const r = await api('GET');
+      if (r.status !== 200) { show(r.status === 401 ? '☁️ Abgleich pausiert: bitte neu anmelden.' : '☁️ Abgleich gerade nicht möglich.'); return; }
+      srv = r.data;
+    } catch { show('☁️ Offline: Änderungen werden abgeglichen, sobald du wieder Internet hast.'); return; }
+    finally { busy = false; }
+    if (!srv.rev) {   // noch nichts online: erstes Gerät lädt seine Einträge hoch
+      if (hasData(local())) { meta.dirty = true; saveMeta(); await push(); } else show('☁️ Abgleich bereit.');
+      return;
+    }
+    if (srv.rev === meta.rev) { if (meta.dirty) await push(); else { meta.at = Date.now(); saveMeta(); okLine(); } return; }
+    await reconcile(srv);
+  }
+
+  // Jede Änderung der Seite an ihren Einträgen löst einen Upload aus
+  Storage.prototype.setItem = function (k, v) {
+    rawSet.call(this, k, v);
+    if (this === localStorage && k === KEY && !applying) { meta.dirty = true; saveMeta(); schedulePush(); }
+  };
+  setTimeout(async () => { await pull(); dispatchEvent(new Event('hb:synced')); }, 400);
+  setInterval(() => { if (!document.hidden) pull(); }, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) pull(); });
+  addEventListener('focus', () => pull());
+  addEventListener('online', () => pull());
+  document.addEventListener('focusout', () => setTimeout(() => { if (idle() && meta.dirty) push(); }, 300));
+  window.janaSync = { pull, push, merge, meta: () => ({ ...meta }) };
 })();
 </script>
 </body>

@@ -74,6 +74,8 @@ JANA_PATCHES = [
  ]
 ]
 # Sparziele gibt es bei Jana nicht
+# Keine Server-Konten: Jana meldet sich über Netlify an (login.ts)
+JANA_PATCHES += [['  const CLOUD = !window.JANA_PREVIEW;', '  const CLOUD = false;']]
 JANA_PATCHES += [
     ['  <section class="card savings" id="saveCard">', '  <section class="card savings" id="saveCard" hidden>'],
     ["    ['save10', '🐷', 'Sparschwein', '10-mal etwas aufs Sparziel gelegt', (s) => s.deposits >= 10],\n", ''],
@@ -95,11 +97,8 @@ for a, b in [('<title>Mein Wochenplaner</title>', '<title>Janas Woche</title>'),
     assert s.count(a) == 1, a
     s = s.replace(a, b)
 assert "const KEY = 'janas-woche.v2'" in s
-# Geräte-Abgleich (nur Janas Seite)
-sync_js = (ROOT / 'janas-woche/tools/sync.js').read_text(encoding='utf-8')
-assert s.endswith('</script>\n</body>\n</html>\n')
-s = s[:-len('</body>\n</html>\n')] + '<script>\n' + sync_js + '</script>\n</body>\n</html>\n'
-cfg = '<script>window.HB_CONFIG = ' + json.dumps(CONFIG, ensure_ascii=False) + ';</script>\n'
+# Geräte-Abgleich über /api/data hinter Janas Login (der Abgleich-Code steckt in der allgemeinen Version)
+cfg = '<script>window.HB_CONFIG = ' + json.dumps(CONFIG, ensure_ascii=False) + ";\nwindow.HB_SYNC = { key: 'janas-woche.v2', meta: 'janas-woche.sync' };</script>\n"
 s = s.replace('<script>', cfg + '<script>', 1)
 out_path.write_text(s, encoding='utf-8')
 print(f'Janas Seite gebaut: {out_path.relative_to(ROOT)} ({len(s) // 1024} KB), Version {CONFIG["changelog"][0]["v"]}')

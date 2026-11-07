@@ -23,6 +23,18 @@ Vorschau erzeugen:
 `python3 janas-woche/tools/make-preview.py vorschau.html habit-baukasten/public/index.html`
 (startet mit dem Assistenten; der Knopf „🧪 Demo“ schaltet auf Beispieldaten mit Tour um).
 
+## ☁️ Konten in der Cloud (ab 0.3.0)
+Auf der Live-Seite liegen Konten und Einträge auf dem Server (Netlify), in der Claude-Vorschau weiterhin nur im Browser.
+- `netlify/functions/auth.mts`: `/api/register`, `/api/login`, `/api/logout`, `/api/me` und für den Admin `/api/admin/users|reset|delete`.
+  Passwörter als PBKDF2-Hash (150 000 Runden). Anmeldung per HttpOnly-Cookie `mw_session`, signiert mit der
+  Netlify-Umgebungsvariable **`AUTH_SECRET`** (muss gesetzt sein). Nach einem Passwort-Reset sind alte Anmeldungen ungültig.
+  Höchstens 30 Anfragen pro Minute und IP (Schutz gegen Passwort-Raten).
+- `netlify/functions/data.mts`: `/api/data`, je Konto ein JSON-Dokument mit Versionszähler (Netlify Blobs, Stores
+  `wochenplaner-users` und `wochenplaner-data`). Der Abgleich-Code in der Seite ist derselbe wie bei Janas Seite.
+- Konten, die bisher nur auf einem Gerät lagen, werden beim ersten Anmelden mit demselben Passwort samt Einträgen übernommen.
+- Beim Abmelden wird die lokale Kopie gelöscht, wenn alles in der Cloud ist.
+- Abhängigkeit `@netlify/blobs` (Version 10) in `package.json` mit `package-lock.json`, Node 22 in `netlify.toml`.
+
 ## Konten, Mann/Frau und Lieblingsverein (Vorschau)
 - „👤 Konto“: Jede Person legt sich Benutzername und Passwort selbst an. Passwörter werden nur als PBKDF2-Hash gespeichert.
   Konten und Einträge liegen bisher nur im Browser des Geräts (localStorage, je Konto ein eigener Schlüssel `habit-baukasten.v2:<name>`).

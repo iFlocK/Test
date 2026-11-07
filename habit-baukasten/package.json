@@ -1,0 +1,8 @@
+{
+  "name": "mein-wochenplaner",
+  "private": true,
+  "description": "Mein Wochenplaner: Seite, Konten und Geräte-Abgleich (Netlify)",
+  "dependencies": {
+    "@netlify/blobs": "^10.7.13"
+  }
+}
