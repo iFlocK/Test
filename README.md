@@ -55,3 +55,5 @@ nachts mit Ton 3× auf die Hütte (Hund singt). Jede gibt einen geheimen Erfolg.
 2. Vorschau erzeugen: `python3 janas-woche/tools/make-preview.py vorschau.html` und als Claude-Artifact ansehen.
    Die Vorschau läuft im Gastmodus mit Beispieldaten (ohne Login und Wetter-Schnittstelle).
 3. Erst wenn ein Paket fertig ist, **einmal** zu Netlify hochladen. Jedes Veröffentlichen kostet Guthaben.
+4. Vor jedem Upload die Version erhöhen: in `index.html` oben in `CHANGELOG` einen neuen Eintrag mit Versionsnummer und Patch Notes ergänzen.
+   Beim nächsten Öffnen zeigt die Seite dann einmal das Fenster „Was ist neu?“. Geheimnisse dort nur andeuten, nicht verraten.

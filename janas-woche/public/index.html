@@ -302,6 +302,20 @@
   @keyframes heartFall { to { transform: translateY(calc(100vh + 80px)) rotate(25deg); } }
   @media (prefers-reduced-motion: reduce) { html.disco main { animation: none; filter: hue-rotate(140deg); } .heart-rain { display: none; } }
 
+  /* Patch Notes */
+  .news { max-width: 460px; display: grid; gap: 10px; }
+  .news-ver { margin: 0; color: var(--muted); font-size: .85rem; font-weight: 700; }
+  .news-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .news-list li { display: grid; grid-template-columns: 1.8rem minmax(0, 1fr); gap: 6px; align-items: start; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 8px 10px; }
+  .news-list .ic { font-size: 1.2rem; text-align: center; line-height: 1.3; }
+  .news-list b { display: block; font-size: .92rem; }
+  .news-list span span { display: block; font-size: .82rem; color: var(--muted); }
+  .news-old { font-size: .85rem; }
+  .news-old summary { cursor: pointer; font-weight: 800; color: var(--muted); }
+  .news-old h3 { font-size: .95rem; margin: 10px 0 6px; }
+  .news .pill.primary { justify-self: center; padding: 8px 22px; }
+  .version { display: block; margin: 0 auto; border: none; background: none; color: var(--muted); font-size: .78rem; font-weight: 700; text-decoration: underline dotted; cursor: pointer; }
+
   /* KW-Übersicht */
   .overlay { position: fixed; inset: 0; z-index: 40; background: rgba(40, 25, 45, .35); display: grid; place-items: center;
     padding: max(16px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
@@ -532,8 +546,16 @@
   </section>
 
   <p class="motto">Entscheidend ist die langfristige Gewohnheit, nicht Perfektion.</p>
+  <button class="version" id="versionBtn" type="button"></button>
 </main>
 
+<div class="overlay" id="newsOverlay" hidden>
+  <div class="sheet news" role="dialog" aria-modal="true" aria-labelledby="newsTitle">
+    <div class="sheet-head"><h2 id="newsTitle">Was ist neu? ✨</h2><button class="pill" id="newsClose" type="button" aria-label="Schließen">✕</button></div>
+    <div id="newsBody"></div>
+    <button class="pill primary" id="newsOk" type="button">Los geht’s! 🐾</button>
+  </div>
+</div>
 <div class="overlay" id="kwOverlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="kwTitle">
     <div class="sheet-head"><h2 id="kwTitle">Alle Kalenderwochen</h2><button class="pill" id="kwClose" type="button" aria-label="Übersicht schließen">✕</button></div>
@@ -1470,6 +1492,54 @@
     $('days').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   });
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('kwOverlay').hidden) closeOverview(); });
+
+  // ---------- Versionsnummer und Patch Notes ----------
+  // Bei jedem Upload: Version erhöhen und oben einen neuen Eintrag ergänzen.
+  const CHANGELOG = [
+    { v: '0.9.0', title: 'Das große Herbst-Update', notes: [
+      ['🎓', 'Uni-Bereich', 'Lern-Timer, Fächer mit Lernzeit, Abgaben und Deadlines und Lernziele für jede Woche. Beim Lernen ist der Hund ganz leise.'],
+      ['💬', 'Discord-Lerngruppe', 'Speichere den Einladungslink im Uni-Bereich und öffne deine Gruppe mit einem Tipp.'],
+      ['📖', 'Gelesene Bücher', 'Dein eigenes Bücherregal mit Titel, Autor:in und Sternen.'],
+      ['😊', 'Stimmungsbarometer', 'Trag jeden Tag ein, wie es dir geht. Der Hund reagiert darauf.'],
+      ['🌦️', 'Wetter', 'Das Wetter aktualisiert sich jetzt jede Stunde von selbst.'],
+      ['🏆', 'Neue Erfolge', 'Für Lernrunden, Abgaben und Bücher.'],
+      ['🤫', 'Geheimnisse', 'Im Garten und am Himmel verstecken sich viele neue Überraschungen. Mehr wird nicht verraten!'],
+    ] },
+  ];
+  const APP_VERSION = CHANGELOG[0].v, SEEN_KEY = 'janas-woche.version';
+  const verNum = (v) => v.split('.').map(Number).reduce((a, n) => a * 1000 + n, 0);
+  const newsItems = (e) => `<ul class="news-list">${e.notes.map(([ic, b, t]) => `<li><span class="ic" aria-hidden="true">${ic}</span><span><b>${b}</b><span>${t}</span></span></li>`).join('')}</ul>`;
+  let newsReturnFocus = null;
+  function openNews(since) {
+    const fresh = CHANGELOG.filter((e) => !since || verNum(e.v) > verNum(since));
+    const show = fresh.length ? fresh : [CHANGELOG[0]], older = CHANGELOG.filter((e) => !show.includes(e));
+    $('newsTitle').textContent = since ? 'Neu seit deinem letzten Besuch ✨' : 'Was ist neu? ✨';
+    $('newsBody').innerHTML = show.map((e) => `<p class="news-ver">Version ${e.v} · ${e.title}</p>${newsItems(e)}`).join('')
+      + (older.length ? `<details class="news-old"><summary>Frühere Versionen</summary>${older.map((e) => `<h3>Version ${e.v} · ${e.title}</h3>${newsItems(e)}`).join('')}</details>` : '');
+    newsReturnFocus = document.activeElement;
+    $('newsOverlay').hidden = false; document.body.style.overflow = 'hidden';
+    $('newsClose').focus({ preventScroll: true }); document.querySelector('#newsOverlay .sheet').scrollTop = 0;
+  }
+  function closeNews(e) {
+    if (e) e.dogHandled = true;
+    if ($('newsOverlay').hidden) return;
+    $('newsOverlay').hidden = true; document.body.style.overflow = '';
+    try { localStorage.setItem(SEEN_KEY, APP_VERSION); } catch {}
+    newsReturnFocus?.focus?.();
+    window.janaDog?.happy('Wuff! Viel Spaß mit dem Update! 🎉');
+  }
+  $('versionBtn').textContent = `Version ${APP_VERSION} · Was ist neu?`;
+  $('versionBtn').addEventListener('click', (e) => { e.dogHandled = true; openNews(); });
+  $('newsOk').addEventListener('click', closeNews);
+  $('newsClose').addEventListener('click', closeNews);
+  $('newsOverlay').addEventListener('click', (e) => { if (e.target === $('newsOverlay')) closeNews(e); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('newsOverlay').hidden) closeNews(); });
+  // Nach einem Update einmal automatisch zeigen (nicht in der Demo-Tour)
+  if (!GUEST) {
+    let seen = null, ok = true;
+    try { seen = localStorage.getItem(SEEN_KEY); } catch { ok = false; }
+    if (ok && seen !== APP_VERSION) setTimeout(() => openNews(seen), 700);
+  }
 
   // Einmaliges Zurücksetzen der Erfolge. Einträge bleiben, gezählt wird nur, was danach passiert.
   window.janaApp = { getSpecial, easterSunday, renderSpecial: () => renderSpecial() };
