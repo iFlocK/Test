@@ -361,6 +361,7 @@
   .setup-dots i.done { background: var(--accent-2); }
   .setup-dots.tabs { flex-wrap: wrap; gap: 6px; }
   .su-tab { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: 4px 10px; font: inherit; font-size: .78rem; font-weight: 800; }
+  .su-tab.done { border-color: var(--accent-2); }
   .su-tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
   .su-input { font: inherit; width: 100%; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
   .su-label { display: block; font-weight: 800; font-size: .85rem; margin: 6px 0 4px; }
@@ -1493,12 +1494,9 @@
     $('setupTitle').textContent = STEP_TITLES[cur()];
     const editing = !!state.profile;   // Einstellungen: Bereiche als Tabs, direkt anwählbar
     const dots = $('setupDots');
-    dots.classList.toggle('tabs', editing);
-    if (editing) { dots.removeAttribute('aria-hidden'); dots.setAttribute('role', 'tablist'); dots.setAttribute('aria-label', 'Bereiche der Einstellungen'); }
-    else { dots.setAttribute('aria-hidden', 'true'); dots.removeAttribute('role'); }
-    dots.innerHTML = editing
-      ? steps().map((k, i) => `<button type="button" class="su-tab" role="tab" data-tab="${i}" aria-selected="${i === step}">${TAB_LABELS[k]}</button>`).join('')
-      : steps().map((_, i) => `<i class="${i === step ? 'on' : i < step ? 'done' : ''}"></i>`).join('');
+    dots.classList.add('tabs');
+    dots.removeAttribute('aria-hidden'); dots.setAttribute('role', 'tablist'); dots.setAttribute('aria-label', editing ? 'Bereiche der Einstellungen' : 'Schritte der Einrichtung');
+    dots.innerHTML = steps().map((k, i) => `<button type="button" class="su-tab${!editing && i < step ? ' done' : ''}" role="tab" data-tab="${i}" aria-selected="${i === step}">${TAB_LABELS[k]}</button>`).join('');
     $('setupBack').hidden = editing || cur() === 'welcome';
     $('setupNext').textContent = editing ? '✓ Speichern' : step === steps().length - 1 ? 'Los geht’s! 🎉' : 'Weiter →';
     const b = $('setupBody');
@@ -1632,6 +1630,7 @@
     state.profile = profile;
     save(); closeSetup(); render(); renderLove(); renderUni(); window.renderCycle?.(); window.renderFuss?.(true);
     window.janaApp.renderSpecial(); window.janaWx?.refresh?.(); window.habitReloadWeather?.();
+    if (first) setTimeout(() => window.habitWelcome?.(), 900);
     if (first) setTimeout(() => window.janaDog?.happy(`Wuff! Hallo ${profile.name}! ${profile.pet ? `Ich bin ${profile.pet}. ` : ''}🐾`), 500);
     window.habitProfile = state.profile;
   }
@@ -1639,7 +1638,10 @@
     e.dogHandled = true;
     readStep();
     if (!stepOk()) return;
-    if (state.profile || step >= steps().length - 1) finishSetup(); else { step++; renderSetup(); }
+    if (state.profile || step >= steps().length - 1) {
+      if (!draft.name || !draft.gender) { step = steps().indexOf(!draft.name ? 'welcome' : 'gender'); renderSetup(); $('suErr').hidden = false; return; }   // per Tab übersprungen
+      finishSetup();
+    } else { step++; renderSetup(); }
   });
   function stepOk() {
     if (cur() === 'welcome' && !draft.name) { $('suErr').hidden = false; $('suName').focus(); return false; }
@@ -2421,6 +2423,11 @@
   // ---------- Versionsnummer und Patch Notes ----------
   // Bei jedem Upload: Version erhöhen und oben einen neuen Eintrag ergänzen.
   const CHANGELOG = [
+    { v: '0.2.0', title: 'Tabs und Live-Spielplan', notes: [
+      ['⚙️', 'Einstellungen mit Tabs', 'Alle Bereiche der Einstellungen stehen oben als Tabs. Ein Tipp, und du bist da.'],
+      ['⚽', 'Spielplan automatisch', 'Bundesliga, DFB-Pokal und Champions League kommen von selbst, während eines Spiels sogar mit Spielstand.'],
+      ['📱', 'Als App', 'Über „Zum Home-Bildschirm“ landet der Wochenplaner mit Pixel-Hund als App auf deinem Handy.'],
+    ] },
     { v: '0.1.0', title: 'Die erste Version für alle', notes: [
       ['👤', 'Eigenes Konto', 'Leg dir Benutzername und Passwort selbst an. Mehrere Personen können sich ein Gerät teilen.'],
       ['👩👨', 'Für Frauen und Männer', 'Der Zyklus-Tracker erscheint nur, wenn du ihn als Frau einschaltest.'],
@@ -2476,10 +2483,10 @@
     size();
     fxRaf = requestAnimationFrame(frame);
   }
-  function openNews(since) {
+  function openNews(since, welcome) {
     const fresh = CHANGELOG.filter((e) => !since || verNum(e.v) > verNum(since));
     const show = fresh.length ? fresh : [CHANGELOG[0]], older = CHANGELOG.filter((e) => !show.includes(e));
-    $('newsTitle').textContent = since ? 'Neu seit deinem letzten Besuch ✨' : 'Was ist neu? ✨';
+    $('newsTitle').textContent = welcome ? 'Willkommen! Das steckt drin ✨' : since ? 'Neu seit deinem letzten Besuch ✨' : 'Was ist neu? ✨';
     $('newsBody').innerHTML = show.map((e) => `<p class="news-ver">Version ${e.v} · ${e.title}</p>${newsItems(e)}`).join('')
       + (older.length ? `<details class="news-old"><summary>Frühere Versionen</summary>${older.map((e) => `<h3>Version ${e.v} · ${e.title}</h3>${newsItems(e)}`).join('')}</details>` : '');
     newsReturnFocus = document.activeElement;
@@ -2495,6 +2502,7 @@
     newsReturnFocus?.focus?.();
     window.janaDog?.happy('Wuff! Viel Spaß mit dem Update! 🎉');
   }
+  window.habitWelcome = () => { try { localStorage.setItem(SEEN_KEY, APP_VERSION); } catch {} openNews(null, true); };
   $('versionBtn').textContent = `Version ${APP_VERSION} · Was ist neu?`;
   $('versionBtn').addEventListener('click', (e) => { e.dogHandled = true; openNews(); });
   $('newsOk').addEventListener('click', closeNews);
