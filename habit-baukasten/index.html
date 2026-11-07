@@ -633,9 +633,11 @@
   // Texte mit „Jana“ werden mit dem eigenen Namen angezeigt
   const PET_WORDS = {
     cat: [[/Wuff/g, 'Miau'], [/wuff/g, 'miau'], [/Grrr/g, 'Fauch'], [/Der Hund/g, 'Die Katze'], [/der Hund/g, 'die Katze'], [/den Hund/g, 'die Katze'],
-      [/dem Hund/g, 'der Katze'], [/Labrador/g, 'Katze'], [/Hütte/g, 'Katzenhaus'], [/Hechel hechel/g, 'Schnurr…']],
+      [/dem Hund/g, 'der Katze'], [/Den Hund/g, 'Die Katze'], [/Labrador/g, 'Katze'], [/Hütte/g, 'Katzenhaus'], [/Hechel hechel/g, 'Schnurr…'],
+      [/Werwolf/g, 'Werkatze'], [/als Wolf/g, 'als Werkatze'], [/zum Wolf/g, 'zur Werkatze'], [/🐺/g, '🐈‍⬛']],
     rabbit: [[/Wuff/g, 'Hopp'], [/wuff/g, 'hopp'], [/Grrr/g, '*klopf klopf*'], [/Der Hund/g, 'Das Kaninchen'], [/der Hund/g, 'das Kaninchen'], [/den Hund/g, 'das Kaninchen'],
-      [/dem Hund/g, 'dem Kaninchen'], [/Labrador/g, 'Kaninchen'], [/Hütte/g, 'Stall'], [/Hechel hechel/g, '*mümmel mümmel*']],
+      [/dem Hund/g, 'dem Kaninchen'], [/Den Hund/g, 'Das Kaninchen'], [/Labrador/g, 'Kaninchen'], [/Hütte/g, 'Stall'], [/Hechel hechel/g, '*mümmel mümmel*'],
+      [/Werwolf-Gefahr/g, 'Mondhasen-Zeit'], [/Werwolf gesichtet/g, 'Mondhase gesichtet'], [/zum Werwolf/g, 'zum Mondhasen'], [/als Wolf/g, 'als Mondhasen'], [/Werwolf/g, 'Mondhase'], [/🐺/g, '🐇']],
   };
   window.P = (t) => {
     const n = state.profile?.name || 'du';
@@ -1000,14 +1002,14 @@
     $('achGrid').innerHTML = ACH.map(([id, icon, name, desc]) => {
       const got = state.ach[id];
       const when = got ? new Date(got + 'T12:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-      return `<div class="ach ${got ? '' : 'locked'}"><div class="ic" aria-hidden="true">${icon}</div><div><b>${name}</b><span>${window.P(desc)}${got ? ` · ${when}` : ''}</span></div></div>`;
+      return `<div class="ach ${got ? '' : 'locked'}"><div class="ic" aria-hidden="true">${window.P(icon)}</div><div><b>${window.P(name)}</b><span>${window.P(desc)}${got ? ` · ${when}` : ''}</span></div></div>`;
     }).join('');
   }
   let toastTimer;
   function toast(fresh) {
     const el = $('toast');
     const [icon, name] = fresh[0];
-    el.innerHTML = `${icon} Erfolg freigeschaltet: ${name}${fresh.length > 1 ? `<small>und ${fresh.length - 1} weitere</small>` : ''}`;
+    el.innerHTML = `${window.P(icon)} Erfolg freigeschaltet: ${window.P(name)}${fresh.length > 1 ? `<small>und ${fresh.length - 1} weitere</small>` : ''}`;
     el.hidden = false;
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { el.hidden = true; }, 4000);
@@ -1564,7 +1566,12 @@
   const fill = (x, y, w, h, c) => { ctx.fillStyle = C[c]; ctx.fillRect(x, y, w, h); };
   const DOG_COL = { b: C.b, l: C.l, e: C.e }, WOLF_COL = { b: '#a3a8b6', l: '#dfe2e8', e: '#727889' };
   const FURS = { golden: { ...DOG_COL }, schoko: { b: '#a8714a', l: '#d6a57c', e: '#7d5133' }, schwarz: { b: '#4a4250', l: '#7a7180', e: '#2f2934' }, weiss: { b: '#f4efe9', l: '#ffffff', e: '#ddd2c6' } };
-  window.habitApplyFur = () => { const f = FURS[window.habitProfile?.fur] || FURS.golden; Object.assign(C, f); Object.assign(DOG_COL, f); };
+  const WERE = { dog: { ...WOLF_COL }, cat: { b: '#2f2934', l: '#4a4250', e: '#1f1a24' }, rabbit: { b: '#e6ebf7', l: '#ffffff', e: '#c3cbe4' } };
+  window.habitApplyFur = () => {
+    const f = FURS[window.habitProfile?.fur] || FURS.golden;
+    Object.assign(C, f); Object.assign(DOG_COL, f);
+    Object.assign(WOLF_COL, WERE[window.habitProfile?.animal] || WERE.dog);
+  };
   window.habitApplyFur();
   C.wy = '#ffd84d';
   function outlined(parts) {
@@ -1700,12 +1707,13 @@
     ctx.save();
     if (dir < 0) { ctx.translate(Math.round(dogX) + 32, 0); ctx.scale(-1, 1); } else ctx.translate(Math.round(dogX), 0);
   }
-  function drawCat(t) {
+  function drawCat(t, were) {
     const { happy, moving, eat, f } = petPose(t);
     const jump = happy && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : 0;
     const bob = moving && (f === 1 || f === 3) ? -1 : 0;
     const Y = (v) => v - jump + bob;
-    const hd = eat ? (Math.floor(t / 220) % 2 ? 5 : 6) : 0, hx = eat ? 1 : 0;
+    const howling = mode === 'howl' && t < howlUntil;
+    const hd = eat ? (Math.floor(t / 220) % 2 ? 5 : 6) : howling ? -2 : 0, hx = eat ? 1 : 0;
     const H = (v) => Y(v) + hd;
     petFlip();
     ctx.fillStyle = C.s; ctx.fillRect(9, 23, 15 - jump, 1);
@@ -1722,19 +1730,20 @@
     fill(20, Y(12), 2, 3, 'c');                                                           // Halsband
     if (happy) { fill(23 + hx, H(9), 1, 1, 'n'); fill(24 + hx, H(8), 1, 1, 'n'); fill(25 + hx, H(9), 1, 1, 'n'); }
     else if (eat) fill(24 + hx, H(9), 2, 1, 'n');
-    else { fill(24 + hx, H(8), 1, 2, 'n'); fill(26 + hx, H(8), 1, 2, 'n'); }
+    else { fill(24 + hx, H(8), 1, 2, were ? 'wy' : 'n'); fill(26 + hx, H(8), 1, 2, were ? 'wy' : 'n'); }
     fill(27 + hx, H(10), 1, 1, 't');                                                     // Näschen
     ctx.fillStyle = '#cfc6db'; ctx.fillRect(28 + hx, H(10), 2, 1); ctx.fillRect(28 + hx, H(11), 2, 1);   // Schnurrhaare
-    if (happy && Math.floor(t / 140) % 2 === 0) fill(25 + hx, H(11), 2, 1, 'n');
+    if (howling || (happy && Math.floor(t / 140) % 2 === 0)) fill(25 + hx, H(11), 2, 1, 'n');
     drawHat(H, hx, 2);
     ctx.restore();
   }
-  function drawRabbit(t) {
+  function drawRabbit(t, were) {
     const { happy, moving, eat } = petPose(t);
     const hop = moving && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : 0;
     const jump = happy && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : hop;
     const Y = (v) => v - jump;
-    const hd = eat ? (Math.floor(t / 220) % 2 ? 3 : 4) : 0, hx = eat ? 1 : 0;
+    const howling = mode === 'howl' && t < howlUntil;
+    const hd = eat ? (Math.floor(t / 220) % 2 ? 3 : 4) : howling ? -2 : 0, hx = eat ? 1 : 0;
     const H = (v) => Y(v) + hd;
     petFlip();
     ctx.fillStyle = C.s; ctx.fillRect(10, 23, 13 - jump, 1);
@@ -1747,13 +1756,21 @@
     else if (eat) fill(24 + hx, H(12), 2, 1, 'n');
     else fill(24 + hx, H(11), 1, 2, 'n');
     fill(26 + hx, H(13), 1, 1, 't');                                                     // Näschen
-    if (happy || eat) fill(25 + hx, H(14), 1, 1, 'n');
-    drawHat(H, hx, 5);
+    if (happy || eat || howling) fill(25 + hx, H(14), 1, 1, 'n');
+    if (were) {   // Mondhase: Glitzer rundherum
+      ctx.fillStyle = '#fff6c9';
+      for (let i = 0; i < 6; i++) if (reduce || Math.floor(t / 260 + i) % 3) ctx.fillRect((3 + i * 5) % 30, Y((2 + i * 7) % 16), 1, 1);
+    }
+    if (window.janaSpecial?.hat !== 'bunny') drawHat(H, hx, 5);   // Hasenohren hat es schon
     ctx.restore();
   }
   function drawPet(t) {
     const a = window.habitProfile?.animal || 'dog';
-    if (a === 'cat') drawCat(t); else if (a === 'rabbit') drawRabbit(t); else drawDog(t);
+    if (a === 'dog') return drawDog(t);
+    const were = mode === 'transform' ? Math.floor(t / 150) % 2 === 0 : wolf;
+    Object.assign(C, were ? WOLF_COL : DOG_COL);
+    if (a === 'cat') drawCat(t, were); else drawRabbit(t, were);
+    Object.assign(C, DOG_COL);
   }
 
   // ---------- Sprechblase ----------
@@ -1792,6 +1809,10 @@
     const sp = window.janaSpecial;
     if (!sp) return;
     const x = bowlX + 12;
+    if (sp.lights && (window.habitProfile?.animal || 'dog') !== 'dog') {   // Lichterkette an Katzenhaus und Stall
+      const cols = ['#ff6b6b', '#ffd36e', '#7fd18b', '#7fb2ec'];
+      for (let i = 0; i < 9; i++) { ctx.fillStyle = cols[(i + Math.floor(t / 500)) % 4]; ctx.fillRect(houseX + 2 + i * 2, window.habitProfile?.animal === 'cat' ? 9 : 10, 1, 1); }
+    }
     if (sp.lights && (window.habitProfile?.animal || 'dog') === 'dog') {                                   // Lichterkette am Dach
       const cols = ['#ff6b6b', '#ffd36e', '#7fd18b', '#7fb2ec'];
       for (let r = 1; r < 8; r += 2) {
@@ -1839,7 +1860,7 @@
   let shelterSaid = false, greetedMorning = false;
   let wolf = false, howlUntil = 0, nextHowl = 0;
   let forcedWolfUntil = 0, forcedMsg = false;
-  const wolfTime = () => (window.habitProfile?.animal || 'dog') === 'dog' && (performance.now() < forcedWolfUntil || (window.janaMoon?.().name === 'Vollmond' && night()));
+  const wolfTime = () => performance.now() < forcedWolfUntil || (window.janaMoon?.().name === 'Vollmond' && night());
   addEventListener('jana:forcewolf', () => { forcedWolfUntil = performance.now() + 45000; forcedMsg = true; });
   function mood() {
     const pn = window.habitProfile?.pet;
@@ -1916,7 +1937,8 @@
     if (wantWolf !== wolf && mode !== 'transform' && mode !== 'happy') {
       if (mode === 'sleep') { dogX = houseX + 3; dir = 1; }
       mode = 'transform'; until = t + 1800;
-      say(wantWolf ? (forcedMsg ? 'Huch… was passiert mit mir?! 🌕' : 'Oh nein… Vollmond! 🌕') : 'Wuff? Was war denn los?', dogX + 16, 1800);
+      const inMsg = { dog: 'Oh nein… Vollmond! 🌕', cat: 'Der Vollmond ruft… ich werde zur Werkatze! 🌕', rabbit: 'Vollmond! Zeit, den Mondhasen zu besuchen! 🌕✨' }[window.habitProfile?.animal || 'dog'];
+      say(wantWolf ? (forcedMsg ? 'Huch… was passiert mit mir?! 🌕' : inMsg) : 'Wuff? Was war denn los?', dogX + 16, 1800);
       forcedMsg = false;
     }
     // Bei Regen oder spät nachts sofort in die Hütte (der Wolf bleibt draußen)
@@ -1946,7 +1968,7 @@
       case 'transform': if (t > until) { wolf = wolfTime(); if (wolf) dispatchEvent(new Event('jana:wolf')); decide(t); } break;
       case 'howl':
         dir = 1;
-        if (t > nextHowl) { howlUntil = t + 1800; nextHowl = t + 3800; say(pick(['Auuuuuu! 🌕', 'Auuuu-uuuu! 🐺', 'Ahuuuuu! 🌕']), dogX + 16, 1800); howlSound(); }
+        if (t > nextHowl) { howlUntil = t + 1800; nextHowl = t + 3800; say(pick({ dog: ['Auuuuuu! 🌕', 'Auuuu-uuuu! 🐺', 'Ahuuuuu! 🌕'], cat: ['Miauuuuu! 🌕', 'Mrrraaauuu~ 🐈‍⬛', 'Miau-uuu! 🌕'], rabbit: ['✨ Hallo Mondhase! 🌕', '*klopf klopf* 🌕', 'Hopp hopp, zum Mond! ✨'] }[window.habitProfile?.animal || 'dog']), dogX + 16, 1800); howlSound(); }
         if (t > until && t > howlUntil) decide(t);
         break;
     }
@@ -2034,6 +2056,18 @@
   // Heulen bei Vollmond (nur wenn der Ton an ist und schon einmal getippt wurde)
   function howlSound() {
     if (!soundOn || !actx) return;
+    const an = window.habitProfile?.animal || 'dog';
+    if (an !== 'dog') {
+      try {
+        if (actx.state === 'suspended') actx.resume();
+        const t0 = actx.currentTime + 0.02;
+        if (an === 'cat') { meow(t0); meow(t0 + 0.55); }
+        else [880, 1175, 1568, 1175].forEach((fr, i) => { const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.value = fr;
+          g.gain.setValueAtTime(0.0001, t0 + i * 0.13); g.gain.exponentialRampToValueAtTime(0.18, t0 + i * 0.13 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.13 + 0.4);
+          o.connect(g); g.connect(actx.destination); o.start(t0 + i * 0.13); o.stop(t0 + i * 0.13 + 0.45); });
+      } catch {}
+      return;
+    }
     try {
       if (actx.state === 'suspended') actx.resume();
       const t0 = actx.currentTime + 0.02, o = actx.createOscillator(), g = actx.createGain(), lfo = actx.createOscillator(), lg = actx.createGain();
@@ -2080,7 +2114,7 @@
     const onHouse = e.clientY >= r.top && e.clientY <= r.bottom && e.clientX >= houseX * S && e.clientX <= (houseX + 20) * S;
     if (onDog) dispatchEvent(new Event('jana:dogpat'));
     const sp = window.janaSpecial;
-    if (onDog || onHouse || e.target.closest('button')) happy(wolf ? pick(['Auuu! 🐺', 'Grrr… Wuff! 🌕', 'Wuff… äh, Auuu!']) : sp?.bark && Math.random() < 0.5 ? sp.bark : pick(BARKS));
+    if (onDog || onHouse || e.target.closest('button')) happy(wolf ? pick({ dog: ['Auuu! 🐺', 'Grrr… Wuff! 🌕', 'Wuff… äh, Auuu!'], cat: ['Mrrrau! 🌕', 'Fauch… äh, Miau!'], rabbit: ['✨ Psst, ich bin beim Mondhasen!', 'Hopp! 🌕'] }[window.habitProfile?.animal || 'dog']) : sp?.bark && Math.random() < 0.5 ? sp.bark : pick(BARKS));
   });
 
   requestAnimationFrame(loop);
@@ -2251,7 +2285,7 @@
     else if (m.name === 'Neumond') extra = ' · Heute ist Neumond';
     else if (m.p < 0.5) extra = ` · Vollmond in ${Math.max(1, Math.round(m.toFull))} ${Math.round(m.toFull) === 1 ? 'Tag' : 'Tagen'}`;
     else extra = ` · Neumond in ${Math.max(1, Math.round(m.toNew))} ${Math.round(m.toNew) === 1 ? 'Tag' : 'Tagen'}`;
-    $('moonLine').textContent = `${m.name} · ${Math.round(m.illum * 100)} % beleuchtet${extra}`;
+    $('moonLine').textContent = (window.P || String)(`${m.name} · ${Math.round(m.illum * 100)} % beleuchtet${extra}`);
   }
 
   function renderWeather(data) {
@@ -2527,7 +2561,7 @@
     wxApi.show(sc.wx);
     if (!sc.run) toTop();
     sc.run?.();
-    $('demoLabel').textContent = sc.label;
+    $('demoLabel').textContent = window.P ? window.P(sc.label) : sc.label;
     $('demoStep').textContent = `${i + 1}/${SCENES.length}`;
     schedule();
   }
