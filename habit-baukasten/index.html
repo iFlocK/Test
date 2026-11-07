@@ -237,6 +237,45 @@
   .su-emoji { width: 40px; height: 40px; display: grid; place-items: center; font-size: 1.8rem; }
   [data-sw="none"] span { display: none; }
 
+  /* 🎓 Uni */
+  .timer { display: grid; gap: 6px; justify-items: start; }
+  .timer-time { font-family: var(--font-display); font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+  .timer[data-phase="focus"] .timer-time { color: var(--accent-ink); }
+  .timer[data-phase="short"] .timer-time, .timer[data-phase="long"] .timer-time { color: #3f9a73; }
+  .timer-dots { display: flex; gap: 4px; align-items: center; font-size: .72rem; color: var(--muted); }
+  .timer-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
+  .timer-dots i.on { background: var(--accent); }
+  .timer-dots span { margin-left: 4px; }
+  .timer-subj, .uni-form select, .uni-form input { font: inherit; font-size: .85rem; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 5px 8px; min-width: 0; }
+  .timer-btns { display: flex; gap: 6px; }
+  .timer .pill { padding: 4px 12px; font-size: .82rem; }
+  .uni-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); margin-top: 10px; align-items: start; }
+  .uni-col { display: grid; gap: 8px; min-width: 0; }
+  .uni-col h3 { font-size: 1rem; }
+  .uni-subjects { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag.subj { display: inline-flex; gap: 6px; align-items: center; background: color-mix(in srgb, var(--c) var(--tint), var(--card)); }
+  .tag.subj button { border: none; background: none; padding: 0; color: var(--muted); font-weight: 800; }
+  .tag.subj button.armed { color: var(--accent-ink); }
+  .uni-form { display: flex; gap: 6px; flex-wrap: wrap; }
+  .uni-form input[name="name"], .uni-form input[name="title"], .uni-form input[name="text"] { flex: 1 1 140px; }
+  .uni-form input[name="min"] { width: 5.5em; }
+  .uni-form .pill { padding: 4px 12px; font-size: .82rem; }
+  .uni-total { margin: 4px 0 0; font-weight: 800; font-size: .9rem; }
+  .study-bars { display: grid; gap: 5px; }
+  .sb { display: grid; grid-template-columns: minmax(0, 7em) minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: .82rem; }
+  .sb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sb-bar { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
+  .sb-bar i { display: block; height: 100%; border-radius: 5px; }
+  .sb-val { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .subj-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: 0; }
+  .due { font-style: normal; font-weight: 700; }
+  .due.soon { color: var(--accent-ink); }
+  .due.late { color: #c2453a; }
+  .goal-count { font-size: .8rem; margin-top: -6px; }
+  .goal-bar { margin: 0; }
+  .uni .todo { padding: 6px 2px; }
+  .su-x { border: none; background: none; padding: 0 0 0 4px; color: var(--muted); font-weight: 800; }
+
   /* Einrichtungs-Assistent */
   .setup p { margin: 0 0 10px; }
   .setup-dots { display: flex; gap: 6px; margin: 0 0 14px; }
@@ -389,6 +428,13 @@
       <div class="water-week" id="waterWeek" aria-label="Wasser diese Woche"></div>
     </div>
   </section>
+  <section class="card timer" id="timerCard" hidden>
+    <div class="mood-head"><h2>Lern-Timer</h2><span class="muted" id="timerPhase">Bereit</span></div>
+    <div class="timer-time" id="timerTime" aria-live="off">25:00</div>
+    <div class="timer-dots" id="timerDots" aria-hidden="true"></div>
+    <select id="timerSubject" class="timer-subj" aria-label="Fach für diese Lernrunde"></select>
+    <div class="timer-btns"><button class="pill primary" id="timerStart" type="button">▶ Start</button><button class="pill" id="timerStop" type="button" hidden>■ Beenden</button></div>
+  </section>
   <section class="card mood" id="moodCard">
     <div class="mood-head"><h2>Stimmung heute</h2><span class="muted" id="moodLabel">Wie geht’s dir?</span></div>
     <div class="mood-row" id="moodRow" role="radiogroup" aria-label="Stimmung heute"></div>
@@ -403,6 +449,32 @@
   </div>
 
   <section class="days" id="days"></section>
+
+  <section class="card uni" id="uniCard" hidden>
+    <div class="todos-head"><h2>🎓 Uni</h2></div>
+    <div class="uni-grid">
+      <div class="uni-col">
+        <h3>📚 Fächer &amp; Lernzeit</h3>
+        <div class="uni-subjects" id="subjList"></div>
+        <form class="uni-form" id="subjForm"><input name="name" placeholder="Neues Fach" aria-label="Neues Fach" autocomplete="off"><select name="color" id="subjColor" aria-label="Farbe des Fachs"></select><button class="pill" type="submit">+</button></form>
+        <p class="uni-total" id="studyTotal"></p>
+        <div class="study-bars" id="studyBars"></div>
+        <form class="uni-form" id="studyForm"><select name="subj" id="studyAddSubj" aria-label="Fach"></select><input name="min" type="number" min="1" max="600" placeholder="Min." aria-label="Minuten" inputmode="numeric"><button class="pill" type="submit">Nachtragen</button></form>
+      </div>
+      <div class="uni-col">
+        <h3>📬 Abgaben &amp; Deadlines</h3>
+        <ul class="todo-list" id="dlOpen"></ul>
+        <details id="dlDoneWrap" hidden><summary>Erledigt (<span id="dlDoneCount">0</span>)</summary><ul class="todo-list" id="dlDone"></ul></details>
+        <form class="uni-form" id="dlForm"><input name="title" placeholder="Was ist abzugeben?" aria-label="Titel der Abgabe" autocomplete="off"><select name="subj" id="dlSubj" aria-label="Fach"></select><input name="due" type="date" aria-label="Abgabedatum"><button class="pill" type="submit">+</button></form>
+      </div>
+      <div class="uni-col">
+        <h3 id="goalHead">🎯 Lernziele</h3><span class="muted goal-count" id="goalCount"></span>
+        <div class="progress goal-bar" id="goalBar" hidden><div></div></div>
+        <ul class="todo-list" id="goalList"></ul>
+        <form class="uni-form" id="goalForm"><input name="text" placeholder="Neues Lernziel" aria-label="Neues Lernziel" autocomplete="off"><select name="subj" id="goalSubj" aria-label="Fach"></select><button class="pill" type="submit">+</button></form>
+      </div>
+    </div>
+  </section>
 
   <div class="two">
     <section class="card manage">
@@ -521,7 +593,20 @@
       ],
       water, ach: { first: key(new Date()), five: key(new Date()), sip: key(new Date()), water: key(last), todo1: key(new Date()) }, flags: {},
       achResetId: 'reset-2026-11-06', achSince: 0,
-      profile: { name: 'Alex', palette: 'lavendel', animal: 'dog', fur: 'golden', pet: 'Bello', birthday: '1998-08-25', together: { date: '2025-09-18', partner: 'Sam' }, city: 'Hamburg' },
+      uni: {
+        subjects: [{ id: 's1', name: 'Statistik', color: 'gehirn' }, { id: 's2', name: 'Anatomie', color: 'sozial' }, { id: 's3', name: 'Englisch', color: 'ern' }],
+        sessions: [0, 1, 1, 2, 3, 3, 4, 8, 9, 10].map((dd, i) => ({ id: 'ss' + i, subject: ['s1', 's2', 's3'][i % 3], minutes: i % 4 ? 25 : 50, at: addDays(new Date(), -dd).getTime(), full: true })),
+        deadlines: [
+          { id: 'd1', title: 'Übungsblatt 5', subject: 's1', due: key(addDays(new Date(), 2)), done: false },
+          { id: 'd2', title: 'Referat Herz-Kreislauf', subject: 's2', due: key(addDays(new Date(), 9)), done: false },
+          { id: 'd3', title: 'Essay „Climate Change“', subject: 's3', due: key(addDays(new Date(), 16)), done: false },
+          { id: 'd4', title: 'Übungsblatt 4', subject: 's1', due: key(addDays(new Date(), -5)), done: true, doneAt: Date.now() - 6 * 864e5 },
+        ],
+        goals: { [key(mon)]: [{ id: 'g1', text: 'Kapitel 3 zusammenfassen', subject: 's1', done: true }, { id: 'g2', text: 'Karteikarten Herz lernen', subject: 's2', done: true },
+          { id: 'g3', text: 'Vokabeln Unit 7', subject: 's3', done: false }, { id: 'g4', text: 'Altklausur 2024 rechnen', subject: 's1', done: false }] },
+        timer: { phase: 'idle', round: 1 },
+      },
+      profile: { name: 'Alex', uni: true, palette: 'lavendel', animal: 'dog', fur: 'golden', pet: 'Bello', birthday: '1998-08-25', together: { date: '2025-09-18', partner: 'Sam' }, city: 'Hamburg' },
       mood: Object.fromEntries([5, 4, 3, 4, 2, 5, 4, 3, 5, 4, 1, 4, 5].map((v, i) => [key(addDays(new Date(), -i - 1)), { v, at: Date.now() }])),
     };
   }
@@ -602,6 +687,7 @@
       `<span class="tag" data-style="--c: var(--c-${t.area})">${esc(t.name)}<button data-rmtag="${t.id}" aria-label="Tag ${esc(t.name)} löschen">×</button></span>`).join('');
 
     $('note').value = w.note || '';
+    window.renderUni?.();
   }
 
   $('days').addEventListener('click', (e) => {
@@ -856,6 +942,8 @@
     ['wolf', '🐺', 'Werwolf gesichtet', 'Den Hund bei Vollmond als Wolf erlebt', () => !!state.flags.wolf],
     ['moonclick', '🌝', 'Mondsüchtig', 'Ein Geheimnis entdeckt', () => !!state.flags.moonclick],
     ['mood7', '🎭', 'Gefühlsprofi', 'An 7 Tagen die Stimmung eingetragen', (s) => s.moodDays >= 7],
+    ['focus10', '🍅', 'Fokus-Profi', '10 Lernrunden à 25 Minuten geschafft', (s) => s.focusRounds >= 10],
+    ['deadline5', '📬', 'Fristgerecht', '5 Abgaben erledigt', (s) => s.deadlinesDone >= 5],
   ];
   function runLength(dates) {
     let best = 0, run = 0, prev = null;
@@ -900,6 +988,8 @@
       anyWater: Object.keys(state.water).some((k) => waterSince(k) > 0), waterGoal: waterDays.length, wBest: runLength(waterDays),
       todosDone: (state.todos || []).filter((t) => t.done && (t.doneAt || 0) >= since).length,
       moodDays: Object.values(state.mood || {}).filter((m) => (m.at || 0) >= since).length,
+      focusRounds: (state.uni?.sessions || []).filter((x) => x.full && x.at >= since).length,
+      deadlinesDone: (state.uni?.deadlines || []).filter((x) => x.done && (x.doneAt || 0) >= since).length,
       custom: state.tags.some((t) => t.id.startsWith('t') && created(t) >= since),
     };
   }
@@ -1023,7 +1113,7 @@
   // ---------- Einrichtungs-Assistent ----------
   const FUR_CHOICES = [['golden', 'Golden', '#ecc173'], ['schoko', 'Schoko', '#a8714a'], ['schwarz', 'Schwarz', '#4a4250'], ['weiss', 'Weiß', '#f4efe9']];
   const ANIMALS = [['dog', 'Hund', '🐶'], ['cat', 'Katze', '🐱'], ['rabbit', 'Kaninchen', '🐰']];
-  const SETUP_TITLES = ['Willkommen! 👋', 'Deine Farbe 🎨', 'Dein Haustier 🐾', 'Deine Gewohnheiten 🌱', 'Besondere Tage 🎂', 'Wetter 🌦️'];
+  const SETUP_TITLES = ['Willkommen! 👋', 'Deine Farbe 🎨', 'Dein Haustier 🐾', 'Deine Gewohnheiten 🌱', 'Uni 🎓', 'Besondere Tage 🎂', 'Wetter 🌦️'];
   let draft = null, step = 0;
   const allChoices = () => {
     const map = new Map();
@@ -1035,7 +1125,7 @@
     draft = {
       name: p.name || '', palette: p.palette || 'rosa', animal: p.animal || 'dog', fur: p.fur || 'golden', pet: p.pet || '',
       habits: state.profile ? state.tags.map((t) => t.id) : ['kraft', 'spazieren', 'gemuese', 'wasser', 'lesen', 'schlafen', 'freunde', 'entspannen'],
-      custom: [], birthday: p.birthday || '', together: { date: p.together?.date || '', partner: p.together?.partner || '' }, city: p.city || '',
+      custom: [], uni: !!p.uni, subjects: (state.uni?.subjects || []).map((x) => ({ ...x })), birthday: p.birthday || '', together: { date: p.together?.date || '', partner: p.together?.partner || '' }, city: p.city || '',
     };
     step = 0;
     $('setupClose').hidden = !state.profile;
@@ -1067,22 +1157,36 @@
     if (step === 3) b.innerHTML = `<p>Was möchtest du regelmäßig machen? Tippe an, was passt. Diese Gewohnheiten kannst du dann jedem Tag zuordnen.</p>
       <div class="su-chips">${allChoices().map((t) => `<button type="button" class="tag" data-style="--c: var(--c-${t.area})" data-hab="${t.id}" aria-pressed="${draft.habits.includes(t.id)}">${esc(t.name)}</button>`).join('')}</div>
       <form class="su-add" id="suAdd"><input id="suNew" class="su-input" placeholder="Eigene Gewohnheit, z. B. Yoga" aria-label="Eigene Gewohnheit"><button class="pill" type="submit">+ Hinzufügen</button></form>`;
-    if (step === 4) b.innerHTML = `<label class="su-label" for="suBirth">Wann hast du Geburtstag? (optional)</label><input id="suBirth" class="su-input" type="date" value="${draft.birthday}">
+    if (step === 4) b.innerHTML = `<p>Studierst du? Dann bekommst du einen Lern-Timer, Fächer mit Lernzeit, Abgaben und Lernziele pro Woche.</p>
+      <div class="su-swatches"><button type="button" class="su-swatch" data-uni="1" aria-pressed="${draft.uni}"><span class="su-emoji">🎓</span>Ja, ich studiere</button>
+      <button type="button" class="su-swatch" data-uni="0" aria-pressed="${!draft.uni}"><span class="su-emoji">🙅</span>Brauche ich nicht</button></div>
+      ${draft.uni ? `<label class="su-label" for="suSubj">Deine Fächer (optional, auch später möglich)</label>
+      <div class="su-chips">${draft.subjects.map((x) => `<span class="tag" data-style="--c: var(--c-${x.color})">${esc(x.name)}<button type="button" class="su-x" data-rmsubj="${x.id}" aria-label="${esc(x.name)} entfernen">×</button></span>`).join('') || '<span class="su-hint">Noch keine Fächer.</span>'}</div>
+      <form class="su-add" id="suSubjForm"><input id="suSubj" class="su-input" placeholder="z. B. Statistik" aria-label="Neues Fach"><button class="pill" type="submit">+ Fach</button></form>` : ''}`;
+    if (step === 5) b.innerHTML = `<label class="su-label" for="suBirth">Wann hast du Geburtstag? (optional)</label><input id="suBirth" class="su-input" type="date" value="${draft.birthday}">
       <p class="su-hint">An deinem Geburtstag gibt es Konfetti, Kuchen und einen Partyhut für dein Haustier.</p>
       <label class="su-label" for="suTog">Jahrestag mit deinem Schatz (optional)</label><input id="suTog" class="su-input" type="date" value="${draft.together.date}">
       <input id="suPartner" class="su-input" placeholder="Name deines Schatzes" aria-label="Name deines Schatzes" value="${esc(draft.together.partner)}">
       <p class="su-hint">Dann zählt eine kleine Karte, wie lange ihr schon zusammen seid.</p>`;
-    if (step === 5) b.innerHTML = `<label class="su-label" for="suCity">Wo wohnst du? (optional)</label><input id="suCity" class="su-input" placeholder="z. B. Hamburg" autocomplete="address-level2" value="${esc(draft.city)}">
+    if (step === 6) b.innerHTML = `<label class="su-label" for="suCity">Wo wohnst du? (optional)</label><input id="suCity" class="su-input" placeholder="z. B. Hamburg" autocomplete="address-level2" value="${esc(draft.city)}">
       <p class="su-hint">Dann zeigt der Himmel oben dein echtes Wetter, und dein Haustier verkriecht sich bei Regen in sein Häuschen. Alles kannst du später unter ⚙️ ändern.</p>`;
     b.querySelector('input')?.focus({ preventScroll: true });
   }
   function readStep() {
     if (step === 0) draft.name = $('suName').value.trim();
     if (step === 2) draft.pet = $('suPet').value.trim();
-    if (step === 4) { draft.birthday = $('suBirth').value; draft.together = { date: $('suTog').value, partner: $('suPartner').value.trim() }; }
-    if (step === 5) draft.city = $('suCity').value.trim();
+    if (step === 5) { draft.birthday = $('suBirth').value; draft.together = { date: $('suTog').value, partner: $('suPartner').value.trim() }; }
+    if (step === 6) draft.city = $('suCity').value.trim();
   }
   $('setupBody').addEventListener('click', (e) => {
+    const un = e.target.closest('[data-uni]'), rs = e.target.closest('[data-rmsubj]');
+    if (un || rs) {
+      e.dogHandled = true;
+      if (un) draft.uni = un.dataset.uni === '1';
+      if (rs) draft.subjects = draft.subjects.filter((x) => x.id !== rs.dataset.rmsubj);
+      renderSetup();
+      return;
+    }
     const sw = e.target.closest('[data-pal]'), fu = e.target.closest('[data-fur]'), hb = e.target.closest('[data-hab]'), an = e.target.closest('[data-animal]');
     if (!sw && !fu && !hb && !an) return;
     e.dogHandled = true;
@@ -1102,6 +1206,12 @@
   });
   $('setupBody').addEventListener('submit', (e) => {
     e.preventDefault();
+    if (e.target.id === 'suSubjForm') {
+      const v = $('suSubj').value.trim();
+      if (v) draft.subjects.push({ id: 's' + uid(), name: v, color: SUBJ_COLORS[draft.subjects.length % SUBJ_COLORS.length][0] });
+      renderSetup(); $('suSubj')?.focus();
+      return;
+    }
     const v = $('suNew').value.trim();
     if (!v) return;
     const ex = allChoices().find((t) => t.name.toLowerCase() === v.toLowerCase());
@@ -1118,9 +1228,10 @@
     for (const t of state.tags.filter((x) => !draft.habits.includes(x.id)))
       for (const w of Object.values(state.weeks)) for (const d of w.days) for (const it of d) if (it.tag === t.id) { it.text = t.name; delete it.tag; }
     state.tags = keep.map((t) => ({ id: t.id, name: t.name, area: t.area }));
-    const { custom, habits, ...profile } = draft;
+    const { custom, habits, subjects, ...profile } = draft;
+    state.uni.subjects = subjects;
     state.profile = profile;
-    save(); closeSetup(); render(); renderLove();
+    save(); closeSetup(); render(); renderLove(); renderUni();
     window.janaApp.renderSpecial(); window.janaWx?.refresh?.(); window.habitReloadWeather?.();
     if (first) setTimeout(() => window.janaDog?.happy(`Wuff! Hallo ${profile.name}! ${profile.pet ? `Ich bin ${profile.pet}. ` : ''}🐾`), 500);
     window.habitProfile = state.profile;
@@ -1136,6 +1247,180 @@
   $('setupBtn').addEventListener('click', openSetup);
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('setupOverlay').hidden && state.profile) closeSetup(); });
   if (!GUEST && !state.profile) setTimeout(openSetup, 400);
+
+  // ---------- 🎓 Uni: Lern-Timer, Fächer & Lernzeit, Abgaben, Lernziele ----------
+  state.uni ||= { subjects: [], sessions: [], deadlines: [], goals: {}, timer: { phase: 'idle', round: 0 } };
+  const U = state.uni;
+  const SUBJ_COLORS = [['gehirn', 'Blau'], ['sozial', 'Rosa'], ['ern', 'Mint'], ['bew', 'Pfirsich'], ['schlaf', 'Lila'], ['psyche', 'Grün'], ['allg', 'Gelb'], ['eigen', 'Beige']];
+  const FOCUS_MIN = 25, SHORT_MIN = 5, LONG_MIN = 15;
+  const subjOf = (id) => U.subjects.find((x) => x.id === id);
+  const subjName = (id) => subjOf(id)?.name || 'Ohne Fach';
+  const fmtMin = (m) => { m = Math.round(m); const h = Math.floor(m / 60); return h ? `${h} h ${String(m % 60).padStart(2, '0')} min` : `${m} min`; };
+  const uniOn = () => !!state.profile?.uni;
+  const subjOptions = (sel, withNone) => (withNone ? `<option value="">Ohne Fach</option>` : '') + U.subjects.map((x) => `<option value="${x.id}" ${x.id === sel ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
+  const weekMinutes = (mon) => {
+    const from = mon.getTime(), to = addDays(mon, 7).getTime(), per = {};
+    for (const ss of U.sessions) if (ss.at >= from && ss.at < to) per[ss.subject || ''] = (per[ss.subject || ''] || 0) + ss.minutes;
+    return per;
+  };
+
+  // --- Lern-Timer (läuft über Zeitstempel weiter, auch nach dem Neuladen) ---
+  const T = U.timer;
+  const phaseLabel = { idle: 'Bereit', focus: 'Lernen', short: 'Kurze Pause', long: 'Lange Pause', paused: 'Angehalten' };
+  function timeLeft() {
+    if (T.phase === 'idle') return FOCUS_MIN * 60;
+    if (T.pausedLeft != null) return T.pausedLeft;
+    return Math.max(0, Math.round((T.endAt - Date.now()) / 1000));
+  }
+  function startPhase(phase) {
+    const min = phase === 'focus' ? FOCUS_MIN : phase === 'short' ? SHORT_MIN : LONG_MIN;
+    T.phase = phase; T.endAt = Date.now() + min * 60000; T.startAt = Date.now(); T.pausedLeft = null;
+    window.habitFocus = phase === 'focus';
+    save(); renderTimer();
+  }
+  function logSession(minutes) {
+    if (minutes < 1) return;
+    U.sessions.push({ id: uid(), subject: T.subject || '', minutes: Math.round(minutes), at: T.startAt || Date.now(), full: minutes >= FOCUS_MIN - 0.5 });
+  }
+  function phaseEnd(silent) {
+    if (T.phase === 'focus') {
+      logSession(FOCUS_MIN);
+      T.round = (T.round || 0) + 1;
+      const long = T.round % 4 === 0;
+      if (!silent) window.janaDog?.happy(long ? 'Wuff! 4 Runden geschafft! Lange Pause! 🎉' : 'Pause! 🎾 25 Minuten geschafft!');
+      startPhase(long ? 'long' : 'short');
+    } else {
+      T.phase = 'idle'; T.pausedLeft = null; window.habitFocus = false;
+      if (!silent) window.janaDog?.happy('Wuff! Pause vorbei. Weiter geht’s? 📚');
+      save(); renderTimer();
+    }
+    renderUni();
+  }
+  function renderTimer() {
+    if (!uniOn()) return;
+    const left = timeLeft(), mm = String(Math.floor(left / 60)).padStart(2, '0'), ss = String(left % 60).padStart(2, '0');
+    $('timerTime').textContent = `${mm}:${ss}`;
+    const paused = T.pausedLeft != null && T.phase !== 'idle';
+    $('timerPhase').textContent = paused ? 'Angehalten' : phaseLabel[T.phase];
+    $('timerCard').dataset.phase = T.phase;
+    $('timerStart').textContent = T.phase === 'idle' ? '▶ Start' : paused ? '▶ Weiter' : '⏸ Pause';
+    $('timerStop').hidden = T.phase === 'idle';
+    $('timerSubject').disabled = T.phase !== 'idle';
+    $('timerDots').innerHTML = [0, 1, 2, 3].map((i) => `<i class="${i < (T.round || 0) % 4 ? 'on' : ''}"></i>`).join('') + `<span>Runde ${((T.round || 0) % 4) + 1} von 4</span>`;
+    const base = document.title.replace(/^⏱ \d\d:\d\d · /, '');
+    document.title = T.phase === 'idle' || paused ? base : `⏱ ${mm}:${ss} · ${base}`;
+  }
+  $('timerSubject').addEventListener('change', (e) => { T.subject = e.target.value; save(); });
+  $('timerStart').addEventListener('click', (e) => {
+    e.dogHandled = true;
+    if (T.phase === 'idle') { T.subject = $('timerSubject').value; startPhase('focus'); window.janaDog?.happy('Viel Erfolg! Ich bin ganz leise. 🤫'); return; }
+    if (T.pausedLeft != null) { T.endAt = Date.now() + T.pausedLeft * 1000; T.pausedLeft = null; window.habitFocus = T.phase === 'focus'; }
+    else { T.pausedLeft = timeLeft(); window.habitFocus = false; }
+    save(); renderTimer();
+  });
+  $('timerStop').addEventListener('click', (e) => {
+    e.dogHandled = true;
+    if (T.phase === 'focus') logSession((FOCUS_MIN * 60 - timeLeft()) / 60);
+    T.phase = 'idle'; T.pausedLeft = null; window.habitFocus = false;
+    save(); renderTimer(); renderUni();
+  });
+  // Ist eine Phase abgelaufen, während die Seite zu war? Dann still nachtragen.
+  if (T.phase !== 'idle' && T.pausedLeft == null && Date.now() >= T.endAt) { phaseEnd(true); if (T.phase !== 'idle' && Date.now() >= T.endAt) phaseEnd(true); }
+  window.habitFocus = T.phase === 'focus' && T.pausedLeft == null;
+  setInterval(() => {
+    if (!uniOn()) return;
+    if (T.phase !== 'idle' && T.pausedLeft == null && Date.now() >= T.endAt) phaseEnd(false);
+    else renderTimer();
+  }, 1000);
+
+  // --- Uni-Bereich: Fächer & Lernzeit, Abgaben, Lernziele ---
+  const relDue = (due) => {
+    const [y, m, d] = due.split('-').map(Number);
+    const diff = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())) / 864e5);
+    return diff < 0 ? { t: `seit ${daysWord(-diff)} überfällig`, cls: 'late' } : diff === 0 ? { t: 'heute', cls: 'soon' } : diff === 1 ? { t: 'morgen', cls: 'soon' } : { t: `in ${diff} Tagen`, cls: diff <= 3 ? 'soon' : '' };
+  };
+  function renderUni() {
+    const on = uniOn();
+    $('uniCard').hidden = $('timerCard').hidden = !on;
+    if (!on) return;
+    $('timerSubject').innerHTML = subjOptions(T.subject, true);
+    // Fächer
+    $('subjList').innerHTML = U.subjects.length ? U.subjects.map((x) => `<span class="tag subj" data-c="${x.color}" data-style="--c: var(--c-${x.color})">${esc(x.name)}<button type="button" data-rmsubj="${x.id}" aria-label="Fach ${esc(x.name)} löschen">×</button></span>`).join('')
+      : '<span class="muted">Noch keine Fächer. Leg unten dein erstes an.</span>';
+    // Lernzeit der angezeigten Woche
+    const per = weekMinutes(monday), entries = Object.entries(per).sort((a, b) => b[1] - a[1]);
+    const total = entries.reduce((a, [, v]) => a + v, 0), max = Math.max(1, ...entries.map(([, v]) => v));
+    $('studyTotal').textContent = total ? `${fmtMin(total)} diese Woche` : 'Diese Woche noch keine Lernzeit';
+    $('studyBars').innerHTML = entries.map(([id, v]) => `<div class="sb"><span class="sb-name">${esc(subjName(id))}</span><span class="sb-bar"><i data-style="width:${Math.max(4, Math.round(v / max * 100))}%;background:var(--c-${subjOf(id)?.color || 'eigen'})"></i></span><span class="sb-val">${fmtMin(v)}</span></div>`).join('');
+    $('studyAddSubj').innerHTML = subjOptions($('studyAddSubj').value, true);
+    // Abgaben
+    const open = U.deadlines.filter((x) => !x.done).sort((a, b) => a.due.localeCompare(b.due));
+    const done = U.deadlines.filter((x) => x.done).sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
+    const dlRow = (x) => {
+      const r = relDue(x.due), [y, m, d] = x.due.split('-').map(Number);
+      const date = new Date(y, m - 1, d).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' });
+      return `<li class="todo ${x.done ? 'done' : ''}"><button class="todo-check" type="button" data-dlcheck="${x.id}" aria-pressed="${!!x.done}" aria-label="${x.done ? 'Wieder öffnen' : 'Abhaken'}: ${esc(x.title)}"></button>
+        <span class="todo-text"><span class="t">${esc(x.title)}</span><small>${x.subject ? `<b class="subj-dot" data-style="background:var(--c-${subjOf(x.subject)?.color || 'eigen'})"></b>${esc(subjName(x.subject))} · ` : ''}${date}${x.done ? '' : ` · <em class="due ${r.cls}">${r.t}</em>`}</small></span>
+        <span></span><button class="todo-del" type="button" data-dldel="${x.id}" aria-label="${esc(x.title)} löschen">×</button></li>`;
+    };
+    $('dlOpen').innerHTML = open.length ? open.map(dlRow).join('') : '<li class="empty">Keine offenen Abgaben 🎉</li>';
+    $('dlDoneWrap').hidden = !done.length; $('dlDoneCount').textContent = done.length; $('dlDone').innerHTML = done.map(dlRow).join('');
+    $('dlSubj').innerHTML = subjOptions($('dlSubj').value, true);
+    // Lernziele der angezeigten Woche
+    const wk = key(monday), goals = (U.goals[wk] ||= []), gDone = goals.filter((g) => g.done).length;
+    $('goalHead').textContent = `Lernziele KW ${isoWeek(monday)}`;
+    $('goalCount').textContent = goals.length ? `${gDone} von ${goals.length}` : '';
+    $('goalBar').hidden = !goals.length;
+    $('goalBar').firstElementChild.setAttribute('data-style', `width:${goals.length ? Math.round(gDone / goals.length * 100) : 0}%`);
+    $('goalList').innerHTML = goals.length ? goals.map((g) => `<li class="todo ${g.done ? 'done' : ''}"><button class="todo-check" type="button" data-gcheck="${g.id}" aria-pressed="${!!g.done}" aria-label="${g.done ? 'Wieder öffnen' : 'Abhaken'}: ${esc(g.text)}"></button>
+        <span class="todo-text"><span class="t">${esc(g.text)}</span>${g.subject ? `<small><b class="subj-dot" data-style="background:var(--c-${subjOf(g.subject)?.color || 'eigen'})"></b>${esc(subjName(g.subject))}</small>` : ''}</span>
+        <span></span><button class="todo-del" type="button" data-gdel="${g.id}" aria-label="${esc(g.text)} löschen">×</button></li>`).join('') : '<li class="empty">Was willst du diese Woche schaffen?</li>';
+    $('goalSubj').innerHTML = subjOptions($('goalSubj').value, true);
+    renderTimer();
+  }
+  const twoClick = (b, done) => {
+    if (b.classList.contains('armed')) return done();
+    b.classList.add('armed'); const old = b.textContent; b.textContent = 'Löschen?';
+    setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = old; } }, 3000);
+  };
+  $('uniCard').addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    const d = b.dataset;
+    if (d.rmsubj) { e.dogHandled = true; return twoClick(b, () => { U.subjects = U.subjects.filter((x) => x.id !== d.rmsubj); save(); renderUni(); }); }
+    if (d.dlcheck) {
+      const x = U.deadlines.find((y) => y.id === d.dlcheck); x.done = !x.done; x.doneAt = x.done ? Date.now() : null; save(); renderUni();
+      if (x.done) { e.dogHandled = true; window.janaDog?.happy('Wuff! Abgegeben! 📬'); }
+      return;
+    }
+    if (d.dldel) { e.dogHandled = true; return twoClick(b, () => { U.deadlines = U.deadlines.filter((x) => x.id !== d.dldel); save(); renderUni(); }); }
+    if (d.gcheck) {
+      const g = U.goals[key(monday)].find((y) => y.id === d.gcheck); g.done = !g.done; g.doneAt = g.done ? Date.now() : null; save(); renderUni();
+      if (g.done) { e.dogHandled = true; window.janaDog?.happy('Wuff! Lernziel geschafft! 🎯'); }
+      return;
+    }
+    if (d.gdel) { e.dogHandled = true; return twoClick(b, () => { U.goals[key(monday)] = U.goals[key(monday)].filter((x) => x.id !== d.gdel); save(); renderUni(); }); }
+  });
+  $('uniCard').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target;
+    if (f.id === 'subjForm') {
+      const name = f.elements.name.value.trim(); if (!name) return;
+      U.subjects.push({ id: 's' + uid(), name, color: f.elements.color.value }); f.elements.name.value = '';
+    } else if (f.id === 'studyForm') {
+      const min = Math.max(0, Math.min(600, parseInt(f.elements.min.value, 10) || 0)); if (!min) return;
+      U.sessions.push({ id: uid(), subject: f.elements.subj.value, minutes: min, at: Date.now(), full: false }); f.elements.min.value = '';
+    } else if (f.id === 'dlForm') {
+      const title = f.elements.title.value.trim(), due = f.elements.due.value; if (!title || !due) return;
+      U.deadlines.push({ id: uid(), title, subject: f.elements.subj.value, due, done: false }); f.elements.title.value = '';
+    } else if (f.id === 'goalForm') {
+      const text = f.elements.text.value.trim(); if (!text) return;
+      (U.goals[key(monday)] ||= []).push({ id: uid(), text, subject: f.elements.subj.value, done: false }); f.elements.text.value = '';
+    }
+    save(); renderUni();
+  });
+  $('subjColor').innerHTML = SUBJ_COLORS.map(([k, n]) => `<option value="${k}">${n}</option>`).join('');
+  window.renderUni = renderUni;
 
   // ---------- KW-Übersicht ----------
   const shortDate = (d) => d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
@@ -1156,6 +1441,7 @@
     return {
       mon, planned, done, perDay, waterGoals: water.filter((v) => v >= GOAL).length, waterSum: water.reduce((a, b) => a + b, 0),
       note: (w?.note || '').trim(), top: Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 3),
+      study: (state.uni?.sessions || []).filter((x) => x.at >= mon.getTime() && x.at < addDays(mon, 7).getTime()).reduce((a, x) => a + x.minutes, 0),
       mood: (() => { const vs = Array.from({ length: 7 }, (_, i) => state.mood[key(addDays(mon, i))]?.v).filter(Boolean); return vs.length ? Math.round(vs.reduce((a, b) => a + b, 0) / vs.length) : 0; })(),
     };
   }
@@ -1176,6 +1462,7 @@
       const parts = [s.planned ? `✅\u00a0${s.done} von ${s.planned} erledigt` : 'Keine Gewohnheiten'];
       if (s.waterGoals) parts.push(`💧\u00a0${s.waterGoals}×\u00a02,5\u00a0l`); else if (s.waterSum) parts.push(`💧\u00a0${fmtL(s.waterSum).replace(' ', '\u00a0')}`);
       if (s.note) parts.push('📝 Notiz');
+      if (s.study) parts.push(`📚\u00a0${fmtMin(s.study).replace(/ /g, '\u00a0')}`);
       const maxD = Math.max(3, ...s.perDay);
       const bars = s.perDay.map((n, i) => `<i data-style="height:${n ? Math.max(4, Math.round(n / maxD * 22)) : 2}px" title="${['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i]}: ${n} erledigt" class="${n ? 'on' : ''}"></i>`).join('');
       return `<button class="kw-row ${k === cur ? 'cur' : ''}" type="button" data-week="${k}">
@@ -1576,6 +1863,7 @@
   }
   function decide(t) {
     if (reduce) { mode = 'idle'; until = t + 1e9; return; }
+    if (window.habitFocus && !wolf) { mode = 'idle'; until = t + 5000; return; }   // Lernzeit: ganz ruhig
     if (wolf) {
       if (Math.random() < 0.65) { mode = 'howl'; until = t + rand(4000, 7000); nextHowl = t + 400; }
       else { mode = 'walk'; target = rand(minDog(), maxDog()); }
@@ -2219,6 +2507,8 @@
     { label: '🎄 Weihnachten', hour: 18, wx: wx(71, false, 0), moon: 3, special: () => app.getSpecial(new Date(Y, 11, 24, 18)) },
     { label: '🎆 Silvester-Feuerwerk', hour: 22, wx: wx(0, false, 1), moon: 25, special: () => app.getSpecial(new Date(Y, 11, 31, 22)) },
     { label: '💖 Valentinstag', hour: 12, wx: wx(2, true, 6), special: () => app.getSpecial(new Date(Y, 1, 14, 12)) },
+    { label: '⏱️ Lern-Timer: 25 Minuten lernen, Haustier bleibt still', hour: 15, wx: wx(1, true, 16), run: () => { toEl('timerCard'); later(1200, () => $('timerStart').click()); }, after: () => { if ($('timerStop') && !$('timerStop').hidden) $('timerStop').click(); } },
+    { label: '🎓 Uni: Lernzeit, Abgaben und Lernziele', hour: 16, wx: wx(1, true, 16), ms: 9000, run: () => { toEl('uniCard'); later(3500, () => document.querySelector('#goalList [data-gcheck]:not([aria-pressed="true"])')?.click()); } },
     { label: '📅 KW-Übersicht aller Wochen', hour: 18, wx: wx(2, true, 12), ms: 9000, run: () => { later(900, () => $('overviewBtn').click()); later(7600, () => { if (!$('kwOverlay').hidden) $('kwClose').click(); }); } },
     { label: '🏆 Erfolge zum Aufklappen', hour: 19, wx: wx(2, false, 10), run: () => { toEl('achCard'); later(1000, () => { $('achDetails').open = true; }); }, after: () => { $('achDetails').open = false; } },
     { label: '📝 Langfristige To-dos', hour: 17, wx: wx(1, true, 14), run: () => toEl('todos') },
