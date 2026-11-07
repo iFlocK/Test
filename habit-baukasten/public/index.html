@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Habit Tracker">
+<meta name="apple-mobile-web-app-title" content="Wochenplaner">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#fdf6fa" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1f1a24" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="/favicon.png">
-<title>Mein Habit Tracker</title>
+<title>Mein Wochenplaner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -359,6 +359,9 @@
   .setup-dots i { width: 22px; height: 6px; border-radius: 3px; background: var(--border); }
   .setup-dots i.on { background: var(--accent); }
   .setup-dots i.done { background: var(--accent-2); }
+  .setup-dots.tabs { flex-wrap: wrap; gap: 6px; }
+  .su-tab { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: 4px 10px; font: inherit; font-size: .78rem; font-weight: 800; }
+  .su-tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
   .su-input { font: inherit; width: 100%; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
   .su-label { display: block; font-weight: 800; font-size: .85rem; margin: 6px 0 4px; }
   .su-hint { color: var(--muted); font-size: .82rem; }
@@ -548,7 +551,7 @@
 <main>
   <header class="top">
     <div>
-      <h1 id="pageTitle">Mein Habit Tracker</h1>
+      <h1 id="pageTitle">Mein Wochenplaner</h1>
       <div class="week" id="weekLabel"></div>
       <button class="quote" id="quote" type="button" title="Antippen für einen neuen Spruch"></button>
     </div>
@@ -755,7 +758,7 @@
 </div>
 <div class="overlay" id="authOverlay" hidden>
   <div class="sheet auth-sheet" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-    <h2 id="authTitle">👋 Willkommen!</h2>
+    <h2 id="authTitle">👋 Mein Wochenplaner</h2>
     <div class="auth-tabs" role="tablist" aria-label="Anmelden oder registrieren"><button type="button" role="tab" data-auth="login">Anmelden</button><button type="button" role="tab" data-auth="create">Konto erstellen</button></div>
     <form id="authForm" class="auth-form" novalidate>
       <label class="su-label" for="authUser">Benutzername</label><input id="authUser" class="su-input" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
@@ -913,7 +916,7 @@
     const p = state.profile || {};
     window.habitProfile = p;
     document.documentElement.dataset.palette = PALETTES[paletteOverride || p.palette] ? (paletteOverride || p.palette) : 'rosa';
-    const title = p.name ? `${genitive(p.name)} Woche` : 'Mein Habit Tracker';
+    const title = p.name ? `${genitive(p.name)} Woche` : 'Mein Wochenplaner';
     $('pageTitle').textContent = title;
     document.title = title;
     window.habitApplyFur?.();
@@ -1460,6 +1463,7 @@
   const STEP_ORDER = ['welcome', 'gender', 'color', 'pet', 'habits', 'uni', 'cycle', 'club', 'days', 'weather'];
   const steps = () => STEP_ORDER.filter((k) => k !== 'cycle' || draft?.gender === 'w');
   const cur = () => steps()[step];
+  const TAB_LABELS = { welcome: '👋 Name', gender: '🙂 Über dich', color: '🎨 Farbe', pet: '🐾 Haustier', habits: '🌱 Gewohnheiten', uni: '🎓 Uni', cycle: '🌸 Zyklus', club: '⚽ Verein', days: '🎂 Besondere Tage', weather: '🌦️ Wetter' };
   let draft = null, step = 0;
   const allChoices = () => {
     const map = new Map();
@@ -1487,11 +1491,18 @@
   }
   function renderSetup() {
     $('setupTitle').textContent = STEP_TITLES[cur()];
-    $('setupDots').innerHTML = steps().map((_, i) => `<i class="${i === step ? 'on' : i < step ? 'done' : ''}"></i>`).join('');
-    $('setupBack').hidden = cur() === 'welcome';
-    $('setupNext').textContent = step === steps().length - 1 ? 'Los geht’s! 🎉' : 'Weiter →';
+    const editing = !!state.profile;   // Einstellungen: Bereiche als Tabs, direkt anwählbar
+    const dots = $('setupDots');
+    dots.classList.toggle('tabs', editing);
+    if (editing) { dots.removeAttribute('aria-hidden'); dots.setAttribute('role', 'tablist'); dots.setAttribute('aria-label', 'Bereiche der Einstellungen'); }
+    else { dots.setAttribute('aria-hidden', 'true'); dots.removeAttribute('role'); }
+    dots.innerHTML = editing
+      ? steps().map((k, i) => `<button type="button" class="su-tab" role="tab" data-tab="${i}" aria-selected="${i === step}">${TAB_LABELS[k]}</button>`).join('')
+      : steps().map((_, i) => `<i class="${i === step ? 'on' : i < step ? 'done' : ''}"></i>`).join('');
+    $('setupBack').hidden = editing || cur() === 'welcome';
+    $('setupNext').textContent = editing ? '✓ Speichern' : step === steps().length - 1 ? 'Los geht’s! 🎉' : 'Weiter →';
     const b = $('setupBody');
-    if (cur() === 'welcome') b.innerHTML = `<p>Schön, dass du da bist! In ein paar Schritten richtest du deinen eigenen Habit Tracker ein.</p>
+    if (cur() === 'welcome') b.innerHTML = `<p>${editing ? 'Wähle oben einen Bereich und ändere, was du möchtest. Mit „Speichern“ übernimmst du alles.' : 'Schön, dass du da bist! In ein paar Schritten richtest du deinen eigenen Wochenplaner ein.'}</p>
       <label class="su-label" for="suName">Wie heißt du?</label><input id="suName" class="su-input" placeholder="Dein Name" autocomplete="given-name" value="${esc(draft.name)}">
       <p class="su-hint">Daraus wird der Titel deiner Seite, z. B. „${esc(genitive(draft.name || 'Alex'))} Woche“.</p><p class="su-err" id="suErr" hidden>Bitte gib einen Namen ein.</p>${window.JANA_PREVIEW ? '<button type="button" class="su-demo" id="suDemo">🧪 Lieber erst die Demo ansehen</button>' : ''}`;
     if (cur() === 'gender') b.innerHTML = `<p>Damit wir dir die passenden Funktionen anbieten können: Bist du eine Frau oder ein Mann?</p>
@@ -1627,9 +1638,22 @@
   $('setupNext').addEventListener('click', (e) => {
     e.dogHandled = true;
     readStep();
-    if (cur() === 'welcome' && !draft.name) { $('suErr').hidden = false; $('suName').focus(); return; }
-    if (cur() === 'gender' && !draft.gender) { $('suErr').hidden = false; return; }
-    if (step < steps().length - 1) { step++; renderSetup(); } else finishSetup();
+    if (!stepOk()) return;
+    if (state.profile || step >= steps().length - 1) finishSetup(); else { step++; renderSetup(); }
+  });
+  function stepOk() {
+    if (cur() === 'welcome' && !draft.name) { $('suErr').hidden = false; $('suName').focus(); return false; }
+    if (cur() === 'gender' && !draft.gender) { $('suErr').hidden = false; return false; }
+    return true;
+  }
+  $('setupDots').addEventListener('click', (e) => {
+    const t = e.target.closest('[data-tab]');
+    if (!t) return;
+    e.dogHandled = true;
+    readStep();
+    if (!stepOk()) return;
+    step = Math.min(+t.dataset.tab, steps().length - 1); renderSetup();
+    $('setupBody').scrollTop = 0;
   });
   $('setupBack').addEventListener('click', (e) => { e.dogHandled = true; readStep(); step = Math.max(0, step - 1); renderSetup(); });
   $('setupClose').addEventListener('click', (e) => { e.dogHandled = true; closeSetup(); });
@@ -2500,7 +2524,7 @@
       $('authRepeat').hidden = authMode !== 'create';
       $('authPass').autocomplete = authMode === 'create' ? 'new-password' : 'current-password';
       $('authSubmit').textContent = authMode === 'create' ? 'Konto erstellen' : 'Anmelden';
-      $('authTitle').textContent = authMode === 'create' ? '👋 Willkommen! Leg dir ein Konto an' : '👋 Schön, dass du wieder da bist!';
+      $('authTitle').textContent = authMode === 'create' ? '👋 Willkommen bei „Mein Wochenplaner“! Leg dir ein Konto an' : '👋 Schön, dass du wieder da bist!';
       err('');
     }
     document.querySelector('.auth-tabs').addEventListener('click', (e) => {

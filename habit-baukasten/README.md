@@ -1,10 +1,11 @@
-# Habit-Baukasten (Vorlage)
+# Mein Wochenplaner
 
-Test-Version von „Janas Woche“ als Vorlage für jeden. Janas Seite (`janas-woche/`) bleibt davon unberührt.
+Die allgemeine Version von „Janas Woche“ für alle (Ordner `habit-baukasten/`). Janas Seite (`janas-woche/`) bleibt davon unberührt.
+Die Seite liegt in `public/` (mit Icons und App-Manifest) und kann direkt bei Netlify veröffentlicht werden.
 
 - Beim ersten Öffnen führt ein Einrichtungs-Assistent durch Name, Farbe, Fellfarbe und Name des Hundes,
   Gewohnheiten, Geburtstag, Jahrestag (optional) und Wohnort für das Wetter.
-- Alles lässt sich später über ⚙️ Einstellungen ändern.
+- Alles lässt sich später über ⚙️ Einstellungen ändern. Dort sind die Bereiche Tabs, die man direkt anwählen kann.
 - Haustier wählbar: Hund (mit Hütte), Katze (mit Katzenhaus) oder Kaninchen (mit Stall).
 - Optionaler Bereich „🎓 Uni“: Lern-Timer (25/5, lange Pause nach 4 Runden), Fächer mit Lernzeit,
   Abgaben & Deadlines, Lernziele pro Woche.
@@ -15,7 +16,7 @@ Test-Version von „Janas Woche“ als Vorlage für jeden. Janas Seite (`janas-w
   (Speicher-Präfix `habit-baukasten.`).
 
 Vorschau erzeugen:
-`python3 janas-woche/tools/make-preview.py vorschau.html habit-baukasten/index.html`
+`python3 janas-woche/tools/make-preview.py vorschau.html habit-baukasten/public/index.html`
 (startet mit dem Assistenten; der Knopf „🧪 Demo“ schaltet auf Beispieldaten mit Tour um).
 
 ## Konten, Mann/Frau und Lieblingsverein (Vorschau)
@@ -31,5 +32,5 @@ Vorschau erzeugen:
   Die Vereinsliste kommt aus `getavailableteams/bl1/<Saison>` und passt sich Auf- und Absteigern an.
   Spielplan höchstens alle 6 Stunden, während eines Spiels alle 5 Minuten (Spielstand). Spiele lassen sich auch selbst eintragen.
   Claude-Vorschauen dürfen keine fremden Seiten abrufen. Für die Vorschau den Spielplan deshalb mit einbetten:
-  `python3 janas-woche/tools/make-preview.py vorschau.html habit-baukasten/index.html && python3 habit-baukasten/tools/fixture-snapshot.py vorschau.html`
+  `python3 janas-woche/tools/make-preview.py vorschau.html habit-baukasten/public/index.html && python3 habit-baukasten/tools/fixture-snapshot.py vorschau.html`
 - Dazu alle Funktionen von Janas Seite: Easter Eggs, Patch Notes mit Feuerwerk, einklappbare Tabs, Discord-Lerngruppe, Ton immer an.
