@@ -218,6 +218,25 @@
   .demo-step { color: var(--muted); font-size: .75rem; font-variant-numeric: tabular-nums; margin-right: 2px; }
   .demo-out { color: var(--muted); font-size: .78rem; margin-left: 4px; }
 
+  /* Farbpaletten (fest im Stylesheet, umgeschaltet per data-palette) */
+  :root[data-palette="rosa"] { --accent:#f2a9c8;--accent-2:#cdb7ef;--on-accent:#4a2340;--accent-ink:#b8557f;--soft:#fbeaf2;--accent-soft:#fbeaf2;--today:#fff4f9;--bg:#fdf6fa; }
+  @media (prefers-color-scheme: dark) { :root[data-palette="rosa"]:not([data-theme="light"]) { --accent:#f2a9c8;--accent-2:#cdb7ef;--on-accent:#4a2340;--accent-ink:#f0b3cf;--soft:#362c3d;--accent-soft:#362c3d;--today:#33293a;--bg:#1f1a24; } }
+  :root[data-palette="rosa"][data-theme="dark"] { --accent:#f2a9c8;--accent-2:#cdb7ef;--on-accent:#4a2340;--accent-ink:#f0b3cf;--soft:#362c3d;--accent-soft:#362c3d;--today:#33293a;--bg:#1f1a24; }
+  :root[data-palette="lavendel"] { --accent:#c9b3ec;--accent-2:#a9c8ec;--on-accent:#2f2146;--accent-ink:#7a58b8;--soft:#f1ebfb;--accent-soft:#f1ebfb;--today:#f6f1fd;--bg:#f9f6fd; }
+  @media (prefers-color-scheme: dark) { :root[data-palette="lavendel"]:not([data-theme="light"]) { --accent:#c9b3ec;--accent-2:#a9c8ec;--on-accent:#2f2146;--accent-ink:#cbb6f0;--soft:#302a3f;--accent-soft:#302a3f;--today:#2d2838;--bg:#1f1a24; } }
+  :root[data-palette="lavendel"][data-theme="dark"] { --accent:#c9b3ec;--accent-2:#a9c8ec;--on-accent:#2f2146;--accent-ink:#cbb6f0;--soft:#302a3f;--accent-soft:#302a3f;--today:#2d2838;--bg:#1f1a24; }
+  :root[data-palette="mint"] { --accent:#9fd8c0;--accent-2:#a9c8ec;--on-accent:#123a2c;--accent-ink:#2f8a68;--soft:#e7f6ef;--accent-soft:#e7f6ef;--today:#f0faf5;--bg:#f5fbf8; }
+  @media (prefers-color-scheme: dark) { :root[data-palette="mint"]:not([data-theme="light"]) { --accent:#9fd8c0;--accent-2:#a9c8ec;--on-accent:#123a2c;--accent-ink:#9fdcc3;--soft:#25352f;--accent-soft:#25352f;--today:#26322d;--bg:#1f1a24; } }
+  :root[data-palette="mint"][data-theme="dark"] { --accent:#9fd8c0;--accent-2:#a9c8ec;--on-accent:#123a2c;--accent-ink:#9fdcc3;--soft:#25352f;--accent-soft:#25352f;--today:#26322d;--bg:#1f1a24; }
+  :root[data-palette="pfirsich"] { --accent:#f8c9a0;--accent-2:#f4a7b9;--on-accent:#45260f;--accent-ink:#b8642a;--soft:#fdf0e4;--accent-soft:#fdf0e4;--today:#fff6ee;--bg:#fdf8f3; }
+  @media (prefers-color-scheme: dark) { :root[data-palette="pfirsich"]:not([data-theme="light"]) { --accent:#f8c9a0;--accent-2:#f4a7b9;--on-accent:#45260f;--accent-ink:#f6c49c;--soft:#3a2e27;--accent-soft:#3a2e27;--today:#352a24;--bg:#1f1a24; } }
+  :root[data-palette="pfirsich"][data-theme="dark"] { --accent:#f8c9a0;--accent-2:#f4a7b9;--on-accent:#45260f;--accent-ink:#f6c49c;--soft:#3a2e27;--accent-soft:#3a2e27;--today:#352a24;--bg:#1f1a24; }
+  :root[data-palette="himmel"] { --accent:#a9c8ec;--accent-2:#cdb7ef;--on-accent:#142a45;--accent-ink:#3f6fa8;--soft:#eaf2fb;--accent-soft:#eaf2fb;--today:#f2f7fd;--bg:#f6f9fd; }
+  @media (prefers-color-scheme: dark) { :root[data-palette="himmel"]:not([data-theme="light"]) { --accent:#a9c8ec;--accent-2:#cdb7ef;--on-accent:#142a45;--accent-ink:#a9c8ec;--soft:#283140;--accent-soft:#283140;--today:#272e3a;--bg:#1f1a24; } }
+  :root[data-palette="himmel"][data-theme="dark"] { --accent:#a9c8ec;--accent-2:#cdb7ef;--on-accent:#142a45;--accent-ink:#a9c8ec;--soft:#283140;--accent-soft:#283140;--today:#272e3a;--bg:#1f1a24; }
+  .su-emoji { width: 40px; height: 40px; display: grid; place-items: center; font-size: 1.8rem; }
+  [data-sw="none"] span { display: none; }
+
   /* Einrichtungs-Assistent */
   .setup p { margin: 0 0 10px; }
   .setup-dots { display: flex; gap: 6px; margin: 0 0 14px; }
@@ -313,6 +332,21 @@
 </head>
 <body>
 
+<script>
+(() => {
+  // Farb- und Größenangaben aus data-style per CSSOM setzen: funktioniert auch dort, wo style-Attribute gesperrt sind
+  const apply = (el) => {
+    const css = el.getAttribute('data-style');
+    if (css == null) return;
+    for (const decl of css.split(';')) { const i = decl.indexOf(':'); if (i > 0) el.style.setProperty(decl.slice(0, i).trim(), decl.slice(i + 1).trim()); }
+  };
+  const scan = (node) => { if (node.nodeType !== 1) return; if (node.hasAttribute('data-style')) apply(node); node.querySelectorAll('[data-style]').forEach(apply); };
+  new MutationObserver((list) => {
+    for (const m of list) { if (m.type === 'attributes') apply(m.target); else m.addedNodes.forEach(scan); }
+  }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-style'] });
+  document.addEventListener('DOMContentLoaded', () => scan(document.body));
+})();
+</script>
 <main>
   <header class="top">
     <div>
@@ -325,7 +359,7 @@
       <button class="pill primary" id="today">Heute</button>
       <button class="pill" id="next" aria-label="Nächste Woche">Woche →</button>
       <button class="pill" id="overviewBtn" type="button">📅 KW-Übersicht</button>
-      <button class="pill" id="setupBtn" type="button" aria-label="Einstellungen">⚙️</button>
+      <button class="pill" id="setupBtn" type="button">⚙️ Einstellungen</button>
       <button class="pill" id="sound" type="button"></button>
     </div>
   </header>
@@ -487,7 +521,7 @@
       ],
       water, ach: { first: key(new Date()), five: key(new Date()), sip: key(new Date()), water: key(last), todo1: key(new Date()) }, flags: {},
       achResetId: 'reset-2026-11-06', achSince: 0,
-      profile: { name: 'Alex', palette: 'lavendel', fur: 'golden', pet: 'Bello', birthday: '1998-08-25', together: { date: '2025-09-18', partner: 'Sam' }, city: 'Hamburg' },
+      profile: { name: 'Alex', palette: 'lavendel', animal: 'dog', fur: 'golden', pet: 'Bello', birthday: '1998-08-25', together: { date: '2025-09-18', partner: 'Sam' }, city: 'Hamburg' },
       mood: Object.fromEntries([5, 4, 3, 4, 2, 5, 4, 3, 5, 4, 1, 4, 5].map((v, i) => [key(addDays(new Date(), -i - 1)), { v, at: Date.now() }])),
     };
   }
@@ -505,19 +539,25 @@
   function applyProfile(paletteOverride) {
     const p = state.profile || {};
     window.habitProfile = p;
-    const pal = PALETTES[paletteOverride || p.palette] || PALETTES.rosa;
-    let st = document.getElementById('paletteStyle');
-    if (!st) { st = document.createElement('style'); st.id = 'paletteStyle'; document.head.append(st); }
-    const dark = `--accent:${pal.a};--accent-2:${pal.a2};--on-accent:${pal.on};--accent-ink:${pal.inkD};--soft:${pal.softD};--accent-soft:${pal.softD};--today:${pal.todayD};`;
-    st.textContent = `:root{--accent:${pal.a};--accent-2:${pal.a2};--on-accent:${pal.on};--accent-ink:${pal.ink};--soft:${pal.soft};--accent-soft:${pal.soft};--today:${pal.today};--bg:${pal.bg};}`
-      + `@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){${dark}}}:root[data-theme="dark"]{${dark}}`;
+    document.documentElement.dataset.palette = PALETTES[paletteOverride || p.palette] ? (paletteOverride || p.palette) : 'rosa';
     const title = p.name ? `${genitive(p.name)} Woche` : 'Mein Habit Tracker';
     $('pageTitle').textContent = title;
     document.title = title;
     window.habitApplyFur?.();
   }
   // Texte mit „Jana“ werden mit dem eigenen Namen angezeigt
-  window.P = (t) => { const n = state.profile?.name || 'du'; return String(t).replace(/Janas/g, genitive(n)).replace(/Jana/g, n); };
+  const PET_WORDS = {
+    cat: [[/Wuff/g, 'Miau'], [/wuff/g, 'miau'], [/Grrr/g, 'Fauch'], [/Der Hund/g, 'Die Katze'], [/der Hund/g, 'die Katze'], [/den Hund/g, 'die Katze'],
+      [/dem Hund/g, 'der Katze'], [/Labrador/g, 'Katze'], [/Hütte/g, 'Katzenhaus'], [/Hechel hechel/g, 'Schnurr…']],
+    rabbit: [[/Wuff/g, 'Hopp'], [/wuff/g, 'hopp'], [/Grrr/g, '*klopf klopf*'], [/Der Hund/g, 'Das Kaninchen'], [/der Hund/g, 'das Kaninchen'], [/den Hund/g, 'das Kaninchen'],
+      [/dem Hund/g, 'dem Kaninchen'], [/Labrador/g, 'Kaninchen'], [/Hütte/g, 'Stall'], [/Hechel hechel/g, '*mümmel mümmel*']],
+  };
+  window.P = (t) => {
+    const n = state.profile?.name || 'du';
+    let out = String(t).replace(/Janas/g, genitive(n)).replace(/Jana/g, n);
+    for (const [re, w] of PET_WORDS[state.profile?.animal] || []) out = out.replace(re, w);
+    return out;
+  };
   applyProfile();
   function isoWeek(d) {
     const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -546,20 +586,20 @@
       return `<article class="card day ${isToday ? 'today' : ''}" data-day="${i}">
         <div class="day-head"><h3>${name}${isToday ? '<span class="badge">heute</span>' : ''}</h3><span class="date">${moodImg(key(d))}${fmt(d, { day: 'numeric', month: 'short' })}</span></div>
         <ul class="items">${items.length ? items.map(it => `
-          <li class="item ${it.done ? 'done' : ''}" style="--c: var(--c-${areaOf(it)})">
+          <li class="item ${it.done ? 'done' : ''}" data-style="--c: var(--c-${areaOf(it)})">
             <button class="toggle" data-toggle="${it.id}" aria-pressed="${!!it.done}" title="Erledigt umschalten">${esc(labelOf(it))}</button>
             <button class="x" data-del="${it.id}" aria-label="${esc(labelOf(it))} entfernen">×</button>
           </li>`).join('') : '<li class="empty">Noch nichts ausgewählt</li>'}</ul>
         <button class="add-btn" data-open="${i}" aria-expanded="${open}">${open ? 'Fertig' : '+ Tag'}</button>
         ${open ? `<div class="picker">
-          <div class="tags">${state.tags.map(t => `<button class="tag" style="--c: var(--c-${t.area})" data-pick="${t.id}" aria-pressed="${used.has(t.id)}">${esc(t.name)}</button>`).join('')}</div>
+          <div class="tags">${state.tags.map(t => `<button class="tag" data-style="--c: var(--c-${t.area})" data-pick="${t.id}" aria-pressed="${used.has(t.id)}">${esc(t.name)}</button>`).join('')}</div>
           <form data-custom="${i}"><input name="text" id="custom-${i}" placeholder="Eigene Gewohnheit…" aria-label="Eigener Eintrag für ${name}" autocomplete="off"><button type="submit">+</button></form>
         </div>` : ''}
       </article>`;
     }).join('');
 
     $('tagList').innerHTML = Object.keys(AREAS).flatMap(a => state.tags.filter(t => t.area === a)).map(t =>
-      `<span class="tag" style="--c: var(--c-${t.area})">${esc(t.name)}<button data-rmtag="${t.id}" aria-label="Tag ${esc(t.name)} löschen">×</button></span>`).join('');
+      `<span class="tag" data-style="--c: var(--c-${t.area})">${esc(t.name)}<button data-rmtag="${t.id}" aria-label="Tag ${esc(t.name)} löschen">×</button></span>`).join('');
 
     $('note').value = w.note || '';
   }
@@ -728,7 +768,7 @@
     const mon = startOfWeek(new Date()), tk = todayKey();
     $('waterWeek').innerHTML = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((n, i) => {
       const k = key(addDays(mon, i)), v = waterOf(k);
-      return `<div class="ww ${v >= GOAL ? 'goal' : ''} ${k === tk ? 'today' : ''}" title="${n}: ${fmtL(v)}"><div class="b" style="height:${Math.round(Math.min(1, v / GOAL) * 18)}px"></div>${n}</div>`;
+      return `<div class="ww ${v >= GOAL ? 'goal' : ''} ${k === tk ? 'today' : ''}" title="${n}: ${fmtL(v)}"><div class="b" data-style="height:${Math.round(Math.min(1, v / GOAL) * 18)}px"></div>${n}</div>`;
     }).join('');
   }
   function addWater(ml, e) {
@@ -870,7 +910,7 @@
     $('achGrid').innerHTML = ACH.map(([id, icon, name, desc]) => {
       const got = state.ach[id];
       const when = got ? new Date(got + 'T12:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-      return `<div class="ach ${got ? '' : 'locked'}"><div class="ic" aria-hidden="true">${icon}</div><div><b>${name}</b><span>${desc}${got ? ` · ${when}` : ''}</span></div></div>`;
+      return `<div class="ach ${got ? '' : 'locked'}"><div class="ic" aria-hidden="true">${icon}</div><div><b>${name}</b><span>${window.P(desc)}${got ? ` · ${when}` : ''}</span></div></div>`;
     }).join('');
   }
   let toastTimer;
@@ -982,7 +1022,8 @@
 
   // ---------- Einrichtungs-Assistent ----------
   const FUR_CHOICES = [['golden', 'Golden', '#ecc173'], ['schoko', 'Schoko', '#a8714a'], ['schwarz', 'Schwarz', '#4a4250'], ['weiss', 'Weiß', '#f4efe9']];
-  const SETUP_TITLES = ['Willkommen! 👋', 'Deine Farbe 🎨', 'Dein Hund 🐶', 'Deine Gewohnheiten 🌱', 'Besondere Tage 🎂', 'Wetter 🌦️'];
+  const ANIMALS = [['dog', 'Hund', '🐶'], ['cat', 'Katze', '🐱'], ['rabbit', 'Kaninchen', '🐰']];
+  const SETUP_TITLES = ['Willkommen! 👋', 'Deine Farbe 🎨', 'Dein Haustier 🐾', 'Deine Gewohnheiten 🌱', 'Besondere Tage 🎂', 'Wetter 🌦️'];
   let draft = null, step = 0;
   const allChoices = () => {
     const map = new Map();
@@ -992,7 +1033,7 @@
   function openSetup() {
     const p = state.profile || {};
     draft = {
-      name: p.name || '', palette: p.palette || 'rosa', fur: p.fur || 'golden', pet: p.pet || '',
+      name: p.name || '', palette: p.palette || 'rosa', animal: p.animal || 'dog', fur: p.fur || 'golden', pet: p.pet || '',
       habits: state.profile ? state.tags.map((t) => t.id) : ['kraft', 'spazieren', 'gemuese', 'wasser', 'lesen', 'schlafen', 'freunde', 'entspannen'],
       custom: [], birthday: p.birthday || '', together: { date: p.together?.date || '', partner: p.together?.partner || '' }, city: p.city || '',
     };
@@ -1017,20 +1058,22 @@
       <label class="su-label" for="suName">Wie heißt du?</label><input id="suName" class="su-input" placeholder="Dein Name" autocomplete="given-name" value="${esc(draft.name)}">
       <p class="su-hint">Daraus wird der Titel deiner Seite, z. B. „${esc(genitive(draft.name || 'Alex'))} Woche“.</p><p class="su-err" id="suErr" hidden>Bitte gib einen Namen ein.</p>`;
     if (step === 1) b.innerHTML = `<p>Welche Farbe gefällt dir? Die Seite zeigt sie sofort.</p><div class="su-swatches">${Object.entries(PALETTES).map(([k, p]) =>
-      `<button type="button" class="su-swatch" data-pal="${k}" aria-pressed="${draft.palette === k}" style="--sw:${p.a};--sw2:${p.a2}"><span></span>${p.name}</button>`).join('')}</div>`;
-    if (step === 2) b.innerHTML = `<p>Unten auf der Seite wohnt ein kleiner Pixel-Hund. Welche Fellfarbe soll er haben?</p><div class="su-swatches">${FUR_CHOICES.map(([k, n, c]) =>
-      `<button type="button" class="su-swatch" data-fur="${k}" aria-pressed="${draft.fur === k}" style="--sw:${c};--sw2:${c}"><span></span>${n}</button>`).join('')}</div>
-      <label class="su-label" for="suPet">Wie heißt dein Hund? (optional)</label><input id="suPet" class="su-input" placeholder="z. B. Bello" value="${esc(draft.pet)}">`;
+      `<button type="button" class="su-swatch" data-pal="${k}" aria-pressed="${draft.palette === k}" data-style="--sw:${p.a};--sw2:${p.a2}"><span></span>${p.name}</button>`).join('')}</div>`;
+    if (step === 2) b.innerHTML = `<p>Unten auf der Seite wohnt ein kleines Pixel-Haustier mit eigenem Häuschen. Wer soll es sein?</p>
+      <div class="su-swatches">${ANIMALS.map(([k, n, e]) => `<button type="button" class="su-swatch" data-animal="${k}" aria-pressed="${draft.animal === k}"><span class="su-emoji">${e}</span>${n}</button>`).join('')}</div>
+      <p>Welche Fellfarbe?</p><div class="su-swatches">${FUR_CHOICES.map(([k, n, c]) =>
+      `<button type="button" class="su-swatch" data-fur="${k}" aria-pressed="${draft.fur === k}" data-style="--sw:${c};--sw2:${c}"><span></span>${n}</button>`).join('')}</div>
+      <label class="su-label" for="suPet">Wie heißt es? (optional)</label><input id="suPet" class="su-input" placeholder="${{ dog: 'z. B. Bello', cat: 'z. B. Minka', rabbit: 'z. B. Hoppel' }[draft.animal]}" value="${esc(draft.pet)}">`;
     if (step === 3) b.innerHTML = `<p>Was möchtest du regelmäßig machen? Tippe an, was passt. Diese Gewohnheiten kannst du dann jedem Tag zuordnen.</p>
-      <div class="su-chips">${allChoices().map((t) => `<button type="button" class="tag" style="--c: var(--c-${t.area})" data-hab="${t.id}" aria-pressed="${draft.habits.includes(t.id)}">${esc(t.name)}</button>`).join('')}</div>
+      <div class="su-chips">${allChoices().map((t) => `<button type="button" class="tag" data-style="--c: var(--c-${t.area})" data-hab="${t.id}" aria-pressed="${draft.habits.includes(t.id)}">${esc(t.name)}</button>`).join('')}</div>
       <form class="su-add" id="suAdd"><input id="suNew" class="su-input" placeholder="Eigene Gewohnheit, z. B. Yoga" aria-label="Eigene Gewohnheit"><button class="pill" type="submit">+ Hinzufügen</button></form>`;
     if (step === 4) b.innerHTML = `<label class="su-label" for="suBirth">Wann hast du Geburtstag? (optional)</label><input id="suBirth" class="su-input" type="date" value="${draft.birthday}">
-      <p class="su-hint">An deinem Geburtstag gibt es Konfetti, Kuchen und einen Partyhut für den Hund.</p>
+      <p class="su-hint">An deinem Geburtstag gibt es Konfetti, Kuchen und einen Partyhut für dein Haustier.</p>
       <label class="su-label" for="suTog">Jahrestag mit deinem Schatz (optional)</label><input id="suTog" class="su-input" type="date" value="${draft.together.date}">
       <input id="suPartner" class="su-input" placeholder="Name deines Schatzes" aria-label="Name deines Schatzes" value="${esc(draft.together.partner)}">
       <p class="su-hint">Dann zählt eine kleine Karte, wie lange ihr schon zusammen seid.</p>`;
     if (step === 5) b.innerHTML = `<label class="su-label" for="suCity">Wo wohnst du? (optional)</label><input id="suCity" class="su-input" placeholder="z. B. Hamburg" autocomplete="address-level2" value="${esc(draft.city)}">
-      <p class="su-hint">Dann zeigt der Himmel oben dein echtes Wetter, und der Hund verkriecht sich bei Regen in seine Hütte. Alles kannst du später unter ⚙️ ändern.</p>`;
+      <p class="su-hint">Dann zeigt der Himmel oben dein echtes Wetter, und dein Haustier verkriecht sich bei Regen in sein Häuschen. Alles kannst du später unter ⚙️ ändern.</p>`;
     b.querySelector('input')?.focus({ preventScroll: true });
   }
   function readStep() {
@@ -1040,13 +1083,15 @@
     if (step === 5) draft.city = $('suCity').value.trim();
   }
   $('setupBody').addEventListener('click', (e) => {
-    const sw = e.target.closest('[data-pal]'), fu = e.target.closest('[data-fur]'), hb = e.target.closest('[data-hab]');
-    if (!sw && !fu && !hb) return;
+    const sw = e.target.closest('[data-pal]'), fu = e.target.closest('[data-fur]'), hb = e.target.closest('[data-hab]'), an = e.target.closest('[data-animal]');
+    if (!sw && !fu && !hb && !an) return;
     e.dogHandled = true;
     if (sw) { draft.palette = sw.dataset.pal; applyProfile(draft.palette); renderSetup(); }
-    if (fu) {
-      draft.pet = $('suPet').value.trim(); draft.fur = fu.dataset.fur;
-      window.habitProfile = { ...(state.profile || {}), fur: draft.fur }; window.habitApplyFur?.();
+    if (fu || an) {
+      draft.pet = $('suPet').value.trim();
+      if (fu) draft.fur = fu.dataset.fur;
+      if (an) draft.animal = an.dataset.animal;
+      window.habitProfile = { ...(state.profile || {}), fur: draft.fur, animal: draft.animal }; window.habitApplyFur?.();
       renderSetup();
     }
     if (hb) {
@@ -1078,6 +1123,7 @@
     save(); closeSetup(); render(); renderLove();
     window.janaApp.renderSpecial(); window.janaWx?.refresh?.(); window.habitReloadWeather?.();
     if (first) setTimeout(() => window.janaDog?.happy(`Wuff! Hallo ${profile.name}! ${profile.pet ? `Ich bin ${profile.pet}. ` : ''}🐾`), 500);
+    window.habitProfile = state.profile;
   }
   $('setupNext').addEventListener('click', (e) => {
     e.dogHandled = true;
@@ -1131,7 +1177,7 @@
       if (s.waterGoals) parts.push(`💧\u00a0${s.waterGoals}×\u00a02,5\u00a0l`); else if (s.waterSum) parts.push(`💧\u00a0${fmtL(s.waterSum).replace(' ', '\u00a0')}`);
       if (s.note) parts.push('📝 Notiz');
       const maxD = Math.max(3, ...s.perDay);
-      const bars = s.perDay.map((n, i) => `<i style="height:${n ? Math.max(4, Math.round(n / maxD * 22)) : 2}px" title="${['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i]}: ${n} erledigt" class="${n ? 'on' : ''}"></i>`).join('');
+      const bars = s.perDay.map((n, i) => `<i data-style="height:${n ? Math.max(4, Math.round(n / maxD * 22)) : 2}px" title="${['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i]}: ${n} erledigt" class="${n ? 'on' : ''}"></i>`).join('');
       return `<button class="kw-row ${k === cur ? 'cur' : ''}" type="button" data-week="${k}">
         <span class="kw-badge">KW ${kw}<small>${mon.getFullYear()}</small></span>
         <span class="kw-info"><b>${s.mood ? `<img class="mood-mini" src="${FACES[s.mood]}" alt="Stimmung im Schnitt: ${MOODS[s.mood].label}">` : ''}${shortDate(mon)} – ${shortDate(sun)} ${tag}</b><span>${parts.join(' · ')}</span>${s.top.length ? `<small>Meist: ${s.top.map(([n, c]) => `${esc(n)} ${c}×`).join(', ')}</small>` : ''}</span>
@@ -1261,6 +1307,9 @@
 
   // ---------- Zeichnen ----------
   function drawHouse() {
+    const animal = window.habitProfile?.animal || 'dog';
+    if (animal === 'cat') return drawCatHouse();
+    if (animal === 'rabbit') return drawHutch();
     const x0 = houseX, parts = [[x0 + 2, 12, 16, 11, 'w']];
     for (let r = 0; r < 8; r++) parts.push([x0 + 9 - r, 4 + r, 2 + 2 * r, 1, 'r']);
     parts.push([x0 + 1, 12, 18, 1, 'r']);
@@ -1272,6 +1321,32 @@
     if (mode === 'sleep') {                                                       // schlafender Kopf in der Tür
       fill(x0 + 8, 18, 4, 4, 'b'); fill(x0 + 8, 18, 1, 3, 'e');
       fill(x0 + 9, 19, 1, 1, 'n'); fill(x0 + 11, 19, 1, 1, 'n'); fill(x0 + 9, 21, 3, 1, 'l');
+    }
+  }
+  function drawCatHouse() {   // Katzenhaus mit rundem Eingang und Kissen obendrauf
+    const x0 = houseX;
+    ctx.fillStyle = C.s; ctx.fillRect(x0 + 1, 23, 19, 1);
+    outlined([[x0 + 2, 10, 16, 13, 'w'], [x0 + 1, 8, 18, 2, 'r'], [x0 + 3, 6, 14, 2, 'p2']]);
+    fill(x0 + 2, 14, 16, 1, 'wd'); fill(x0 + 2, 19, 5, 1, 'wd'); fill(x0 + 14, 19, 4, 1, 'wd');
+    for (let y = 13; y <= 22; y++) for (let x = x0 + 5; x <= x0 + 15; x++) if ((x + 0.5 - (x0 + 10)) ** 2 + (y + 0.5 - 18.5) ** 2 <= 13) fill(x, y, 1, 1, 'd');
+    fill(x0 + 3, 11, 1, 1, 'hp'); fill(x0 + 5, 11, 1, 1, 'hp'); fill(x0 + 4, 12, 1, 1, 'hp');   // Pfötchen
+    if (mode === 'sleep') {   // schlafende Katze im Eingang
+      fill(x0 + 8, 18, 5, 3, 'b'); fill(x0 + 8, 17, 1, 1, 'b'); fill(x0 + 12, 17, 1, 1, 'b');
+      fill(x0 + 9, 19, 1, 1, 'n'); fill(x0 + 11, 19, 1, 1, 'n'); fill(x0 + 10, 20, 1, 1, 't');
+    }
+  }
+  function drawHutch() {   // Kaninchenstall auf Beinen mit Gitterfenster und Heu
+    const x0 = houseX;
+    ctx.fillStyle = C.s; ctx.fillRect(x0 + 1, 23, 19, 1);
+    outlined([[x0 + 3, 19, 2, 4, 'wd'], [x0 + 15, 19, 2, 4, 'wd'], [x0 + 2, 10, 16, 9, 'w'], [x0 + 1, 8, 18, 2, 'r'], [x0 + 3, 7, 14, 1, 'r']]);
+    fill(x0 + 4, 12, 6, 5, 'd');
+    for (let i = 0; i < 3; i++) fill(x0 + 5 + i * 2, 12, 1, 5, 'wd');
+    fill(x0 + 4, 14, 6, 1, 'wd');
+    fill(x0 + 11, 12, 5, 7, 'd');
+    fill(x0 + 2, 18, 16, 1, 'hy');   // Heu
+    if (mode === 'sleep') {   // schlafendes Kaninchen in der Tür
+      fill(x0 + 12, 15, 3, 3, 'b'); fill(x0 + 12, 12, 1, 3, 'b'); fill(x0 + 14, 12, 1, 3, 'b');
+      fill(x0 + 12, 16, 1, 1, 'n'); fill(x0 + 14, 16, 1, 1, 'n');
     }
   }
   function drawBowl() {
@@ -1329,6 +1404,71 @@
     Object.assign(C, DOG_COL);
   }
 
+  function petPose(t) {
+    const pose = mode === 'happy' ? 'happy' : mode === 'eat' ? 'eat' : (mode === 'idle' || mode === 'transform' || mode === 'howl') ? 'stand'
+      : (mode === 'play' || mode === 'goPlay') ? 'run' : 'walk';
+    return { pose, happy: pose === 'happy', moving: pose === 'walk' || pose === 'run', eat: pose === 'eat', f: frame % 4 };
+  }
+  function petFlip() {
+    ctx.save();
+    if (dir < 0) { ctx.translate(Math.round(dogX) + 32, 0); ctx.scale(-1, 1); } else ctx.translate(Math.round(dogX), 0);
+  }
+  function drawCat(t) {
+    const { happy, moving, eat, f } = petPose(t);
+    const jump = happy && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : 0;
+    const bob = moving && (f === 1 || f === 3) ? -1 : 0;
+    const Y = (v) => v - jump + bob;
+    const hd = eat ? (Math.floor(t / 220) % 2 ? 5 : 6) : 0, hx = eat ? 1 : 0;
+    const H = (v) => Y(v) + hd;
+    petFlip();
+    ctx.fillStyle = C.s; ctx.fillRect(9, 23, 15 - jump, 1);
+    const lift = (i) => moving && ((f < 2) === (i % 2 === 0)) ? 1 : 0;
+    const sway = Math.floor(t / (happy ? 120 : 420)) % 2;
+    const parts = [];
+    [10, 13, 19, 22].forEach((lx, i) => parts.push([lx, Y(18), 2, 4 - lift(i), 'b']));
+    parts.push([7, Y(8), 2, 7, 'b'], [sway ? 5 : 8, Y(6), 2, 2, 'b']);               // Schwanz nach oben
+    parts.push([9, Y(12), 14, 6, 'b'], [21 + hx, H(7), 7, 6, 'b'], [21 + hx, H(5), 2, 2, 'b'], [26 + hx, H(5), 2, 2, 'b']);
+    outlined(parts);
+    fill(21 + hx, H(6), 1, 1, 't'); fill(27 + hx, H(6), 1, 1, 't');                     // Ohren innen
+    [12, 15, 18].forEach((x) => fill(x, Y(12), 1, 3, 'e'));                              // Streifen
+    fill(11, Y(16), 10, 2, 'l');
+    fill(20, Y(12), 2, 3, 'c');                                                           // Halsband
+    if (happy) { fill(23 + hx, H(9), 1, 1, 'n'); fill(24 + hx, H(8), 1, 1, 'n'); fill(25 + hx, H(9), 1, 1, 'n'); }
+    else if (eat) fill(24 + hx, H(9), 2, 1, 'n');
+    else { fill(24 + hx, H(8), 1, 2, 'n'); fill(26 + hx, H(8), 1, 2, 'n'); }
+    fill(27 + hx, H(10), 1, 1, 't');                                                     // Näschen
+    ctx.fillStyle = '#cfc6db'; ctx.fillRect(28 + hx, H(10), 2, 1); ctx.fillRect(28 + hx, H(11), 2, 1);   // Schnurrhaare
+    if (happy && Math.floor(t / 140) % 2 === 0) fill(25 + hx, H(11), 2, 1, 'n');
+    drawHat(H, hx, 2);
+    ctx.restore();
+  }
+  function drawRabbit(t) {
+    const { happy, moving, eat } = petPose(t);
+    const hop = moving && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : 0;
+    const jump = happy && !reduce ? Math.round(Math.abs(Math.sin(t / 110)) * 3) : hop;
+    const Y = (v) => v - jump;
+    const hd = eat ? (Math.floor(t / 220) % 2 ? 3 : 4) : 0, hx = eat ? 1 : 0;
+    const H = (v) => Y(v) + hd;
+    petFlip();
+    ctx.fillStyle = C.s; ctx.fillRect(10, 23, 13 - jump, 1);
+    outlined([[11, Y(19), 6, 3, 'b'], [19, Y(19), 2, 3, 'b'], [10, Y(13), 12, 7, 'b'], [20 + hx, H(10), 7, 6, 'b'],
+      [21 + hx, H(3), 2, 7, 'b'], [24 + hx, H(2), 2, 8, 'b'], [8, Y(14), 3, 3, 'l']]);
+    fill(22 + hx, H(4), 1, 5, 't'); fill(25 + hx, H(3), 1, 6, 't');                     // Ohren innen
+    fill(12, Y(17), 8, 2, 'l');
+    fill(19, Y(13), 2, 3, 'c');                                                           // Halsband
+    if (happy) { fill(23 + hx, H(12), 1, 1, 'n'); fill(24 + hx, H(11), 1, 1, 'n'); fill(25 + hx, H(12), 1, 1, 'n'); }
+    else if (eat) fill(24 + hx, H(12), 2, 1, 'n');
+    else fill(24 + hx, H(11), 1, 2, 'n');
+    fill(26 + hx, H(13), 1, 1, 't');                                                     // Näschen
+    if (happy || eat) fill(25 + hx, H(14), 1, 1, 'n');
+    drawHat(H, hx, 5);
+    ctx.restore();
+  }
+  function drawPet(t) {
+    const a = window.habitProfile?.animal || 'dog';
+    if (a === 'cat') drawCat(t); else if (a === 'rabbit') drawRabbit(t); else drawDog(t);
+  }
+
   // ---------- Sprechblase ----------
   let hideTimer;
   function say(text, centerArt, ms = 1700) {
@@ -1350,7 +1490,8 @@
     for (const [x, y, w, h] of parts) { ctx.fillStyle = C.o; ctx.fillRect(x - 1, y - 1, w + 2, h + 2); }
     for (const [x, y, w, h, c] of parts) sfill(x, y, w, h, c);
   }
-  function drawHat(H, hx) {
+  function drawHat(H0, hx, dy = 0) {
+    const H = (v) => H0(v + dy);
     const sp = window.janaSpecial;
     if (!sp?.hat) return;
     if (sp.hat === 'party') soutlined([[22 + hx, H(4), 5, 1, 'hp2'], [22 + hx, H(3), 4, 1, 'hp1'], [23 + hx, H(2), 3, 1, 'hp2'], [23 + hx, H(1), 2, 1, 'hp1'], [24 + hx, H(0), 1, 1, 'hy']]);
@@ -1364,7 +1505,7 @@
     const sp = window.janaSpecial;
     if (!sp) return;
     const x = bowlX + 12;
-    if (sp.lights) {                                   // Lichterkette am Dach
+    if (sp.lights && (window.habitProfile?.animal || 'dog') === 'dog') {                                   // Lichterkette am Dach
       const cols = ['#ff6b6b', '#ffd36e', '#7fd18b', '#7fb2ec'];
       for (let r = 1; r < 8; r += 2) {
         const ci = (r + Math.floor(t / 500)) % 4;
@@ -1411,7 +1552,7 @@
   let shelterSaid = false, greetedMorning = false;
   let wolf = false, howlUntil = 0, nextHowl = 0;
   let forcedWolfUntil = 0, forcedMsg = false;
-  const wolfTime = () => performance.now() < forcedWolfUntil || (window.janaMoon?.().name === 'Vollmond' && night());
+  const wolfTime = () => (window.habitProfile?.animal || 'dog') === 'dog' && (performance.now() < forcedWolfUntil || (window.janaMoon?.().name === 'Vollmond' && night()));
   addEventListener('jana:forcewolf', () => { forcedWolfUntil = performance.now() + 45000; forcedMsg = true; });
   function mood() {
     const pn = window.habitProfile?.pet;
@@ -1551,7 +1692,7 @@
     drawHouse();
     drawBowl();
     drawDecor(t);
-    if (mode !== 'sleep') drawDog(t);
+    if (mode !== 'sleep') drawPet(t);
     drawBall();
     drawPrecip(t);
     requestAnimationFrame(loop);
@@ -1617,13 +1758,28 @@
       o.connect(g); g.connect(actx.destination); o.start(t0); lfo.start(t0); o.stop(t0 + 1.9); lfo.stop(t0 + 1.9);
     } catch {}
   }
+  function meow(t0) {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(520, t0); o.frequency.linearRampToValueAtTime(820, t0 + 0.18); o.frequency.linearRampToValueAtTime(480, t0 + 0.5);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.3, t0 + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.55);
+    o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + 0.6);
+  }
+  function squeak(t0) {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(1500, t0); o.frequency.exponentialRampToValueAtTime(1100, t0 + 0.07);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.15, t0 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
+    o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + 0.1);
+  }
   function bark(times) {
     if (!soundOn) return;
     try {
       actx ||= new (window.AudioContext || window.webkitAudioContext)();
       if (actx.state === 'suspended') actx.resume();
       const now = actx.currentTime + 0.01;
-      for (let i = 0; i < times; i++) woof(now + i * 0.24);
+      const a = window.habitProfile?.animal || 'dog';
+      for (let i = 0; i < times; i++) (a === 'cat' ? meow : a === 'rabbit' ? squeak : woof)(now + i * (a === 'cat' ? 0.6 : 0.24));
     } catch {}
   }
 
