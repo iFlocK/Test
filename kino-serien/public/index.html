@@ -291,6 +291,7 @@
 
   footer { color: var(--label-2); font-size: 12px; text-align: center; padding: 24px 20px calc(32px + env(safe-area-inset-bottom)); line-height: 1.5; }
   footer a { color: inherit; }
+  .made { margin-top: 10px; font-size: 13px; font-weight: 500; } .made span { color: var(--red); }
 
   .toast {
     position: fixed; z-index: 60; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px);
@@ -428,6 +429,7 @@
 <footer>
   Daten und Cover von <a href="https://www.themoviedb.org" target="_blank" rel="noopener">The Movie Database (TMDB)</a>.
   Diese Seite nutzt die TMDB-Schnittstelle, ist aber nicht von TMDB unterstützt oder zertifiziert.
+  <div class="made">Created with <span aria-label="love">♥</span> by FH</div>
 </footer>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1412,6 +1414,7 @@
         <div class="row"><button class="row-btn" id="showIntro">Einführung zeigen</button></div>
       </div>
       <p class="group-foot">Listen werden für drei Stunden zwischengespeichert, damit die Seite schnell lädt.</p>
+      <p class="made" style="text-align:center;color:var(--label-2);margin-top:24px">Created with <span aria-label="love">♥</span> by FH</p>
     </div>`, true);
     const reload = () => { state.lists = {}; closeSheet(); start(); };
     el.querySelector('#setReg').addEventListener('change', (e) => { state.region = e.target.value; store.set(LS.region, state.region); reload(); });
