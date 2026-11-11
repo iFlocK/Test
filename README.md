@@ -71,7 +71,9 @@ und ihren eigenen Patch Notes. Alle Jana-Anpassungen stehen nur im Skript, die �
 4. Vor jedem Upload die Version erhöhen: in `index.html` oben in `CHANGELOG` einen neuen Eintrag mit Versionsnummer und Patch Notes ergänzen.
    Beim nächsten Öffnen zeigt die Seite dann einmal das Fenster „Was ist neu?“. Geheimnisse dort nur andeuten, nicht verraten.
 
-# Kino & Serien
+# Next Up – Filme und Serien
+
+(Arbeitstitel war „Kino & Serien“; Ordner `kino-serien/` und Netlify-Projekt `kino-und-serien` heißen weiter so.)
 
 Zeigt, was für den deutschen Markt gerade neu ist und bald kommt: Kinofilme sowie Serien und neue Staffeln, jeweils mit Cover.
 Dazu eine eigene Liste, in der man Filme und Serien nach Staffeln und Folgen abhakt.

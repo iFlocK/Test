@@ -1,6 +1,6 @@
 {
-  "name": "Kino & Serien",
-  "short_name": "Kino & Serien",
+  "name": "Next Up – Filme und Serien",
+  "short_name": "Next Up",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

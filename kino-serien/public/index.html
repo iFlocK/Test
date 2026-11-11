@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<title>Kino & Serien</title>
+<title>Next Up – Filme und Serien</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Kino & Serien">
+<meta name="apple-mobile-web-app-title" content="Next Up">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -350,7 +350,8 @@
   /* Einführung */
   .intro { text-align: center; padding-top: 36px; }
   .intro-icon { width: 72px; height: 72px; border-radius: 18px; box-shadow: var(--shadow); }
-  .intro h2 { font-size: 30px; line-height: 1.12; font-weight: 700; margin: 16px 0 26px; letter-spacing: 0; }
+  .intro h2 { font-size: 30px; line-height: 1.12; font-weight: 700; margin: 16px 0 4px; letter-spacing: 0; }
+  .intro-sub { margin: 0 0 24px; font-size: 17px; font-weight: 600; color: var(--label-2); }
   .intro-list { text-align: left; display: grid; gap: 20px; max-width: 400px; margin: 0 auto 28px; }
   .intro-row { display: flex; gap: 14px; align-items: flex-start; }
   .intro-row svg { width: 34px; height: 34px; flex: none; color: var(--blue); margin-top: 2px; }
@@ -361,7 +362,7 @@
   .intro-go { width: 100%; max-width: 400px; height: 50px; border-radius: 14px; }
   @media (max-width: 600px) {
     .intro { padding-top: 28px; } .intro-icon { width: 60px; height: 60px; border-radius: 15px; }
-    .intro h2 { font-size: 26px; margin: 12px 0 20px; } .intro-list { gap: 15px; margin-bottom: 12px; }
+    .intro h2 { font-size: 26px; margin: 12px 0 4px; } .intro-sub { margin-bottom: 18px; } .intro-list { gap: 15px; margin-bottom: 12px; }
   }
 
   /* Schalter und Zeilen */
@@ -398,7 +399,7 @@
 
 <nav class="nav" id="nav">
   <div class="wrap nav-row">
-    <div class="nav-title" id="navTitle">Kino & Serien</div>
+    <div class="nav-title" id="navTitle">Next Up</div>
     <button class="icon-btn" id="settingsBtn" aria-label="Einstellungen" title="Einstellungen">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
     </button>
@@ -406,7 +407,7 @@
 </nav>
 
 <main class="wrap" id="main">
-  <h1 class="large-title" id="largeTitle">Kino & Serien</h1>
+  <h1 class="large-title" id="largeTitle">Next Up</h1>
   <p class="subtitle" id="subtitle">Was jetzt läuft und was bald kommt.</p>
 </main>
   <div class="controls-bar" id="controlsWrap" hidden><div class="wrap">
@@ -1317,7 +1318,8 @@
     $('#subtitle').textContent = '';
     view.innerHTML = `<div class="setup">
       <img class="icon-big" src="icon.svg" alt="">
-      <h2>Kino & Serien</h2>
+      <h2>Next Up</h2>
+      <p class="lead" style="margin:-4px 0 12px;font-weight:600">Filme und Serien</p>
       <p class="lead">Die Seite holt aktuelle Filme, Serien und Cover von TMDB. Dafür brauchst du einmalig einen kostenlosen Schlüssel.</p>
       <div class="group-label">So geht's</div>
       <div class="group"><ol class="steps">
@@ -1367,7 +1369,8 @@
     store.set(LS.intro, 1);
     const el = openSheet(`<div class="sheet-pad intro">
       <img class="intro-icon" src="icon.svg" alt="">
-      <h2>Willkommen bei<br>Kino & Serien</h2>
+      <h2>Willkommen bei<br>Next Up</h2>
+      <p class="intro-sub">Filme und Serien</p>
       <div class="intro-list">${INTRO.map(([ic, t, d]) => `<div class="intro-row">${icons[ic]}<div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div>
       <div class="intro-foot"><button class="btn btn-filled intro-go">Los geht's</button></div>
     </div>`, true);
@@ -1514,7 +1517,7 @@
   // ---------- Start ----------
   let syncStarted = false;
   async function start() {
-    $('#largeTitle').textContent = 'Kino & Serien';
+    $('#largeTitle').textContent = 'Next Up';
     view.innerHTML = skeleton(12);
     if (!syncStarted) { syncStarted = true; sync.init(); }
     let ok = false, err = null;
