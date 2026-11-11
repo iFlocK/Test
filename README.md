@@ -78,7 +78,7 @@ Gestaltet nach den Apple-Designrichtlinien (SF-Schrift, Segmentsteuerung, durchs
 Die Seite liegt in `kino-serien/public/index.html` und braucht keine Installation.
 
 - **Filme:** „Jetzt im Kino“ und „Demnächst im Kino“ (nach Monaten gruppiert, mit Countdown). Starttermine und FSK für das gewählte Land (Deutschland, Österreich, Schweiz).
-- **Serien:** neu gestartet (letzte 90 Tage) und demnächst (nächste 12 Monate). Nachrichten, Reality-TV, Talkshows und Seifenopern sind ausgeblendet.
+- **Serien:** neu gestartet (letzte 90 Tage, nur was im gewählten Land per Abo, kostenlos oder mit Werbung streambar ist) und demnächst (nächste 12 Monate). Nachrichten, Reality-TV, Talkshows und Seifenopern sind ausgeblendet, ebenso Titel ohne Namen in lateinischer Schrift.
 - **Details** per Tipp aufs Cover: Handlung, Trailer, Besetzung, Regie, Sender, nächste Folge, Streaming-Anbieter.
 - **Merkliste** und Suche in den geladenen Titeln.
 

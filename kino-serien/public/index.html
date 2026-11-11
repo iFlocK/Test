@@ -360,6 +360,7 @@
   // Nachrichten, Reality-TV, Talkshows und Seifenopern ausblenden
   const TV_SKIP_GENRES = '10763|10764|10767|10766';
   const PAGES_START = 2;
+  const LATIN = /[A-Za-zÀ-ɏ0-9]/;
 
   const $ = (s, el = document) => el.querySelector(s);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -525,7 +526,9 @@
     newTv: {
       type: 'tv', title: 'Neue Serien', eyebrow: 'Neue Serie',
       fetch: (page) => api('/discover/tv', {
-        page, sort_by: 'popularity.desc', without_genres: TV_SKIP_GENRES, watch_region: state.region,
+        page, sort_by: 'popularity.desc', without_genres: TV_SKIP_GENRES,
+        // nur Serien, die man im gewählten Land streamen kann
+        watch_region: state.region, with_watch_monetization_types: 'flatrate|free|ads',
         'first_air_date.gte': iso(addDays(today, -90)), 'first_air_date.lte': TODAY,
       }),
       sort: (a, b) => b.popularity - a.popularity,
@@ -555,7 +558,8 @@
       }
       L.page = want[want.length - 1];
       const seen = new Set(L.items.map((x) => x.id));
-      fresh = fresh.filter((x) => x.poster && !seen.has(x.id) && seen.add(x.id));
+      // ohne Cover oder ohne Titel in lateinischer Schrift (meist dann nicht hierzulande erschienen) weglassen
+      fresh = fresh.filter((x) => x.poster && LATIN.test(x.title) && !seen.has(x.id) && seen.add(x.id));
       if (def.post) fresh = await def.post(fresh);
       L.items = L.items.concat(fresh).sort(def.sort);
     } catch (e) {
