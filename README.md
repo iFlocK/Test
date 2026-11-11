@@ -117,3 +117,4 @@ unter ⚙️ ein Konto anlegen, dann ist die Liste auf allen Geräten gleich. Au
 - Abhängigkeit `@netlify/blobs` (Version 10) in `package.json`, Node 22 in `netlify.toml`.
 - App-Icon mit Filmklappe: `public/icon.svg` ist die Vorlage, daraus sind `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`
   und `favicon.png` erzeugt. Mit `manifest.webmanifest` lässt sich die Seite auf den Home-Bildschirm legen.
+- Beim ersten Öffnen erklärt eine Einführung die Funktionen (Merker `ks.intro` im Browser); unter ⚙️ → „Einführung zeigen“ lässt sie sich wieder aufrufen.

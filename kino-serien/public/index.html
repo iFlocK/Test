@@ -234,6 +234,7 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
   .sheet.open { transform: translate(-50%, 0); }
+  @media (prefers-color-scheme: dark) { .sheet { --bg: #1c1c1e; --bg-2: #2c2c2e; --bg-3: #3a3a3c; } }
   .sheet.small { width: min(100%, 560px); background: var(--bg); }
   @media (min-width: 800px) {
     .sheet { bottom: auto; top: 50%; border-radius: 16px; max-height: min(88vh, 900px); transform: translate(-50%, -46%) scale(.96); opacity: 0;
@@ -345,6 +346,23 @@
   .empty.small { padding: 20px 16px; font-size: 15px; }
   .btn-green { background: var(--green); color: #fff; }
 
+  /* Einführung */
+  .intro { text-align: center; padding-top: 36px; }
+  .intro-icon { width: 72px; height: 72px; border-radius: 18px; box-shadow: var(--shadow); }
+  .intro h2 { font-size: 30px; line-height: 1.12; font-weight: 700; margin: 16px 0 26px; letter-spacing: 0; }
+  .intro-list { text-align: left; display: grid; gap: 20px; max-width: 400px; margin: 0 auto 28px; }
+  .intro-row { display: flex; gap: 14px; align-items: flex-start; }
+  .intro-row svg { width: 34px; height: 34px; flex: none; color: var(--blue); margin-top: 2px; }
+  .intro-row b { font-size: 15px; font-weight: 600; }
+  .intro-row p { margin: 1px 0 0; font-size: 15px; line-height: 1.35; color: var(--label-2); }
+  .intro-foot { position: sticky; bottom: 0; margin: 0 -20px -28px; padding: 16px 20px calc(20px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--bg) 70%, transparent); }
+  .intro-go { width: 100%; max-width: 400px; height: 50px; border-radius: 14px; }
+  @media (max-width: 600px) {
+    .intro { padding-top: 28px; } .intro-icon { width: 60px; height: 60px; border-radius: 15px; }
+    .intro h2 { font-size: 26px; margin: 12px 0 20px; } .intro-list { gap: 15px; margin-bottom: 12px; }
+  }
+
   /* Schalter und Zeilen */
   .row .grow, .row > span:first-child { flex: 1; }
   .row .val, .row.muted { color: var(--label-2); }
@@ -421,7 +439,7 @@
   // ---------- Grundlagen ----------
   const TMDB = 'https://api.themoviedb.org/3';
   const IMG = 'https://image.tmdb.org/t/p/';
-  const LS = { key: 'ks.key', region: 'ks.region', saved: 'ks.saved', tab: 'ks.tab', cache: 'ks.c:', lib: 'ks.lib', world: 'ks.world', rev: 'ks.rev' };
+  const LS = { key: 'ks.key', region: 'ks.region', saved: 'ks.saved', tab: 'ks.tab', cache: 'ks.c:', lib: 'ks.lib', world: 'ks.world', rev: 'ks.rev', intro: 'ks.intro' };
   const REGIONS = { DE: 'Deutschland', AT: 'Österreich', CH: 'Schweiz' };
   // Nachrichten, Reality-TV, Talkshows und Seifenopern ausblenden
   const TV_SKIP_GENRES = '10763|10764|10767|10766';
@@ -450,6 +468,9 @@
     search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
     wifi: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 8.8a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg>',
     ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v8a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2z"/><path d="M14 6v12" stroke-dasharray="2 2.5"/></svg>',
+    tv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 18v3"/></svg>',
+    person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20.500a8 8 0 0 1 16 0"/></svg>',
+    checkCircle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.500"/><path d="m8 12.500 3 3 5-6"/></svg>',
     list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6.5 1.5 1.5L8 5M4 12.5 5.5 14 8 11M4 18.5 5.5 20 8 17M12 7h8M12 13h8M12 19h8"/></svg>',
   };
 
@@ -1332,6 +1353,26 @@
     });
   }
 
+  // ---------- Einführung beim ersten Öffnen ----------
+  const INTRO = [
+    ['ticket', 'Filme', 'Was jetzt im Kino läuft und was in den nächsten Monaten startet, mit Countdown bis zum Kinostart.'],
+    ['tv', 'Serien', 'Neue Serien und neue Staffeln, die du hier streamen kannst. Oben filterst du nach Anbieter und Genre.'],
+    ['search', 'Suche', 'Finde jeden Film und jede Serie, auch ältere. Ein Tipp aufs Cover zeigt Handlung, Trailer und Besetzung.'],
+    ['checkCircle', 'Abhaken', 'Markiere Filme als gesehen. Bei Serien hakst du ganze Staffeln oder einzelne Folgen ab.'],
+    ['list', 'Meine Liste', 'Zeigt deine nächste Folge, wann neue Folgen kommen und was du dir gemerkt hast.'],
+    ['person', 'Konto', 'Lege unter dem Zahnrad oben rechts ein Konto an, dann ist deine Liste auf all deinen Geräten gleich.'],
+  ];
+  function openIntro() {
+    store.set(LS.intro, 1);
+    const el = openSheet(`<div class="sheet-pad intro">
+      <img class="intro-icon" src="icon.svg" alt="">
+      <h2>Willkommen bei<br>Kino & Serien</h2>
+      <div class="intro-list">${INTRO.map(([ic, t, d]) => `<div class="intro-row">${icons[ic]}<div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div>
+      <div class="intro-foot"><button class="btn btn-filled intro-go">Los geht's</button></div>
+    </div>`, true);
+    el.querySelector('.intro-go').addEventListener('click', () => closeSheet());
+  }
+
   function accountHTML() {
     if (!sync.available) return `<div class="group-label">Konto</div><div class="group"><div class="row muted">Nicht verfügbar</div></div>
       <p class="group-foot">Den Abgleich zwischen Geräten gibt es in der veröffentlichten Version der Seite. Hier bleibt deine Liste in diesem Browser.</p>`;
@@ -1368,6 +1409,7 @@
       <div class="group-label">Daten</div>
       <div class="group">
         <div class="row"><button class="row-btn" id="clearCache">Listen neu laden</button></div>
+        <div class="row"><button class="row-btn" id="showIntro">Einführung zeigen</button></div>
       </div>
       <p class="group-foot">Listen werden für drei Stunden zwischengespeichert, damit die Seite schnell lädt.</p>
     </div>`, true);
@@ -1380,6 +1422,7 @@
     });
     el.querySelector('#logout')?.addEventListener('click', () => { store.del(LS.key); state.key = ''; clearCache(); reload(); });
     el.querySelector('#clearCache').addEventListener('click', () => { clearCache(); reload(); toast('Wird neu geladen'); });
+    el.querySelector('#showIntro').addEventListener('click', openIntro);
     bindAccount(el);
   }
 
@@ -1489,6 +1532,7 @@
     requestAnimationFrame(sizeThumb);
     try { await loadGenres(); } catch {}
     showTab(state.tab);
+    if (!store.get(LS.intro)) openIntro();
   }
   start();
 })();
