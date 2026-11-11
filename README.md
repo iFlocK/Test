@@ -70,3 +70,22 @@ und ihren eigenen Patch Notes. Alle Jana-Anpassungen stehen nur im Skript, die �
 3. Erst wenn ein Paket fertig ist, **einmal** zu Netlify hochladen. Jedes Veröffentlichen kostet Guthaben.
 4. Vor jedem Upload die Version erhöhen: in `index.html` oben in `CHANGELOG` einen neuen Eintrag mit Versionsnummer und Patch Notes ergänzen.
    Beim nächsten Öffnen zeigt die Seite dann einmal das Fenster „Was ist neu?“. Geheimnisse dort nur andeuten, nicht verraten.
+
+# Kino & Serien
+
+Zeigt alle aktuellen und kommenden Kinofilme sowie neue und bald startende Serien, jeweils mit Cover.
+Gestaltet nach den Apple-Designrichtlinien (SF-Schrift, Segmentsteuerung, durchscheinende Leisten, Sheets, heller und dunkler Modus).
+Die Seite liegt in `kino-serien/public/index.html` und braucht keine Installation.
+
+- **Filme:** „Jetzt im Kino“ und „Demnächst im Kino“ (nach Monaten gruppiert, mit Countdown). Starttermine und FSK für das gewählte Land (Deutschland, Österreich, Schweiz).
+- **Serien:** neu gestartet (letzte 90 Tage) und demnächst (nächste 12 Monate). Nachrichten, Reality-TV, Talkshows und Seifenopern sind ausgeblendet.
+- **Details** per Tipp aufs Cover: Handlung, Trailer, Besetzung, Regie, Sender, nächste Folge, Streaming-Anbieter.
+- **Merkliste** und Suche in den geladenen Titeln.
+
+Daten und Cover kommen von [TMDB](https://www.themoviedb.org). Dafür braucht man einen kostenlosen Schlüssel
+(Konto anlegen, dann unter *Einstellungen → API* beantragen). Es gibt zwei Wege:
+
+1. **Im Browser:** Seite öffnen und den Schlüssel einfügen. Er bleibt nur im `localStorage` dieses Browsers.
+2. **Auf Netlify (ohne Eingabe auf jedem Gerät):** Ordner `kino-serien/` veröffentlichen und die Umgebungsvariable `TMDB_KEY` setzen.
+   Die Edge-Funktion `netlify/edge-functions/tmdb.ts` reicht die Anfragen dann unter `/api/tmdb/*` weiter.
+   Listen werden im Browser drei Stunden zwischengespeichert, damit möglichst wenige Aufrufe anfallen.

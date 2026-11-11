@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<title>Kino & Serien</title>
+<link rel="preconnect" href="https://image.tmdb.org">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-2: #f2f2f7;
+    --bg-3: #ffffff;
+    --fill: rgba(120,120,128,.12);
+    --fill-2: rgba(120,120,128,.2);
+    --label: #000000;
+    --label-2: rgba(60,60,67,.6);
+    --label-3: rgba(60,60,67,.3);
+    --sep: rgba(60,60,67,.18);
+    --blue: #007aff;
+    --red: #ff3b30;
+    --orange: #ff9500;
+    --green: #34c759;
+    --bar: rgba(255,255,255,.72);
+    --thumb: #ffffff;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.08);
+    --radius: 12px;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000000;
+      --bg-2: #1c1c1e;
+      --bg-3: #2c2c2e;
+      --fill: rgba(120,120,128,.24);
+      --fill-2: rgba(120,120,128,.36);
+      --label: #ffffff;
+      --label-2: rgba(235,235,245,.6);
+      --label-3: rgba(235,235,245,.3);
+      --sep: rgba(84,84,88,.6);
+      --blue: #0a84ff;
+      --red: #ff453a;
+      --orange: #ff9f0a;
+      --green: #30d158;
+      --bar: rgba(22,22,24,.72);
+      --thumb: #636366;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.5);
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--label);
+    font: 17px/1.35 var(--font); letter-spacing: -.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+  body.locked { overflow: hidden; }
+  button, input, select { font: inherit; color: inherit; letter-spacing: inherit; }
+  button { cursor: pointer; border: 0; background: none; padding: 0; }
+  :focus-visible { outline: 3px solid color-mix(in srgb, var(--blue) 60%, transparent); outline-offset: 2px; border-radius: 8px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left)); }
+
+  /* Navigationsleiste */
+  .nav {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--bar);
+    -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: .5px solid transparent; transition: border-color .2s;
+    padding-top: env(safe-area-inset-top);
+  }
+  .nav.scrolled { border-bottom-color: var(--sep); }
+  .nav-row { display: flex; align-items: center; gap: 12px; height: 52px; }
+  .nav-title { font-weight: 600; font-size: 17px; opacity: 0; transform: translateY(4px); transition: .2s; flex: 1; white-space: nowrap; }
+  .nav.scrolled .nav-title { opacity: 1; transform: none; }
+  .icon-btn {
+    width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+    color: var(--blue); background: var(--fill); flex: none;
+  }
+  .icon-btn:hover { background: var(--fill-2); }
+  .icon-btn[hidden], .large-title:empty, .subtitle:empty { display: none; }
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  .large-title { font-size: 34px; line-height: 41px; font-weight: 700; letter-spacing: .01em; margin: 4px 0 2px; }
+  .subtitle { color: var(--label-2); font-size: 15px; margin: 0 0 16px; }
+
+  .controls-bar {
+    position: sticky; top: calc(52px + env(safe-area-inset-top)); z-index: 19; margin-bottom: 8px;
+    background: var(--bar); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+  }
+  .controls-bar.stuck { box-shadow: 0 .5px 0 var(--sep); }
+  .nav.scrolled { border-bottom-color: transparent; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 8px 0; }
+  /* Segmentsteuerung */
+  .segmented {
+    position: relative; display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+    background: var(--fill); border-radius: 9px; padding: 2px; min-width: min(100%, 360px);
+  }
+  .segmented button {
+    position: relative; z-index: 1; height: 30px; padding: 0 14px; font-size: 13px; font-weight: 500;
+    border-radius: 7px; white-space: nowrap; transition: font-weight .2s;
+  }
+  .segmented button[aria-selected="true"] { font-weight: 600; }
+  .segmented .thumb {
+    position: absolute; z-index: 0; top: 2px; bottom: 2px; left: 2px; border-radius: 7px;
+    background: var(--thumb); box-shadow: 0 3px 8px rgba(0,0,0,.12), 0 3px 1px rgba(0,0,0,.04);
+    transition: transform .3s cubic-bezier(.3,.7,.2,1);
+  }
+  .search {
+    flex: 1; min-width: 200px; display: flex; align-items: center; gap: 6px;
+    background: var(--fill); border-radius: 10px; height: 36px; padding: 0 8px; color: var(--label-2);
+  }
+  .search svg { width: 16px; height: 16px; flex: none; }
+  .search input { flex: 1; border: 0; background: none; outline: none; color: var(--label); font-size: 17px; min-width: 0; }
+  .search input::placeholder { color: var(--label-2); }
+
+  /* Hero */
+  .hero {
+    position: relative; margin: 8px 0 28px; border-radius: 16px; overflow: hidden; aspect-ratio: 21/9;
+    background: var(--bg-2); box-shadow: var(--shadow); cursor: pointer; min-height: 220px; max-height: 460px; width: 100%;
+  }
+  .hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.78), rgba(0,0,0,.15) 55%, transparent); }
+  .hero-text { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; padding: 24px; color: #fff; }
+  .hero-eyebrow { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; opacity: .85; }
+  .hero-title { font-size: clamp(24px, 4vw, 40px); font-weight: 700; line-height: 1.1; margin: 4px 0 8px; letter-spacing: 0; }
+  .hero-desc { max-width: 620px; font-size: 15px; opacity: .9; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* Abschnitte */
+  section { margin-bottom: 36px; }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 0 12px; }
+  .sec-head h2 { font-size: 22px; font-weight: 700; margin: 0; letter-spacing: 0; }
+  .sec-head .count { color: var(--label-2); font-size: 15px; }
+  .month {
+    position: sticky; top: calc(52px + var(--ctl-h, 52px) + env(safe-area-inset-top)); z-index: 5;
+    font-size: 15px; font-weight: 600; color: var(--label-2); padding: 10px 0 8px; margin: 8px 0 4px;
+    background: var(--bg);
+  }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 24px 18px; }
+  .card { text-align: left; display: block; width: 100%; color: inherit; }
+  .poster {
+    position: relative; aspect-ratio: 2/3; border-radius: var(--radius); overflow: hidden;
+    background: var(--bg-2); box-shadow: var(--shadow); transition: transform .25s cubic-bezier(.3,.7,.2,1), box-shadow .25s;
+  }
+  .card:hover .poster { transform: scale(1.03); }
+  .card:active .poster { transform: scale(.97); }
+  .poster img { position: relative; width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .3s; }
+  .poster img.loaded { opacity: 1; }
+  .poster .ph {
+    position: absolute; inset: 0; display: grid; place-items: center; padding: 12px; text-align: center;
+    color: var(--label-2); font-size: 14px; font-weight: 600;
+    background: linear-gradient(160deg, var(--bg-2), var(--fill-2));
+  }
+  .badge {
+    position: absolute; left: 8px; top: 8px; z-index: 2; font-size: 12px; font-weight: 600;
+    padding: 3px 8px; border-radius: 999px; color: #fff;
+    background: rgba(0,0,0,.5); -webkit-backdrop-filter: blur(12px) saturate(180%); backdrop-filter: blur(12px) saturate(180%);
+  }
+  .badge.soon { background: color-mix(in srgb, var(--blue) 85%, transparent); }
+  .mark {
+    position: absolute; right: 8px; top: 8px; z-index: 2; width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center; color: #fff;
+    background: rgba(0,0,0,.45); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  }
+  .mark svg { width: 14px; height: 14px; }
+  .card-title { font-size: 15px; font-weight: 600; margin: 10px 0 2px; line-height: 1.25;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-meta { font-size: 13px; color: var(--label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .more { display: flex; justify-content: center; margin-top: 24px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    height: 44px; padding: 0 20px; border-radius: 12px; font-size: 17px; font-weight: 600;
+    white-space: nowrap; text-decoration: none;
+  }
+  .btn-tinted { background: color-mix(in srgb, var(--blue) 15%, transparent); color: var(--blue); }
+  .btn-filled { background: var(--blue); color: #fff; }
+  .btn-gray { background: var(--fill); color: var(--label); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn svg { width: 18px; height: 18px; }
+
+  .empty { text-align: center; color: var(--label-2); padding: 48px 16px; }
+  .empty h3 { color: var(--label); font-size: 20px; margin: 12px 0 6px; }
+  .empty svg { width: 48px; height: 48px; color: var(--label-3); }
+
+  /* Ladeplatzhalter */
+  .skel .poster { animation: pulse 1.4s ease-in-out infinite; }
+  .skel .line { height: 12px; border-radius: 6px; background: var(--bg-2); margin-top: 10px; width: 80%; animation: pulse 1.4s ease-in-out infinite; }
+  .skel .line.short { width: 50%; margin-top: 6px; }
+  @keyframes pulse { 50% { opacity: .5; } }
+
+  /* Grouped Inset (Einrichtung, Einstellungen) */
+  .setup { max-width: 560px; margin: 24px auto 64px; }
+  .setup .icon-big { width: 72px; height: 72px; border-radius: 18px; display: grid; place-items: center; margin: 0 auto 16px;
+    background: linear-gradient(145deg, #ff375f, #ff9f0a); color: #fff; box-shadow: var(--shadow); }
+  .setup .icon-big svg { width: 40px; height: 40px; }
+  .setup h2 { text-align: center; font-size: 28px; margin: 0 0 8px; }
+  .setup p.lead { text-align: center; color: var(--label-2); margin: 0 0 24px; }
+  .group-label { font-size: 13px; color: var(--label-2); text-transform: uppercase; letter-spacing: .02em; margin: 20px 16px 6px; }
+  .group { background: var(--bg-2); border-radius: 10px; overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 16px; }
+  .row + .row { box-shadow: inset 0 .5px 0 var(--sep); margin-left: 16px; padding-left: 0; }
+  .row label { flex: none; }
+  .row input, .row select { flex: 1; min-width: 0; border: 0; background: none; outline: none; text-align: right; font-size: 17px; color: var(--label-2); }
+  .row select { -webkit-appearance: none; appearance: none; cursor: pointer; direction: rtl; }
+  .row input:focus { color: var(--label); }
+  .group-foot { font-size: 13px; color: var(--label-2); margin: 6px 16px 0; line-height: 1.4; }
+  .group-foot a, .steps a { color: var(--blue); text-decoration: none; }
+  .steps { margin: 0; padding: 12px 16px 12px 36px; font-size: 15px; line-height: 1.5; }
+  .steps li + li { margin-top: 6px; }
+  .error { color: var(--red); font-size: 15px; text-align: center; margin: 12px 0 0; min-height: 1.4em; }
+  .actions { display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .row-btn { width: 100%; text-align: left; color: var(--blue); }
+  .row-btn.destructive { color: var(--red); }
+
+  /* Sheet */
+  .scrim { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.4); opacity: 0; transition: opacity .3s; }
+  .scrim.open { opacity: 1; }
+  .sheet {
+    position: fixed; z-index: 41; left: 50%; bottom: 0; width: min(100%, 760px);
+    max-height: calc(100% - 40px - env(safe-area-inset-top)); overflow: auto; overscroll-behavior: contain;
+    background: var(--bg); border-radius: 14px 14px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,.25);
+    transform: translate(-50%, 100%); transition: transform .38s cubic-bezier(.3,.8,.2,1);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .sheet.open { transform: translate(-50%, 0); }
+  .sheet.small { width: min(100%, 560px); background: var(--bg); }
+  @media (min-width: 800px) {
+    .sheet { bottom: auto; top: 50%; border-radius: 16px; max-height: min(88vh, 900px); transform: translate(-50%, -46%) scale(.96); opacity: 0;
+      transition: transform .3s cubic-bezier(.3,.8,.2,1), opacity .25s; }
+    .sheet.open { transform: translate(-50%, -50%); opacity: 1; }
+    .grabber { display: none; }
+  }
+  .grabber { position: absolute; z-index: 3; top: 6px; left: 50%; width: 36px; height: 5px; margin-left: -18px; border-radius: 3px; background: rgba(255,255,255,.6); }
+  .sheet.small .grabber { background: var(--label-3); }
+  .close {
+    position: absolute; z-index: 3; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center; color: rgba(255,255,255,.9);
+    background: rgba(0,0,0,.35); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  }
+  .close svg { width: 12px; height: 12px; }
+  .sheet.small .close { background: var(--fill); color: var(--label-2); }
+  .sheet-pad { padding: 20px 20px 28px; }
+  .sheet.small .sheet-pad { padding-top: 20px; }
+  .sheet-h { font-size: 20px; font-weight: 700; text-align: center; margin: 4px 0 8px; }
+
+  .backdrop { position: relative; aspect-ratio: 16/9; background: var(--bg-2); overflow: hidden; }
+  .backdrop img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .backdrop::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg), transparent 55%); }
+  .d-head { display: flex; gap: 18px; margin-top: -90px; position: relative; z-index: 2; align-items: flex-end; }
+  .d-poster { width: 120px; flex: none; aspect-ratio: 2/3; border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); background: var(--bg-2); }
+  .d-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .d-title { font-size: 26px; font-weight: 700; line-height: 1.15; margin: 0; letter-spacing: 0; }
+  .d-tagline { color: var(--label-2); font-size: 15px; margin: 4px 0 0; font-style: italic; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 0; }
+  .chip { font-size: 13px; font-weight: 500; padding: 4px 10px; border-radius: 999px; background: var(--fill); color: var(--label); white-space: nowrap; }
+  .chip.fsk { background: none; box-shadow: inset 0 0 0 1px var(--label-3); }
+  .chip.star { color: var(--orange); background: color-mix(in srgb, var(--orange) 14%, transparent); }
+  .d-actions { display: flex; gap: 10px; margin: 18px 0 4px; flex-wrap: wrap; }
+  .d-actions .btn { flex: 1; min-width: 0; padding: 0 12px; }
+  .d-sec { margin-top: 22px; }
+  .d-sec h3 { font-size: 20px; font-weight: 700; margin: 0 0 8px; letter-spacing: 0; }
+  .d-sec p { margin: 0; font-size: 17px; line-height: 1.45; }
+  .facts { background: var(--bg-2); border-radius: 10px; overflow: hidden; margin-top: 4px; }
+  .fact { display: flex; justify-content: space-between; gap: 16px; padding: 11px 16px; font-size: 15px; }
+  .fact + .fact { box-shadow: inset 16px .5px 0 var(--bg-2), inset 0 .5px 0 var(--sep); }
+  .fact span:first-child { color: var(--label-2); }
+  .fact span:last-child { text-align: right; }
+  .cast { display: flex; gap: 14px; overflow-x: auto; padding: 4px 2px 8px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .cast::-webkit-scrollbar { display: none; }
+  .person { width: 84px; flex: none; text-align: center; scroll-snap-align: start; }
+  .person .ava { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 6px; overflow: hidden; background: var(--bg-2);
+    display: grid; place-items: center; color: var(--label-3); font-weight: 600; font-size: 20px; }
+  .person .ava img { width: 100%; height: 100%; object-fit: cover; }
+  .person .n { font-size: 13px; font-weight: 500; line-height: 1.2; }
+  .person .r { font-size: 12px; color: var(--label-2); line-height: 1.2; margin-top: 2px; }
+  .providers { display: flex; flex-wrap: wrap; gap: 10px; }
+  .prov { display: flex; align-items: center; gap: 8px; font-size: 15px; background: var(--bg-2); border-radius: 10px; padding: 6px 12px 6px 6px; }
+  .prov img { width: 30px; height: 30px; border-radius: 7px; }
+
+  footer { color: var(--label-2); font-size: 12px; text-align: center; padding: 24px 20px calc(32px + env(safe-area-inset-bottom)); line-height: 1.5; }
+  footer a { color: inherit; }
+
+  .toast {
+    position: fixed; z-index: 60; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px);
+    background: var(--bg-3); color: var(--label); box-shadow: var(--shadow); border-radius: 999px; padding: 10px 18px;
+    font-size: 15px; font-weight: 500; opacity: 0; transition: .3s; pointer-events: none; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 0 16px; }
+    .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 12px; }
+    .card-title { font-size: 13px; margin-top: 8px; }
+    .card-meta { font-size: 12px; }
+    .badge { font-size: 11px; left: 6px; top: 6px; padding: 2px 6px; }
+    .mark { width: 24px; height: 24px; right: 6px; top: 6px; }
+    .hero { aspect-ratio: 4/3; }
+    .hero-text { padding: 18px; }
+    .segmented { width: 100%; }
+    .d-poster { width: 96px; }
+    .d-title { font-size: 22px; }
+    .d-head { margin-top: -60px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: .01ms !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="wrap nav-row">
+    <div class="nav-title" id="navTitle">Kino & Serien</div>
+    <button class="icon-btn" id="settingsBtn" aria-label="Einstellungen" title="Einstellungen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </div>
+</nav>
+
+<main class="wrap" id="main">
+  <h1 class="large-title" id="largeTitle">Kino & Serien</h1>
+  <p class="subtitle" id="subtitle">Was jetzt läuft und was bald kommt.</p>
+</main>
+  <div class="controls-bar" id="controlsWrap" hidden><div class="wrap">
+    <div class="controls">
+      <div class="segmented" role="tablist" id="tabs">
+        <span class="thumb" id="thumb"></span>
+        <button role="tab" data-tab="movies" aria-selected="true">Filme</button>
+        <button role="tab" data-tab="tv" aria-selected="false">Serien</button>
+        <button role="tab" data-tab="saved" aria-selected="false">Merkliste</button>
+      </div>
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="search" placeholder="Suchen" autocomplete="off" aria-label="Titel suchen">
+      </label>
+    </div>
+  </div>
+  </div>
+<div class="wrap" id="viewWrap"><div id="view"></div></div>
+
+<footer>
+  Daten und Cover von <a href="https://www.themoviedb.org" target="_blank" rel="noopener">The Movie Database (TMDB)</a>.
+  Diese Seite nutzt die TMDB-Schnittstelle, ist aber nicht von TMDB unterstützt oder zertifiziert.
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------- Grundlagen ----------
+  const TMDB = 'https://api.themoviedb.org/3';
+  const IMG = 'https://image.tmdb.org/t/p/';
+  const LS = { key: 'ks.key', region: 'ks.region', saved: 'ks.saved', tab: 'ks.tab', cache: 'ks.c:' };
+  const REGIONS = { DE: 'Deutschland', AT: 'Österreich', CH: 'Schweiz' };
+  // Nachrichten, Reality-TV, Talkshows und Seifenopern ausblenden
+  const TV_SKIP_GENRES = '10763|10764|10767|10766';
+  const PAGES_START = 2;
+
+  const $ = (s, el = document) => el.querySelector(s);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const store = {
+    get(k, d = null) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } },
+    del(k) { try { localStorage.removeItem(k); } catch {} },
+  };
+
+  const icons = {
+    bookmark: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/></svg>',
+    bookmarkO: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/></svg>',
+    play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    film: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 3v18M17 3v18M3 8h4M3 12h4M3 16h4M17 8h4M17 12h4M17 16h4"/></svg>',
+    tv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 18v3"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+    wifi: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 8.8a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg>',
+    ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v8a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2z"/><path d="M14 6v12" stroke-dasharray="2 2.5"/></svg>',
+  };
+
+  // ---------- Datum ----------
+  const pad = (n) => String(n).padStart(2, '0');
+  const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const parse = (s) => { if (!s) return null; const [y, m, d] = s.slice(0, 10).split('-').map(Number); return new Date(y, m - 1, d); };
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const TODAY = iso(today);
+  const fmtDate = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+  const fmtShort = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'short' });
+  const fmtMonth = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' });
+  const daysUntil = (s) => Math.round((parse(s) - today) / 864e5);
+  function relLabel(s) {
+    const n = daysUntil(s);
+    if (n === 0) return 'Heute';
+    if (n === 1) return 'Morgen';
+    if (n > 1 && n < 14) return `in ${n} Tagen`;
+    return fmtShort.format(parse(s));
+  }
+
+  // ---------- Zustand ----------
+  const state = {
+    key: store.get(LS.key, ''),
+    region: store.get(LS.region, 'DE'),
+    useProxy: false,
+    tab: store.get(LS.tab, 'movies'),
+    query: '',
+    genres: { movie: {}, tv: {} },
+    lists: {},       // id -> { items, page, total, loading }
+    saved: store.get(LS.saved, []), // [{type,id,title,poster,date}]
+  };
+  const lang = () => 'de-' + state.region;
+
+  // ---------- Schnittstelle ----------
+  function readCache(k) {
+    const v = store.get(k);
+    if (v && v.exp > Date.now()) return v.data;
+    return null;
+  }
+  function writeCache(k, data, ttl) {
+    if (store.set(k, { exp: Date.now() + ttl, data })) return;
+    // Speicher voll: alte Zwischenspeicher-Einträge entfernen und noch einmal versuchen
+    try {
+      Object.keys(localStorage).filter((x) => x.startsWith(LS.cache)).forEach((x) => localStorage.removeItem(x));
+    } catch {}
+    store.set(k, { exp: Date.now() + ttl, data });
+  }
+
+  async function api(path, params = {}, ttl = 3 * 3600e3) {
+    const qs = new URLSearchParams({ language: lang(), ...params });
+    const ck = LS.cache + state.region + path + '?' + qs;
+    const hit = readCache(ck);
+    if (hit) return hit;
+
+    let url, headers = { accept: 'application/json' };
+    if (state.key) {
+      if (state.key.startsWith('eyJ')) headers.authorization = 'Bearer ' + state.key;
+      else qs.set('api_key', state.key);
+      url = TMDB + path + '?' + qs;
+    } else {
+      url = '/api/tmdb' + path + '?' + qs;
+    }
+    const res = await fetch(url, { headers });
+    if (!res.ok) {
+      const err = new Error('HTTP ' + res.status);
+      err.status = res.status;
+      throw err;
+    }
+    const data = await res.json();
+    writeCache(ck, data, ttl);
+    return data;
+  }
+
+  async function checkAccess() {
+    if (state.key) {
+      await api('/configuration', {}, 24 * 3600e3);
+      return true;
+    }
+    if (location.protocol === 'file:') return false;
+    try {
+      const r = await fetch('/api/tmdb/configuration', { headers: { accept: 'application/json' } });
+      if (r.ok && (r.headers.get('content-type') || '').includes('json')) { state.useProxy = true; return true; }
+    } catch {}
+    return false;
+  }
+
+  async function loadGenres() {
+    const [m, t] = await Promise.all([api('/genre/movie/list', {}, 7 * 864e5), api('/genre/tv/list', {}, 7 * 864e5)]);
+    for (const g of m.genres || []) state.genres.movie[g.id] = g.name;
+    for (const g of t.genres || []) state.genres.tv[g.id] = g.name;
+  }
+
+  // Mehrere Anfragen gleichzeitig, aber nicht zu viele auf einmal
+  async function pool(items, n, fn) {
+    const out = new Array(items.length); let i = 0;
+    await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => {
+      while (i < items.length) { const k = i++; try { out[k] = await fn(items[k]); } catch { out[k] = null; } }
+    }));
+    return out;
+  }
+
+  // Das Startdatum im gewählten Land (TMDB liefert in Listen sonst oft das US-Datum)
+  async function regionalDates(movies) {
+    const res = await pool(movies, 6, (m) => api(`/movie/${m.id}/release_dates`, {}, 24 * 3600e3));
+    movies.forEach((m, i) => {
+      const r = res[i]?.results?.find((x) => x.iso_3166_1 === state.region);
+      if (!r) return;
+      const theatrical = r.release_dates.filter((d) => d.type === 3 || d.type === 2).map((d) => d.release_date.slice(0, 10)).sort();
+      if (theatrical.length) m.localDate = theatrical[0];
+      const cert = r.release_dates.map((d) => d.certification).find(Boolean);
+      if (cert) m.cert = cert;
+    });
+  }
+
+  const norm = (x, type) => ({
+    type, id: x.id,
+    title: type === 'movie' ? x.title : x.name,
+    original: type === 'movie' ? x.original_title : x.original_name,
+    date: (type === 'movie' ? x.release_date : x.first_air_date) || '',
+    poster: x.poster_path, backdrop: x.backdrop_path,
+    overview: x.overview || '',
+    genreIds: x.genre_ids || [],
+    vote: x.vote_average, votes: x.vote_count, popularity: x.popularity,
+  });
+
+  // Listen-Definitionen
+  const LISTS = {
+    nowMovies: {
+      type: 'movie', title: 'Jetzt im Kino', eyebrow: 'Neu im Kino',
+      fetch: (page) => api('/movie/now_playing', { region: state.region, page }),
+      post: async (items) => { await regionalDates(items); return items.filter((m) => !m.localDate || m.localDate <= TODAY); },
+      sort: (a, b) => b.popularity - a.popularity,
+    },
+    soonMovies: {
+      type: 'movie', title: 'Demnächst im Kino', grouped: true,
+      fetch: (page) => api('/discover/movie', {
+        region: state.region, page, sort_by: 'popularity.desc', with_release_type: '2|3',
+        'release_date.gte': iso(addDays(today, 1)), 'release_date.lte': iso(addDays(today, 365)),
+      }),
+      post: async (items) => { await regionalDates(items); return items.filter((m) => (m.localDate || m.date) > TODAY); },
+      sort: (a, b) => (a.localDate || a.date).localeCompare(b.localDate || b.date) || b.popularity - a.popularity,
+    },
+    newTv: {
+      type: 'tv', title: 'Neue Serien', eyebrow: 'Neue Serie',
+      fetch: (page) => api('/discover/tv', {
+        page, sort_by: 'popularity.desc', without_genres: TV_SKIP_GENRES, watch_region: state.region,
+        'first_air_date.gte': iso(addDays(today, -90)), 'first_air_date.lte': TODAY,
+      }),
+      sort: (a, b) => b.popularity - a.popularity,
+    },
+    soonTv: {
+      type: 'tv', title: 'Demnächst', grouped: true,
+      fetch: (page) => api('/discover/tv', {
+        page, sort_by: 'popularity.desc', without_genres: TV_SKIP_GENRES,
+        'first_air_date.gte': iso(addDays(today, 1)), 'first_air_date.lte': iso(addDays(today, 365)),
+      }),
+      sort: (a, b) => a.date.localeCompare(b.date) || b.popularity - a.popularity,
+    },
+  };
+
+  async function loadList(id, pages = 1) {
+    const def = LISTS[id];
+    const L = state.lists[id] ||= { items: [], page: 0, total: 1, loading: false, error: null };
+    if (L.loading || L.page >= L.total) return;
+    L.loading = true; L.error = null;
+    try {
+      const want = Array.from({ length: pages }, (_, i) => L.page + 1 + i).filter((p) => p <= Math.max(L.total, pages));
+      const results = await Promise.all(want.map((p) => def.fetch(p)));
+      let fresh = [];
+      for (const r of results) {
+        L.total = Math.min(r.total_pages || 1, 500);
+        fresh.push(...(r.results || []).map((x) => norm(x, def.type)));
+      }
+      L.page = want[want.length - 1];
+      const seen = new Set(L.items.map((x) => x.id));
+      fresh = fresh.filter((x) => x.poster && !seen.has(x.id) && seen.add(x.id));
+      if (def.post) fresh = await def.post(fresh);
+      L.items = L.items.concat(fresh).sort(def.sort);
+    } catch (e) {
+      L.error = e;
+    } finally {
+      L.loading = false;
+    }
+  }
+
+  // ---------- Darstellung ----------
+  const view = $('#view');
+  const genreNames = (it, n = 2) => it.genreIds.map((g) => state.genres[it.type][g]).filter(Boolean).slice(0, n);
+  const showDate = (it) => it.localDate || it.date;
+  const isSaved = (it) => state.saved.some((s) => s.type === it.type && s.id === it.id);
+
+  function cardHTML(it, opts = {}) {
+    const d = showDate(it);
+    let badge = '';
+    if (opts.soon && d) badge = `<span class="badge soon">${esc(relLabel(d))}</span>`;
+    else if (opts.badge) badge = `<span class="badge">${esc(opts.badge)}</span>`;
+    const meta = [];
+    if (d) meta.push(opts.soon ? fmtShort.format(parse(d)) : (it.type === 'movie' ? 'seit ' : 'ab ') + fmtShort.format(parse(d)));
+    meta.push(...genreNames(it, 1));
+    const img = it.poster
+      ? `<img loading="lazy" decoding="async" alt="" src="${IMG}w342${esc(it.poster)}" srcset="${IMG}w185${esc(it.poster)} 185w, ${IMG}w342${esc(it.poster)} 342w, ${IMG}w500${esc(it.poster)} 500w" sizes="(max-width:600px) 33vw, 180px" onload="this.classList.add('loaded')" onerror="this.remove()">`
+      : '';
+    return `<button class="card" data-type="${it.type}" data-id="${it.id}" aria-label="${esc(it.title)}">
+      <div class="poster"><div class="ph">${esc(it.title)}</div>${img}${badge}
+        ${isSaved(it) ? `<span class="mark" aria-label="Gemerkt">${icons.bookmark}</span>` : ''}</div>
+      <div class="card-title">${esc(it.title)}</div>
+      <div class="card-meta">${esc(meta.join(' · ')) || '&nbsp;'}</div>
+    </button>`;
+  }
+
+  const skeleton = (n = 12) => `<div class="grid">${Array.from({ length: n }, () =>
+    '<div class="card skel"><div class="poster"></div><div class="line"></div><div class="line short"></div></div>').join('')}</div>`;
+
+  function matches(it) {
+    const q = state.query.trim().toLowerCase();
+    if (!q) return true;
+    return (it.title + ' ' + (it.original || '') + ' ' + genreNames(it, 9).join(' ')).toLowerCase().includes(q);
+  }
+
+  function sectionHTML(id) {
+    const def = LISTS[id], L = state.lists[id];
+    const head = (n) => `<div class="sec-head"><h2>${esc(def.title)}</h2>${n != null ? `<span class="count">${n} Titel</span>` : ''}</div>`;
+    if (!L || (L.loading && !L.items.length)) return `<section>${head()}${skeleton(def.grouped ? 6 : 12)}</section>`;
+    if (L.error && !L.items.length) return `<section>${head()}${errorHTML(L.error, id)}</section>`;
+    const items = L.items.filter(matches);
+    if (!items.length) return state.query ? '' : `<section>${head(0)}<div class="empty">Gerade nichts gefunden.</div></section>`;
+
+    let body;
+    if (def.grouped) {
+      const groups = new Map();
+      for (const it of items) {
+        const k = showDate(it).slice(0, 7);
+        if (!groups.has(k)) groups.set(k, []);
+        groups.get(k).push(it);
+      }
+      body = [...groups].map(([k, arr]) =>
+        `<div class="month">${esc(fmtMonth.format(parse(k + '-01')))}</div><div class="grid">${arr.map((it) => cardHTML(it, { soon: true })).join('')}</div>`
+      ).join('');
+    } else {
+      body = `<div class="grid">${items.map((it) => cardHTML(it)).join('')}</div>`;
+    }
+    const more = !state.query && L.page < L.total
+      ? `<div class="more"><button class="btn btn-tinted" data-more="${id}" ${L.loading ? 'disabled' : ''}>${L.loading ? 'Lädt …' : 'Mehr laden'}</button></div>` : '';
+    return `<section id="sec-${id}">${head(items.length)}${body}${more}</section>`;
+  }
+
+  function errorHTML(e, id) {
+    const auth = e.status === 401;
+    return `<div class="empty">${icons.wifi}
+      <h3>${auth ? 'Schlüssel ungültig' : 'Keine Verbindung'}</h3>
+      <p>${auth ? 'TMDB hat den Schlüssel abgelehnt. Prüfe ihn in den Einstellungen.' : 'Die Daten konnten nicht geladen werden.'}</p>
+      <div class="actions"><button class="btn btn-tinted" data-retry="${id || ''}">Erneut versuchen</button></div></div>`;
+  }
+
+  function heroHTML(listId) {
+    const L = state.lists[listId];
+    const it = L?.items.find((x) => x.backdrop && matches(x));
+    if (!it || state.query) return '';
+    return `<div class="hero" data-type="${it.type}" data-id="${it.id}" role="button" tabindex="0" aria-label="${esc(it.title)} – Details">
+      <img alt="" src="${IMG}w1280${esc(it.backdrop)}" srcset="${IMG}w780${esc(it.backdrop)} 780w, ${IMG}w1280${esc(it.backdrop)} 1280w" sizes="(max-width:1240px) 100vw, 1200px">
+      <div class="hero-text">
+        <div class="hero-eyebrow">${esc(LISTS[listId].eyebrow)}</div>
+        <div class="hero-title">${esc(it.title)}</div>
+        <div class="hero-desc">${esc(it.overview)}</div>
+      </div></div>`;
+  }
+
+  function savedHTML() {
+    const items = state.saved.filter((s) => !state.query || s.title.toLowerCase().includes(state.query.trim().toLowerCase()));
+    if (!state.saved.length) return `<div class="empty">${icons.bookmarkO.replace('<svg', '<svg style="width:48px;height:48px"')}
+      <h3>Noch nichts gemerkt</h3><p>Öffne einen Film oder eine Serie und tippe auf „Merken“.</p></div>`;
+    if (!items.length) return noHits();
+    const sorted = [...items].sort((a, b) => (a.date || '9').localeCompare(b.date || '9'));
+    const coming = sorted.filter((s) => s.date > TODAY);
+    const out = sorted.filter((s) => !(s.date > TODAY));
+    const toIt = (s) => ({ ...s, genreIds: s.genreIds || [], localDate: s.date });
+    let html = '';
+    if (coming.length) html += `<section><div class="sec-head"><h2>Kommt bald</h2><span class="count">${coming.length} Titel</span></div><div class="grid">${coming.map((s) => cardHTML(toIt(s), { soon: true })).join('')}</div></section>`;
+    if (out.length) html += `<section><div class="sec-head"><h2>Schon da</h2><span class="count">${out.length} Titel</span></div><div class="grid">${out.map((s) => cardHTML(toIt(s), { badge: s.type === 'movie' ? 'Film' : 'Serie' })).join('')}</div></section>`;
+    return html;
+  }
+
+  const noHits = () => `<div class="empty">${icons.search}<h3>Keine Treffer</h3><p>Für „${esc(state.query)}“ wurde nichts gefunden.</p></div>`;
+
+  const TAB_LISTS = { movies: ['nowMovies', 'soonMovies'], tv: ['newTv', 'soonTv'] };
+  const SUBTITLES = {
+    movies: () => `Was jetzt in den Kinos in ${REGIONS[state.region]} läuft und was bald startet.`,
+    tv: () => 'Serien, die gerade neu gestartet sind, und solche, die bald kommen.',
+    saved: () => 'Deine gemerkten Filme und Serien.',
+  };
+
+  function render() {
+    $('#subtitle').textContent = SUBTITLES[state.tab]();
+    if (state.tab === 'saved') { view.innerHTML = savedHTML(); return; }
+    const ids = TAB_LISTS[state.tab];
+    const sections = ids.map(sectionHTML).join('');
+    view.innerHTML = heroHTML(ids[0]) + (sections.trim() || (state.query ? noHits() : ''));
+  }
+
+  async function showTab(tab) {
+    state.tab = tab; store.set(LS.tab, tab);
+    document.querySelectorAll('#tabs button').forEach((b, i) => {
+      const on = b.dataset.tab === tab;
+      b.setAttribute('aria-selected', on);
+      if (on) $('#thumb').style.transform = `translateX(${i * 100}%)`;
+    });
+    render();
+    const ids = TAB_LISTS[tab];
+    if (!ids) return;
+    await Promise.all(ids.map(async (id) => {
+      if (!state.lists[id]?.items.length) { await loadList(id, PAGES_START); if (state.tab === tab) render(); }
+    }));
+  }
+
+  function sizeThumb() {
+    document.documentElement.style.setProperty('--ctl-h', $('#controlsWrap').offsetHeight + 'px');
+    const btns = document.querySelectorAll('#tabs button');
+    $('#thumb').style.width = btns[0].offsetWidth + 'px';
+  }
+
+  // ---------- Detailansicht ----------
+  let sheetEl = null, scrimEl = null, lastFocus = null;
+  function openSheet(html, small = false) {
+    closeSheet(true);
+    lastFocus = document.activeElement;
+    scrimEl = document.createElement('div'); scrimEl.className = 'scrim';
+    sheetEl = document.createElement('div'); sheetEl.className = 'sheet' + (small ? ' small' : '');
+    sheetEl.setAttribute('role', 'dialog'); sheetEl.setAttribute('aria-modal', 'true');
+    sheetEl.innerHTML = `<div class="grabber"></div><button class="close" aria-label="Schließen">${icons.close}</button>${html}`;
+    document.body.append(scrimEl, sheetEl);
+    document.body.classList.add('locked');
+    scrimEl.addEventListener('click', () => closeSheet());
+    sheetEl.querySelector('.close').addEventListener('click', () => closeSheet());
+    requestAnimationFrame(() => { scrimEl.classList.add('open'); sheetEl.classList.add('open'); sheetEl.querySelector('.close').focus({ preventScroll: true }); });
+    enableSwipe(sheetEl);
+    return sheetEl;
+  }
+  function closeSheet(instant = false) {
+    if (!sheetEl) return;
+    const s = sheetEl, c = scrimEl; sheetEl = scrimEl = null;
+    document.body.classList.remove('locked');
+    if (instant) { s.remove(); c.remove(); return; }
+    s.classList.remove('open'); c.classList.remove('open');
+    s.style.transform = '';
+    setTimeout(() => { s.remove(); c.remove(); }, 380);
+    lastFocus?.focus?.({ preventScroll: true });
+  }
+  // Nach unten wischen schließt das Sheet (Handy)
+  function enableSwipe(el) {
+    let y0 = null, dy = 0;
+    el.addEventListener('touchstart', (e) => { if (el.scrollTop <= 0 && innerWidth < 800) { y0 = e.touches[0].clientY; dy = 0; } }, { passive: true });
+    el.addEventListener('touchmove', (e) => {
+      if (y0 === null) return;
+      dy = Math.max(0, e.touches[0].clientY - y0);
+      if (dy > 0) { el.style.transition = 'none'; el.style.transform = `translate(-50%, ${dy}px)`; }
+    }, { passive: true });
+    el.addEventListener('touchend', () => {
+      if (y0 === null) return;
+      el.style.transition = '';
+      if (dy > 120) closeSheet(); else el.style.transform = '';
+      y0 = null;
+    });
+  }
+
+  function findItem(type, id) {
+    for (const L of Object.values(state.lists)) {
+      const it = L.items.find((x) => x.type === type && x.id === id);
+      if (it) return it;
+    }
+    const s = state.saved.find((x) => x.type === type && x.id === id);
+    return s ? { ...s, genreIds: s.genreIds || [], localDate: s.date } : null;
+  }
+
+  async function openDetail(type, id) {
+    const base = findItem(type, id) || { type, id, title: '', poster: null, backdrop: null, genreIds: [] };
+    const el = openSheet(detailHTML(base, null));
+    try {
+      const d = await api(`/${type}/${id}`, {
+        append_to_response: type === 'movie' ? 'videos,release_dates,credits,watch/providers' : 'videos,credits,watch/providers,content_ratings',
+        include_video_language: 'de,en,null',
+      }, 12 * 3600e3);
+      if (sheetEl !== el) return;
+      el.querySelector('.d-body').outerHTML = detailBody(base, d);
+      el.querySelector('.d-title').textContent = type === 'movie' ? d.title : d.name;
+      if (!base.poster && d.poster_path) el.querySelector('.d-poster').innerHTML = `<img alt="" src="${IMG}w342${esc(d.poster_path)}">`;
+      if (!base.backdrop && d.backdrop_path) el.querySelector('.backdrop').innerHTML = `<img alt="" src="${IMG}w1280${esc(d.backdrop_path)}">`;
+      bindDetail(el, base, d);
+    } catch (e) {
+      if (sheetEl === el) el.querySelector('.d-body').innerHTML = `<p style="color:var(--label-2)">Details konnten nicht geladen werden.</p>`;
+    }
+  }
+
+  function detailHTML(it) {
+    return `<div class="backdrop">${it.backdrop ? `<img alt="" src="${IMG}w1280${esc(it.backdrop)}">` : ''}</div>
+      <div class="sheet-pad"><div class="d-head">
+        <div class="d-poster">${it.poster ? `<img alt="Cover von ${esc(it.title)}" src="${IMG}w342${esc(it.poster)}">` : ''}</div>
+        <div><h2 class="d-title">${esc(it.title)}</h2></div>
+      </div><div class="d-body">${skeletonLines()}</div></div>`;
+  }
+  const skeletonLines = () => '<div class="skel" style="margin-top:20px"><div class="line"></div><div class="line"></div><div class="line short"></div></div>';
+
+  function pickTrailer(videos) {
+    const v = (videos?.results || []).filter((x) => x.site === 'YouTube');
+    const score = (x) => (x.type === 'Trailer' ? 4 : x.type === 'Teaser' ? 2 : 0) + (x.iso_639_1 === 'de' ? 3 : 0) + (x.official ? 1 : 0);
+    return v.sort((a, b) => score(b) - score(a))[0];
+  }
+
+  function detailBody(base, d) {
+    const type = base.type;
+    const title = type === 'movie' ? d.title : d.name;
+    const original = type === 'movie' ? d.original_title : d.original_name;
+    let date = type === 'movie' ? d.release_date : d.first_air_date;
+    let cert = '';
+    if (type === 'movie') {
+      const r = d.release_dates?.results?.find((x) => x.iso_3166_1 === state.region);
+      const th = r?.release_dates?.filter((x) => x.type === 3 || x.type === 2).map((x) => x.release_date.slice(0, 10)).sort()[0];
+      if (th) date = th;
+      cert = r?.release_dates?.map((x) => x.certification).find(Boolean) || '';
+    } else {
+      cert = d.content_ratings?.results?.find((x) => x.iso_3166_1 === state.region)?.rating || '';
+    }
+    base.date = date || base.date; base.localDate = base.date;
+    const genres = (d.genres || []).map((g) => g.name);
+    base.genreIds = (d.genres || []).map((g) => g.id);
+
+    const chips = [];
+    if (d.vote_count > 20 && d.vote_average) chips.push(`<span class="chip star">★ ${d.vote_average.toFixed(1).replace('.', ',')}</span>`);
+    if (cert) chips.push(`<span class="chip fsk">${state.region === 'DE' ? 'FSK ' : ''}${esc(cert)}</span>`);
+    if (type === 'movie' && d.runtime) chips.push(`<span class="chip">${Math.floor(d.runtime / 60) ? Math.floor(d.runtime / 60) + ' Std. ' : ''}${d.runtime % 60} Min.</span>`);
+    if (type === 'tv' && d.number_of_seasons) chips.push(`<span class="chip">${d.number_of_seasons} ${d.number_of_seasons === 1 ? 'Staffel' : 'Staffeln'}</span>`);
+    genres.forEach((g) => chips.push(`<span class="chip">${esc(g)}</span>`));
+
+    const trailer = pickTrailer(d.videos);
+    const facts = [];
+    if (date) {
+      const n = daysUntil(date);
+      const label = type === 'movie' ? (n > 0 ? 'Kinostart' : 'Im Kino seit') : (n > 0 ? 'Startet am' : 'Gestartet am');
+      facts.push([label, fmtDate.format(parse(date)) + (n > 0 && n < 60 ? ` (${relLabel(date)})` : '')]);
+    }
+    if (original && original !== title) facts.push(['Originaltitel', original]);
+    if (type === 'tv') {
+      if (d.networks?.length) facts.push(['Sender', d.networks.map((n) => n.name).join(', ')]);
+      if (d.next_episode_to_air?.air_date) facts.push(['Nächste Folge', fmtDate.format(parse(d.next_episode_to_air.air_date)) + (d.next_episode_to_air.season_number ? ` · S${d.next_episode_to_air.season_number} E${d.next_episode_to_air.episode_number}` : '')]);
+      if (d.number_of_episodes) facts.push(['Folgen', String(d.number_of_episodes)]);
+      if (d.created_by?.length) facts.push(['Idee', d.created_by.map((p) => p.name).join(', ')]);
+    } else {
+      const dir = d.credits?.crew?.filter((c) => c.job === 'Director').map((c) => c.name);
+      if (dir?.length) facts.push(['Regie', dir.join(', ')]);
+    }
+    if (d.production_countries?.length) facts.push(['Land', d.production_countries.map((c) => c.iso_3166_1).join(', ')]);
+
+    const prov = d['watch/providers']?.results?.[state.region];
+    const provList = [...(prov?.flatrate || []), ...(prov?.free || []), ...(prov?.ads || [])]
+      .filter((p, i, a) => a.findIndex((q) => q.provider_id === p.provider_id) === i).slice(0, 8);
+    const cast = (d.credits?.cast || []).slice(0, 15);
+
+    return `<div class="d-body">
+      ${d.tagline ? `<p class="d-tagline">${esc(d.tagline)}</p>` : ''}
+      <div class="chips">${chips.join('')}</div>
+      <div class="d-actions">
+        ${trailer ? `<a class="btn btn-filled" href="https://www.youtube.com/watch?v=${encodeURIComponent(trailer.key)}" target="_blank" rel="noopener">${icons.play} Trailer ansehen</a>` : ''}
+        <button class="btn btn-gray" data-save>${isSaved(base) ? icons.bookmark + ' Gemerkt' : icons.bookmarkO + ' Merken'}</button>
+      </div>
+      <div class="d-sec"><h3>Handlung</h3><p>${esc(d.overview || base.overview) || '<span style="color:var(--label-2)">Noch keine Beschreibung auf Deutsch vorhanden.</span>'}</p></div>
+      ${provList.length ? `<div class="d-sec"><h3>Streamen</h3><div class="providers">${provList.map((p) =>
+        `<span class="prov"><img alt="" src="${IMG}w92${esc(p.logo_path)}">${esc(p.provider_name)}</span>`).join('')}</div></div>` : ''}
+      ${cast.length ? `<div class="d-sec"><h3>Besetzung</h3><div class="cast">${cast.map((c) => `<div class="person">
+        <div class="ava">${c.profile_path ? `<img loading="lazy" alt="" src="${IMG}w185${esc(c.profile_path)}">` : esc((c.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join(''))}</div>
+        <div class="n">${esc(c.name)}</div><div class="r">${esc(c.character || '')}</div></div>`).join('')}</div></div>` : ''}
+      ${facts.length ? `<div class="d-sec"><h3>Infos</h3><div class="facts">${facts.map(([k, v]) => `<div class="fact"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('')}</div></div>` : ''}
+      <div class="d-sec"><a class="btn btn-gray" style="width:100%" href="https://www.themoviedb.org/${type}/${base.id}" target="_blank" rel="noopener">Auf TMDB ansehen</a></div>
+    </div>`;
+  }
+
+  function bindDetail(el, base, d) {
+    const title = base.type === 'movie' ? d.title : d.name;
+    const btn = el.querySelector('[data-save]');
+    btn?.addEventListener('click', () => {
+      const i = state.saved.findIndex((s) => s.type === base.type && s.id === base.id);
+      if (i >= 0) { state.saved.splice(i, 1); toast('Von der Merkliste entfernt'); }
+      else {
+        state.saved.push({ type: base.type, id: base.id, title: title || base.title, poster: d.poster_path || base.poster,
+          backdrop: d.backdrop_path || base.backdrop, date: base.date || '', genreIds: base.genreIds, overview: d.overview || '' });
+        toast('Zur Merkliste hinzugefügt');
+      }
+      store.set(LS.saved, state.saved);
+      btn.innerHTML = isSaved(base) ? icons.bookmark + ' Gemerkt' : icons.bookmarkO + ' Merken';
+      render();
+    });
+  }
+
+  let toastT;
+  function toast(msg) {
+    const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  // ---------- Einrichtung & Einstellungen ----------
+  function regionOptions() {
+    return Object.entries(REGIONS).map(([k, v]) => `<option value="${k}" ${k === state.region ? 'selected' : ''}>${v}</option>`).join('');
+  }
+
+  function showSetup(msg = '') {
+    $('#controlsWrap').hidden = true;
+    $('#settingsBtn').hidden = true;
+    $('#largeTitle').textContent = '';
+    $('#subtitle').textContent = '';
+    view.innerHTML = `<div class="setup">
+      <div class="icon-big">${icons.ticket}</div>
+      <h2>Kino & Serien</h2>
+      <p class="lead">Die Seite holt aktuelle Filme, Serien und Cover von TMDB. Dafür brauchst du einmalig einen kostenlosen Schlüssel.</p>
+      <div class="group-label">So geht's</div>
+      <div class="group"><ol class="steps">
+        <li>Kostenloses Konto bei <a href="https://www.themoviedb.org/signup" target="_blank" rel="noopener">themoviedb.org</a> anlegen.</li>
+        <li>In den <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">API-Einstellungen</a> einen Schlüssel beantragen (Zweck: privat).</li>
+        <li>Den „API-Schlüssel“ oder das „Lese-Zugriffstoken“ unten einfügen.</li>
+      </ol></div>
+      <form id="setupForm">
+        <div class="group-label">Zugang</div>
+        <div class="group">
+          <div class="row"><label for="keyIn">Schlüssel</label><input id="keyIn" type="password" autocomplete="off" spellcheck="false" placeholder="einfügen" required></div>
+          <div class="row"><label for="regIn">Land</label><select id="regIn">${regionOptions()}</select></div>
+        </div>
+        <p class="group-foot">Der Schlüssel bleibt nur in diesem Browser gespeichert.</p>
+        <p class="error" id="setupErr">${esc(msg)}</p>
+        <div class="actions"><button class="btn btn-filled" type="submit" style="min-width:200px">Los geht's</button></div>
+      </form></div>`;
+    $('#setupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.submitter || $('#setupForm button');
+      const key = $('#keyIn').value.trim();
+      if (!key) return;
+      btn.disabled = true; btn.textContent = 'Prüfe …';
+      state.key = key; state.region = $('#regIn').value;
+      try {
+        await api('/configuration', {}, 24 * 3600e3);
+        store.set(LS.key, key); store.set(LS.region, state.region);
+        start();
+      } catch (err) {
+        state.key = '';
+        btn.disabled = false; btn.textContent = "Los geht's";
+        $('#setupErr').textContent = err.status === 401 ? 'Dieser Schlüssel wird von TMDB nicht angenommen.' : 'TMDB ist gerade nicht erreichbar. Bitte später noch einmal versuchen.';
+      }
+    });
+  }
+
+  function openSettings() {
+    const el = openSheet(`<div class="sheet-pad">
+      <div class="sheet-h">Einstellungen</div>
+      <div class="group-label">Land</div>
+      <div class="group"><div class="row"><label for="setReg">Kinostarts für</label><select id="setReg">${regionOptions()}</select></div></div>
+      <p class="group-foot">Bestimmt Starttermine, Altersfreigaben und Streaming-Anbieter.</p>
+      ${state.useProxy && !state.key ? '<div class="group-label">Zugang</div><div class="group"><div class="row">Über den Server verbunden</div></div>' : `
+      <div class="group-label">Zugang</div>
+      <div class="group">
+        <div class="row"><label for="setKey">Schlüssel</label><input id="setKey" type="password" autocomplete="off" spellcheck="false" value="${esc(state.key)}"></div>
+        <div class="row"><button class="row-btn destructive" id="logout">Schlüssel entfernen</button></div>
+      </div>`}
+      <div class="group-label">Daten</div>
+      <div class="group">
+        <div class="row"><button class="row-btn" id="clearCache">Neu laden</button></div>
+        ${state.saved.length ? '<div class="row"><button class="row-btn destructive" id="clearSaved">Merkliste leeren</button></div>' : ''}
+      </div>
+      <p class="group-foot">Listen werden für drei Stunden zwischengespeichert, damit die Seite schnell lädt.</p>
+    </div>`, true);
+    el.querySelector('#setReg').addEventListener('change', (e) => { state.region = e.target.value; store.set(LS.region, state.region); state.lists = {}; closeSheet(); start(); });
+    el.querySelector('#setKey')?.addEventListener('change', (e) => {
+      const v = e.target.value.trim(); if (!v || v === state.key) return;
+      state.key = v; store.set(LS.key, v); clearCache(); state.lists = {}; closeSheet(); start();
+    });
+    el.querySelector('#logout')?.addEventListener('click', () => { store.del(LS.key); state.key = ''; clearCache(); state.lists = {}; closeSheet(); start(); });
+    el.querySelector('#clearCache').addEventListener('click', () => { clearCache(); state.lists = {}; closeSheet(); start(); toast('Wird neu geladen'); });
+    el.querySelector('#clearSaved')?.addEventListener('click', () => {
+      if (!confirm('Merkliste wirklich leeren?')) return;
+      state.saved = []; store.set(LS.saved, []); closeSheet(); render(); toast('Merkliste geleert');
+    });
+  }
+  function clearCache() {
+    try { Object.keys(localStorage).filter((x) => x.startsWith(LS.cache)).forEach((x) => localStorage.removeItem(x)); } catch {}
+  }
+
+  // ---------- Ereignisse ----------
+  document.addEventListener('click', (e) => {
+    const card = e.target.closest('.card[data-id], .hero[data-id]');
+    if (card) { openDetail(card.dataset.type, Number(card.dataset.id)); return; }
+    const more = e.target.closest('[data-more]');
+    if (more) { const id = more.dataset.more; more.disabled = true; more.textContent = 'Lädt …'; loadList(id, 1).then(render); return; }
+    if (e.target.closest('[data-retry]')) { state.lists = {}; start(); return; }
+    const tab = e.target.closest('#tabs button');
+    if (tab) { showTab(tab.dataset.tab); const y = $('#controlsWrap').offsetTop - $('#nav').offsetHeight; if (scrollY > y) scrollTo({ top: y }); }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSheet();
+    if (e.key === 'Enter' && e.target.matches('.hero[data-id]')) openDetail(e.target.dataset.type, Number(e.target.dataset.id));
+    if (e.key === '/' && !e.target.matches('input, select') && !sheetEl) { e.preventDefault(); $('#search')?.focus(); }
+  });
+  $('#settingsBtn').addEventListener('click', () => (state.key || state.useProxy) ? openSettings() : null);
+  let qT;
+  $('#search').addEventListener('input', (e) => { clearTimeout(qT); qT = setTimeout(() => { state.query = e.target.value; render(); }, 120); });
+  const onScroll = () => {
+    $('#nav').classList.toggle('scrolled', scrollY > 30);
+    const bar = $('#controlsWrap');
+    bar.classList.toggle('stuck', !bar.hidden && bar.getBoundingClientRect().top <= $('#nav').offsetHeight + 1);
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', sizeThumb);
+
+  // ---------- Start ----------
+  async function start() {
+    $('#largeTitle').textContent = 'Kino & Serien';
+    view.innerHTML = skeleton(12);
+    let ok = false, err = null;
+    try { ok = await checkAccess(); } catch (e) { err = e; }
+    if (!ok) {
+      if (err && err.status !== 401) {
+        $('#controlsWrap').hidden = true;
+        view.innerHTML = errorHTML(err);
+        return;
+      }
+      if (err?.status === 401) { store.del(LS.key); state.key = ''; }
+      showSetup(err?.status === 401 ? 'Der gespeicherte Schlüssel ist nicht mehr gültig.' : '');
+      return;
+    }
+    $('#controlsWrap').hidden = false;
+    $('#settingsBtn').hidden = false;
+    requestAnimationFrame(sizeThumb);
+    try { await loadGenres(); } catch {}
+    showTab(TAB_LISTS[state.tab] || state.tab === 'saved' ? state.tab : 'movies');
+  }
+  start();
+})();
+</script>
+</body>
+</html>
