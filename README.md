@@ -71,15 +71,15 @@ und ihren eigenen Patch Notes. Alle Jana-Anpassungen stehen nur im Skript, die �
 4. Vor jedem Upload die Version erhöhen: in `index.html` oben in `CHANGELOG` einen neuen Eintrag mit Versionsnummer und Patch Notes ergänzen.
    Beim nächsten Öffnen zeigt die Seite dann einmal das Fenster „Was ist neu?“. Geheimnisse dort nur andeuten, nicht verraten.
 
-# Next Up – Filme und Serien
+# NextUp – Filme und Serien
 
-(Arbeitstitel war „Kino & Serien“; Ordner `kino-serien/` und Netlify-Projekt `kino-und-serien` heißen weiter so.)
+(Arbeitstitel war „Kino & Serien“; der Ordner `kino-serien/` heißt weiter so.)
 
 Zeigt, was für den deutschen Markt gerade neu ist und bald kommt: Kinofilme sowie Serien und neue Staffeln, jeweils mit Cover.
 Dazu eine eigene Liste, in der man Filme und Serien nach Staffeln und Folgen abhakt.
 Gestaltet nach den Apple-Designrichtlinien (SF-Schrift, Segmentsteuerung, durchscheinende Leisten, Sheets, heller und dunkler Modus).
 Alles liegt im Ordner `kino-serien/`, die Seite selbst in `public/index.html`.
-Live unter https://kino-und-serien.netlify.app (Netlify-Projekt `kino-und-serien`, Umgebungsvariablen `TMDB_KEY` und `AUTH_SECRET` sind gesetzt).
+Live unter https://nextup-filme-serien.netlify.app (Netlify-Projekt `nextup-filme-serien`, Umgebungsvariablen `TMDB_KEY` und `AUTH_SECRET` sind gesetzt).
 
 - **Filme:** „Jetzt im Kino“ und „Demnächst im Kino“ (nach Monaten, mit Countdown). Nur Filme mit Kinostart im gewählten Land
   (Deutschland, Österreich, Schweiz), mit dem dortigen Starttermin und der FSK.
