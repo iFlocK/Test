@@ -115,3 +115,5 @@ unter ⚙️ ein Konto anlegen, dann ist die Liste auf allen Geräten gleich. Au
   beide Stände zusammen; der jeweils neuere Haken gewinnt. Beim Abmelden wird die Liste auf dem Gerät entfernt.
 - Ein vergessenes Passwort lässt sich noch nicht zurücksetzen.
 - Abhängigkeit `@netlify/blobs` (Version 10) in `package.json`, Node 22 in `netlify.toml`.
+- App-Icon mit Filmklappe: `public/icon.svg` ist die Vorlage, daraus sind `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`
+  und `favicon.png` erzeugt. Mit `manifest.webmanifest` lässt sich die Seite auf den Home-Bildschirm legen.
