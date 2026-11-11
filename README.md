@@ -70,3 +70,48 @@ und ihren eigenen Patch Notes. Alle Jana-Anpassungen stehen nur im Skript, die �
 3. Erst wenn ein Paket fertig ist, **einmal** zu Netlify hochladen. Jedes Veröffentlichen kostet Guthaben.
 4. Vor jedem Upload die Version erhöhen: in `index.html` oben in `CHANGELOG` einen neuen Eintrag mit Versionsnummer und Patch Notes ergänzen.
    Beim nächsten Öffnen zeigt die Seite dann einmal das Fenster „Was ist neu?“. Geheimnisse dort nur andeuten, nicht verraten.
+
+# Kino & Serien
+
+Zeigt, was für den deutschen Markt gerade neu ist und bald kommt: Kinofilme sowie Serien und neue Staffeln, jeweils mit Cover.
+Dazu eine eigene Liste, in der man Filme und Serien nach Staffeln und Folgen abhakt.
+Gestaltet nach den Apple-Designrichtlinien (SF-Schrift, Segmentsteuerung, durchscheinende Leisten, Sheets, heller und dunkler Modus).
+Alles liegt im Ordner `kino-serien/`, die Seite selbst in `public/index.html`.
+Live unter https://kino-und-serien.netlify.app (Netlify-Projekt `kino-und-serien`, Umgebungsvariablen `TMDB_KEY` und `AUTH_SECRET` sind gesetzt).
+
+- **Filme:** „Jetzt im Kino“ und „Demnächst im Kino“ (nach Monaten, mit Countdown). Nur Filme mit Kinostart im gewählten Land
+  (Deutschland, Österreich, Schweiz), mit dem dortigen Starttermin und der FSK.
+- **Serien:** „Neue Serien und Staffeln“ (Staffelstart in den letzten 60 Tagen) und „Demnächst“ (nächste 12 Monate).
+  Nur was im gewählten Land per Abo, kostenlos oder mit Werbung streambar ist; bei ganz neuen Serien ohne eingetragenen Anbieter
+  nur deutsch- und englischsprachige. Nachrichten, Reality-TV, Talkshows und Seifenopern sind ausgeblendet.
+  Der Schalter „Auch internationale Titel“ in den Einstellungen hebt die Eingrenzung auf.
+- **Filter:** nach Genre (Filme und Serien) und nach Streaming-Dienst (Serien).
+- **Suche** über ganz TMDB, um auch ältere Titel in die eigene Liste zu holen.
+- **Meine Liste:** Filme merken und als gesehen markieren; Serien Staffel für Staffel und Folge für Folge abhaken.
+  Bereiche „Als Nächstes“ (nächste Folge ohne Haken, mit Schnell-Haken auf dem Cover), „Bald neue Folgen“, „Merkliste“ und „Gesehen“.
+- **Details** per Tipp aufs Cover: Handlung, Trailer, Staffeln und Folgen, Besetzung, Sender, nächste Folge, Streaming-Anbieter.
+
+## Daten (TMDB)
+Daten und Cover kommen von [TMDB](https://www.themoviedb.org). Dafür braucht man einen kostenlosen Schlüssel
+(Konto anlegen, dann unter *Einstellungen → API* beantragen). Es gibt zwei Wege:
+
+1. **Im Browser:** Seite öffnen und den Schlüssel einfügen. Er bleibt nur im `localStorage` dieses Browsers.
+2. **Auf Netlify:** Umgebungsvariable `TMDB_KEY` setzen. Die Edge-Funktion `netlify/edge-functions/tmdb.ts` reicht die Anfragen
+   dann unter `/api/tmdb/*` weiter (nur die benötigten Pfade, höchstens 600 Anfragen pro Minute und IP).
+
+Listen werden im Browser drei Stunden zwischengespeichert, Staffel-Stände zwölf Stunden. Der erste Aufruf des Serien-Tabs braucht
+rund 100 Anfragen, weil für jede Serie der Staffelstart nachgeschlagen wird.
+Hinweis: TMDB führt bei Serien die Termine der Erstausstrahlung, nicht eigene deutsche Starttermine.
+
+## Konto und Abgleich zwischen Geräten
+Ohne Konto liegt „Meine Liste“ nur im Browser (`localStorage`, Schlüssel `ks.lib`). Auf der veröffentlichten Seite kann man sich
+unter ⚙️ ein Konto anlegen, dann ist die Liste auf allen Geräten gleich. Aufbau wie bei „Mein Wochenplaner“:
+
+- `netlify/functions/auth.mts`: `/api/register`, `/api/login`, `/api/logout`, `/api/me`. Passwörter als PBKDF2-Hash,
+  Anmeldung per HttpOnly-Cookie `ks_session`, signiert mit der Netlify-Umgebungsvariable **`AUTH_SECRET`** (muss gesetzt sein).
+- `netlify/functions/data.mts`: `/api/data`, je Konto ein JSON-Dokument mit Versionszähler (Netlify Blobs, Stores
+  `kino-serien-users` und `kino-serien-data`).
+- Jeder Haken trägt einen Zeitstempel (negativ = Haken entfernt). Haben zwei Geräte gleichzeitig geändert, führt die Seite
+  beide Stände zusammen; der jeweils neuere Haken gewinnt. Beim Abmelden wird die Liste auf dem Gerät entfernt.
+- Ein vergessenes Passwort lässt sich noch nicht zurücksetzen.
+- Abhängigkeit `@netlify/blobs` (Version 10) in `package.json`, Node 22 in `netlify.toml`.
