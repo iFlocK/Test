@@ -77,6 +77,7 @@ Zeigt, was für den deutschen Markt gerade neu ist und bald kommt: Kinofilme sow
 Dazu eine eigene Liste, in der man Filme und Serien nach Staffeln und Folgen abhakt.
 Gestaltet nach den Apple-Designrichtlinien (SF-Schrift, Segmentsteuerung, durchscheinende Leisten, Sheets, heller und dunkler Modus).
 Alles liegt im Ordner `kino-serien/`, die Seite selbst in `public/index.html`.
+Live unter https://kino-und-serien.netlify.app (Netlify-Projekt `kino-und-serien`, Umgebungsvariablen `TMDB_KEY` und `AUTH_SECRET` sind gesetzt).
 
 - **Filme:** „Jetzt im Kino“ und „Demnächst im Kino“ (nach Monaten, mit Countdown). Nur Filme mit Kinostart im gewählten Land
   (Deutschland, Österreich, Schweiz), mit dem dortigen Starttermin und der FSK.
