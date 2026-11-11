@@ -1,0 +1,8 @@
+{
+  "name": "kino-serien",
+  "private": true,
+  "description": "Kino & Serien: Seite, Konten und Geräte-Abgleich (Netlify)",
+  "dependencies": {
+    "@netlify/blobs": "^10.7.13"
+  }
+}

@@ -290,6 +290,62 @@
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+  /* Filter */
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 16px; }
+  .pill { position: relative; display: inline-flex; align-items: center; height: 34px; border-radius: 999px; background: var(--fill); font-size: 15px; font-weight: 500; }
+  .pill.on { background: var(--blue); color: #fff; }
+  .pill select { -webkit-appearance: none; appearance: none; border: 0; background: none; outline: none; cursor: pointer; height: 100%;
+    padding: 0 30px 0 14px; max-width: 70vw; border-radius: 999px; font-weight: 500; }
+  .pill select option { color: initial; }
+  .pill svg { position: absolute; right: 10px; width: 14px; height: 14px; pointer-events: none; opacity: .7; }
+
+  /* Abhaken */
+  .chk { width: 24px; height: 24px; border-radius: 50%; flex: none; display: grid; place-items: center; color: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--label-3); transition: background .15s, box-shadow .15s; }
+  .chk svg { width: 14px; height: 14px; }
+  .chk.on { background: var(--blue); box-shadow: none; color: #fff; }
+  .chk.part { box-shadow: inset 0 0 0 1.5px var(--blue); color: var(--blue); }
+  .d-sec .sec-head { margin-bottom: 8px; } .d-sec .sec-head h3 { margin: 0; }
+  .season + .season { box-shadow: inset 0 .5px 0 var(--sep); margin-left: 16px; }
+  .season + .season .srow { margin-left: -16px; }
+  .srow { display: flex; align-items: center; gap: 12px; padding-left: 16px; }
+  .stoggle { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 6px 14px 6px 0; text-align: left; }
+  .st { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .st b { font-weight: 500; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .st small { font-size: 13px; color: var(--label-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .prog { font-size: 15px; color: var(--label-2); font-variant-numeric: tabular-nums; }
+  .stoggle > svg { width: 14px; height: 14px; color: var(--label-3); transition: transform .2s; flex: none; }
+  .season.open .stoggle > svg { transform: rotate(90deg); }
+  .eps { background: var(--bg); margin: 0 12px 12px 0; border-radius: 10px; overflow: hidden; }
+  .season + .season .eps { margin-left: -4px; }
+  .season:first-child .eps { margin-left: 12px; }
+  .erow { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 52px; padding: 6px 12px; text-align: left; }
+  .erow + .erow { box-shadow: inset 0 .5px 0 var(--sep); }
+  .erow .st b { font-size: 15px; } .erow.unaired { opacity: .45; cursor: default; }
+  .erow.loading { color: var(--label-2); font-size: 15px; }
+
+  /* Karten in „Meine Liste“ */
+  .mark.done { background: var(--green); }
+  .quick { position: absolute; z-index: 3; right: 8px; bottom: 8px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
+    color: #fff; background: var(--blue); box-shadow: 0 2px 8px rgba(0,0,0,.35); transition: transform .15s; }
+  .quick:hover { transform: scale(1.08); } .quick:active { transform: scale(.92); }
+  .quick svg { width: 18px; height: 18px; }
+  .bar { height: 4px; border-radius: 2px; background: var(--fill-2); margin-top: 8px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--blue); border-radius: 2px; }
+  .bar + .card-title { margin-top: 8px; }
+  .card { cursor: pointer; }
+  .empty.small { padding: 20px 16px; font-size: 15px; }
+  .btn-green { background: var(--green); color: #fff; }
+
+  /* Schalter und Zeilen */
+  .row .grow, .row > span:first-child { flex: 1; }
+  .row .val, .row.muted { color: var(--label-2); }
+  .row input.switch { -webkit-appearance: none; appearance: none; flex: none; width: 51px; height: 31px; border-radius: 16px; background: var(--fill-2);
+    position: relative; transition: background .2s; cursor: pointer; margin: 0; }
+  .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2); transition: transform .2s; }
+  .switch:checked { background: var(--green); } .switch:checked::after { transform: translateX(20px); }
+
   @media (max-width: 600px) {
     .wrap { padding: 0 16px; }
     .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 12px; }
@@ -297,6 +353,8 @@
     .card-meta { font-size: 12px; }
     .badge { font-size: 11px; left: 6px; top: 6px; padding: 2px 6px; }
     .mark { width: 24px; height: 24px; right: 6px; top: 6px; }
+    .quick { width: 32px; height: 32px; right: 6px; bottom: 6px; }
+    .d-actions .btn { font-size: 15px; padding: 0 8px; }
     .hero { aspect-ratio: 4/3; }
     .hero-text { padding: 18px; }
     .segmented { width: 100%; }
@@ -330,11 +388,11 @@
         <span class="thumb" id="thumb"></span>
         <button role="tab" data-tab="movies" aria-selected="true">Filme</button>
         <button role="tab" data-tab="tv" aria-selected="false">Serien</button>
-        <button role="tab" data-tab="saved" aria-selected="false">Merkliste</button>
+        <button role="tab" data-tab="mine" aria-selected="false">Meine Liste</button>
       </div>
       <label class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input type="search" id="search" placeholder="Suchen" autocomplete="off" aria-label="Titel suchen">
+        <input type="search" id="search" placeholder="Filme und Serien suchen" autocomplete="off" aria-label="Filme und Serien suchen">
       </label>
     </div>
   </div>
@@ -355,12 +413,14 @@
   // ---------- Grundlagen ----------
   const TMDB = 'https://api.themoviedb.org/3';
   const IMG = 'https://image.tmdb.org/t/p/';
-  const LS = { key: 'ks.key', region: 'ks.region', saved: 'ks.saved', tab: 'ks.tab', cache: 'ks.c:' };
+  const LS = { key: 'ks.key', region: 'ks.region', saved: 'ks.saved', tab: 'ks.tab', cache: 'ks.c:', lib: 'ks.lib', world: 'ks.world', rev: 'ks.rev' };
   const REGIONS = { DE: 'Deutschland', AT: 'Österreich', CH: 'Schweiz' };
   // Nachrichten, Reality-TV, Talkshows und Seifenopern ausblenden
   const TV_SKIP_GENRES = '10763|10764|10767|10766';
-  const PAGES_START = 2;
   const LATIN = /[A-Za-zÀ-ɏ0-9]/;
+  // Streaming-Dienste (TMDB-Nummern)
+  const PROVIDERS = [[8, 'Netflix'], [9, 'Prime Video'], [337, 'Disney+'], [350, 'Apple TV'], [531, 'Paramount+'], [30, 'WOW'],
+    [2750, 'RTL+'], [304, 'Joyn'], [178, 'MagentaTV'], [283, 'Crunchyroll'], [219, 'ARD Mediathek']];
 
   const $ = (s, el = document) => el.querySelector(s);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -372,68 +432,206 @@
 
   const icons = {
     bookmark: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/></svg>',
-    bookmarkO: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+    minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg>',
+    chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>',
+    down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
     play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>',
     close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
-    film: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 3v18M17 3v18M3 8h4M3 12h4M3 16h4M17 8h4M17 12h4M17 16h4"/></svg>',
-    tv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 18v3"/></svg>',
     search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
     wifi: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 8.8a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg>',
     ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v8a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2z"/><path d="M14 6v12" stroke-dasharray="2 2.5"/></svg>',
+    list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6.5 1.5 1.5L8 5M4 12.5 5.5 14 8 11M4 18.5 5.5 20 8 17M12 7h8M12 13h8M12 19h8"/></svg>',
   };
 
   // ---------- Datum ----------
   const pad = (n) => String(n).padStart(2, '0');
   const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
-  const parse = (s) => { if (!s) return null; const [y, m, d] = s.slice(0, 10).split('-').map(Number); return new Date(y, m - 1, d); };
+  const parse = (s) => { if (!s) return null; const [y, m, d] = s.slice(0, 10).split('-').map(Number); return new Date(y, m - 1, d || 1); };
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const TODAY = iso(today);
   const fmtDate = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
   const fmtShort = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'short' });
   const fmtMonth = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' });
   const daysUntil = (s) => Math.round((parse(s) - today) / 864e5);
+  const short = (s) => { const d = parse(s); return d.getFullYear() === today.getFullYear() || Math.abs(daysUntil(s)) < 150 ? fmtShort.format(d) : fmtShort.format(d) + ' ' + d.getFullYear(); };
   function relLabel(s) {
     const n = daysUntil(s);
     if (n === 0) return 'Heute';
     if (n === 1) return 'Morgen';
     if (n > 1 && n < 14) return `in ${n} Tagen`;
-    return fmtShort.format(parse(s));
+    return short(s);
   }
 
   // ---------- Zustand ----------
   const state = {
     key: store.get(LS.key, ''),
     region: store.get(LS.region, 'DE'),
+    world: store.get(LS.world, false),
     useProxy: false,
     tab: store.get(LS.tab, 'movies'),
     query: '',
+    search: { q: '', items: [], loading: false, error: null },
+    genre: { movies: '', tv: '' },
+    prov: '',
     genres: { movie: {}, tv: {} },
-    lists: {},       // id -> { items, page, total, loading }
-    saved: store.get(LS.saved, []), // [{type,id,title,poster,date}]
+    lists: {},
   };
+  if (!['movies', 'tv', 'mine'].includes(state.tab)) state.tab = state.tab === 'saved' ? 'mine' : 'movies';
   const lang = () => 'de-' + state.region;
 
-  // ---------- Schnittstelle ----------
-  function readCache(k) {
-    const v = store.get(k);
-    if (v && v.exp > Date.now()) return v.data;
+  // ---------- Meine Liste (Speicher) ----------
+  // items: { "movie:1": {type,id,title,poster,backdrop,date,genreIds,added,upd,w}, "tv:2": {…, eps:{"1:3":Zeit}, meta} }
+  // Zeiten sind positiv für „gesehen“ und negativ für „Haken entfernt“; so lassen sich zwei Geräte sauber zusammenführen.
+  let lib = store.get(LS.lib, null);
+  if (!lib || typeof lib.items !== 'object') lib = { v: 1, items: {}, removed: {} };
+  lib.removed ||= {};
+  const keyOf = (type, id) => type + ':' + id;
+  const epKey = (s, e) => s + ':' + e;
+  const libGet = (it) => lib.items[keyOf(it.type, it.id)];
+  (function migrateSaved() {
+    const old = store.get(LS.saved, null);
+    if (!Array.isArray(old)) return;
+    for (const s of old) {
+      const k = keyOf(s.type, s.id);
+      if (!lib.items[k]) lib.items[k] = { type: s.type, id: s.id, title: s.title, poster: s.poster, backdrop: s.backdrop, date: s.date || '',
+        genreIds: s.genreIds || [], added: Date.now(), upd: Date.now(), ...(s.type === 'tv' ? { eps: {} } : {}) };
+    }
+    store.set(LS.lib, lib); store.del(LS.saved);
+  })();
+
+  function ensure(base) {
+    const k = keyOf(base.type, base.id);
+    let it = lib.items[k];
+    if (!it) {
+      const now = Date.now();
+      it = lib.items[k] = { type: base.type, id: base.id, title: base.title, poster: base.poster || null, backdrop: base.backdrop || null,
+        date: base.localDate || base.date || '', genreIds: base.genreIds || [], added: now, upd: now };
+      if (base.type === 'tv') it.eps = {};
+      delete lib.removed[k];
+    }
+    return it;
+  }
+  function dropItem(base) { const k = keyOf(base.type, base.id); delete lib.items[k]; lib.removed[k] = Date.now(); }
+  const seen = (it, s, e) => it?.eps?.[epKey(s, e)] > 0;
+  const seenCount = (it) => Object.values(it?.eps || {}).filter((t) => t > 0).length;
+  const seenInSeason = (it, n) => Object.entries(it?.eps || {}).filter(([k, t]) => t > 0 && k.startsWith(n + ':')).length;
+  function setEp(it, s, e, on) { it.eps ||= {}; it.eps[epKey(s, e)] = on ? Date.now() : -Date.now(); it.upd = Date.now(); }
+  function airedCount(it) {
+    const m = it.meta; if (!m?.last) return 0;
+    return m.seasons.reduce((n, s) => n + (s.n < m.last.s ? s.c : s.n === m.last.s ? m.last.e : 0), 0);
+  }
+  // die nächste erschienene Folge ohne Haken
+  function nextUnseen(it) {
+    const m = it.meta; if (!m?.last) return null;
+    for (const s of [...m.seasons].sort((a, b) => a.n - b.n)) {
+      for (let e = 1; e <= s.c; e++) {
+        if (s.n > m.last.s || (s.n === m.last.s && e > m.last.e)) return null;
+        if (!seen(it, s.n, e)) return { s: s.n, e };
+      }
+    }
     return null;
   }
-  function writeCache(k, data, ttl) {
-    if (store.set(k, { exp: Date.now() + ttl, data })) return;
-    // Speicher voll: alte Zwischenspeicher-Einträge entfernen und noch einmal versuchen
-    try {
-      Object.keys(localStorage).filter((x) => x.startsWith(LS.cache)).forEach((x) => localStorage.removeItem(x));
-    } catch {}
-    store.set(k, { exp: Date.now() + ttl, data });
+  function saveLib() { store.set(LS.lib, lib); sync.schedule(); }
+
+  // Zwei Stände zusammenführen (dieses Gerät und der Server)
+  function mergeLib(a, b) {
+    const out = { v: 1, items: {}, removed: {} };
+    for (const k of new Set([...Object.keys(a.removed || {}), ...Object.keys(b.removed || {})])) out.removed[k] = Math.max(a.removed?.[k] || 0, b.removed?.[k] || 0);
+    const newer = (x, y) => (Math.abs(x || 0) >= Math.abs(y || 0) ? x : y);
+    for (const k of new Set([...Object.keys(a.items || {}), ...Object.keys(b.items || {})])) {
+      const A = a.items?.[k], B = b.items?.[k];
+      let m;
+      if (A && B) {
+        m = { ...((A.upd || 0) >= (B.upd || 0) ? A : B) };
+        m.added = Math.min(A.added || Infinity, B.added || Infinity); m.upd = Math.max(A.upd || 0, B.upd || 0);
+        if (A.w || B.w) m.w = newer(A.w, B.w);
+        if (m.type === 'tv') {
+          m.eps = {};
+          for (const e of new Set([...Object.keys(A.eps || {}), ...Object.keys(B.eps || {})])) m.eps[e] = newer(A.eps?.[e], B.eps?.[e]);
+        }
+      } else m = A || B;
+      if (out.removed[k] && out.removed[k] >= (m.upd || 0)) continue;
+      delete out.removed[k];
+      out.items[k] = m;
+    }
+    return out;
   }
 
+  // ---------- Abgleich zwischen Geräten ----------
+  const sync = {
+    available: false, user: null, rev: store.get(LS.rev, 0), busy: false, timer: null, last: 0, error: '',
+    async init() {
+      if (location.protocol === 'file:') return;
+      try {
+        const r = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' });
+        if (!(r.headers.get('content-type') || '').includes('json')) return;
+        this.available = true;
+        if (r.ok) { this.user = (await r.json()).user; await this.pull(); }
+      } catch {}
+    },
+    async call(method, body) {
+      const r = await fetch('/api/data', { method, credentials: 'same-origin', cache: 'no-store',
+        headers: body ? { 'content-type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+      if (r.status === 401) { this.user = null; throw new Error('abgemeldet'); }
+      if (!r.ok && r.status !== 409) throw new Error('HTTP ' + r.status);
+      return { status: r.status, data: await r.json() };
+    },
+    adopt(remote, rev) {
+      this.rev = rev; store.set(LS.rev, rev);
+      if (!remote) return true;
+      const before = JSON.stringify(lib);
+      lib = mergeLib(lib, remote);
+      store.set(LS.lib, lib);
+      if (JSON.stringify(lib) !== before) render();
+      return JSON.stringify(lib) !== JSON.stringify(remote);
+    },
+    async pull() {
+      if (!this.user || this.busy) return;
+      this.busy = true;
+      try {
+        const { data } = await this.call('GET');
+        const differs = this.adopt(data.state, data.rev);
+        this.last = Date.now(); this.error = '';
+        this.busy = false;
+        if (differs) await this.push();
+      } catch (e) { this.error = e.message; } finally { this.busy = false; }
+    },
+    async push() {
+      if (!this.user || this.busy) return;
+      this.busy = true;
+      try {
+        for (let i = 0; i < 4; i++) {
+          const { status, data } = await this.call('PUT', { baseRev: this.rev, state: lib });
+          if (status === 200) { this.rev = data.rev; store.set(LS.rev, data.rev); this.last = Date.now(); this.error = ''; break; }
+          this.adopt(data.state, data.rev);   // jemand war schneller: zusammenführen und noch einmal
+        }
+      } catch (e) { this.error = e.message; } finally { this.busy = false; }
+    },
+    schedule() { if (!this.user) return; clearTimeout(this.timer); this.timer = setTimeout(() => this.push(), 1500); },
+  };
+
+  // ---------- Schnittstelle ----------
+  const mem = new Map();
+  function readCache(k) { const v = store.get(k); return v && v.exp > Date.now() ? v.data : null; }
+  function writeCache(k, data, ttl) {
+    if (store.set(k, { exp: Date.now() + ttl, data })) return;
+    clearCache();   // Speicher voll: Zwischenspeicher leeren und noch einmal versuchen
+    store.set(k, { exp: Date.now() + ttl, data });
+  }
+  function clearCache() {
+    mem.clear();
+    try { Object.keys(localStorage).filter((x) => x.startsWith(LS.cache)).forEach((x) => localStorage.removeItem(x)); } catch {}
+  }
+
+  // ttl > 0: im Browser zwischenspeichern; ttl = 0: nur für diese Sitzung merken
   async function api(path, params = {}, ttl = 3 * 3600e3) {
     const qs = new URLSearchParams({ language: lang(), ...params });
-    const ck = LS.cache + state.region + path + '?' + qs;
-    const hit = readCache(ck);
-    if (hit) return hit;
+    const ck = LS.cache + path + '?' + qs;
+    if (mem.has(ck)) return mem.get(ck);
+    if (ttl) { const hit = readCache(ck); if (hit) return hit; }
 
     let url, headers = { accept: 'application/json' };
     if (state.key) {
@@ -444,21 +642,15 @@
       url = '/api/tmdb' + path + '?' + qs;
     }
     const res = await fetch(url, { headers });
-    if (!res.ok) {
-      const err = new Error('HTTP ' + res.status);
-      err.status = res.status;
-      throw err;
-    }
+    if (!res.ok) { const err = new Error('HTTP ' + res.status); err.status = res.status; throw err; }
     const data = await res.json();
-    writeCache(ck, data, ttl);
+    if (ttl) writeCache(ck, data, ttl);
+    else { mem.set(ck, data); if (mem.size > 300) mem.delete(mem.keys().next().value); }
     return data;
   }
 
   async function checkAccess() {
-    if (state.key) {
-      await api('/configuration', {}, 24 * 3600e3);
-      return true;
-    }
+    if (state.key) { await api('/configuration', {}, 24 * 3600e3); return true; }
     if (location.protocol === 'file:') return false;
     try {
       const r = await fetch('/api/tmdb/configuration', { headers: { accept: 'application/json' } });
@@ -490,56 +682,108 @@
       if (!r) return;
       const theatrical = r.release_dates.filter((d) => d.type === 3 || d.type === 2).map((d) => d.release_date.slice(0, 10)).sort();
       if (theatrical.length) m.localDate = theatrical[0];
-      const cert = r.release_dates.map((d) => d.certification).find(Boolean);
-      if (cert) m.cert = cert;
     });
   }
 
-  const norm = (x, type) => ({
-    type, id: x.id,
-    title: type === 'movie' ? x.title : x.name,
-    original: type === 'movie' ? x.original_title : x.original_name,
-    date: (type === 'movie' ? x.release_date : x.first_air_date) || '',
-    poster: x.poster_path, backdrop: x.backdrop_path,
-    overview: x.overview || '',
-    genreIds: x.genre_ids || [],
-    vote: x.vote_average, votes: x.vote_count, popularity: x.popularity,
+  // Staffeln und letzte/nächste Folge einer Serie, knapp gehalten
+  const epRef = (e) => (e ? { s: e.season_number, e: e.episode_number, air: e.air_date || '' } : null);
+  const slimTv = (d) => ({
+    seasons: (d.seasons || []).filter((s) => s.season_number > 0).map((s) => ({ n: s.season_number, c: s.episode_count, air: s.air_date || '' })),
+    last: epRef(d.last_episode_to_air), next: epRef(d.next_episode_to_air), at: Date.now(),
   });
+  async function tvInfo(id) {
+    const ck = LS.cache + 'tv:' + id;
+    const hit = readCache(ck); if (hit) return hit;
+    const info = slimTv(await api(`/tv/${id}`, {}, 0));
+    writeCache(ck, info, 12 * 3600e3);
+    return info;
+  }
+
+  const known = new Map();
+  const norm = (x, type) => {
+    const it = {
+      type, id: x.id,
+      title: type === 'movie' ? x.title : x.name,
+      original: type === 'movie' ? x.original_title : x.original_name,
+      date: (type === 'movie' ? x.release_date : x.first_air_date) || '',
+      poster: x.poster_path, backdrop: x.backdrop_path,
+      overview: x.overview || '',
+      genreIds: x.genre_ids || [],
+      popularity: x.popularity || 0,
+    };
+    known.set(keyOf(type, x.id), it);
+    return it;
+  };
+
+  // Serien für den hiesigen Markt: gewählter Anbieter, sonst alles, was im Land streambar ist
+  function tvMarket() {
+    if (state.prov) return { watch_region: state.region, with_watch_providers: state.prov };
+    if (!state.world) return { watch_region: state.region, with_watch_monetization_types: 'flatrate|free|ads' };
+    return {};
+  }
+  const tvBase = (page) => ({ page, sort_by: 'popularity.desc', without_genres: TV_SKIP_GENRES });
+  const seasonLabel = (it) => (it.season > 1 ? `Staffel ${it.season}` : 'Neue Serie');
+  const g1 = (it) => genreNames(it, 1);
 
   // Listen-Definitionen
   const LISTS = {
     nowMovies: {
-      type: 'movie', title: 'Jetzt im Kino', eyebrow: 'Neu im Kino',
+      type: 'movie', title: 'Jetzt im Kino', eyebrow: 'Jetzt im Kino', pages: 2,
       fetch: (page) => api('/movie/now_playing', { region: state.region, page }),
-      post: async (items) => { await regionalDates(items); return items.filter((m) => !m.localDate || m.localDate <= TODAY); },
+      post: async (items) => { await regionalDates(items); return items.filter((m) => (m.localDate ? m.localDate <= TODAY : state.world)); },
       sort: (a, b) => b.popularity - a.popularity,
+      card: (it) => ({ meta: [showDate(it) && 'seit ' + short(showDate(it)), ...g1(it)] }),
     },
     soonMovies: {
-      type: 'movie', title: 'Demnächst im Kino', grouped: true,
+      type: 'movie', title: 'Demnächst im Kino', grouped: true, pages: 2,
       fetch: (page) => api('/discover/movie', {
         region: state.region, page, sort_by: 'popularity.desc', with_release_type: '2|3',
         'release_date.gte': iso(addDays(today, 1)), 'release_date.lte': iso(addDays(today, 365)),
       }),
-      post: async (items) => { await regionalDates(items); return items.filter((m) => (m.localDate || m.date) > TODAY); },
-      sort: (a, b) => (a.localDate || a.date).localeCompare(b.localDate || b.date) || b.popularity - a.popularity,
+      post: async (items) => { await regionalDates(items); return items.filter((m) => (m.localDate ? m.localDate > TODAY : state.world && m.date > TODAY)); },
+      sort: (a, b) => showDate(a).localeCompare(showDate(b)) || b.popularity - a.popularity,
+      card: (it) => ({ badge: relLabel(showDate(it)), soon: true, meta: [short(showDate(it)), ...g1(it)] }),
     },
-    newTv: {
-      type: 'tv', title: 'Neue Serien', eyebrow: 'Neue Serie',
-      fetch: (page) => api('/discover/tv', {
-        page, sort_by: 'popularity.desc', without_genres: TV_SKIP_GENRES,
-        // nur Serien, die man im gewählten Land streamen kann
-        watch_region: state.region, with_watch_monetization_types: 'flatrate|free|ads',
-        'first_air_date.gte': iso(addDays(today, -90)), 'first_air_date.lte': TODAY,
-      }),
+    nowTv: {
+      type: 'tv', title: 'Neue Serien und Staffeln', eyebrow: 'Neu zum Streamen', pages: 3,
+      fetch: (page) => api('/discover/tv', { ...tvBase(page), ...tvMarket(), 'air_date.gte': iso(addDays(today, -60)), 'air_date.lte': TODAY }),
+      // nur behalten, wenn die laufende Staffel in den letzten 60 Tagen gestartet ist
+      post: async (items) => {
+        const infos = await pool(items, 6, (x) => tvInfo(x.id)); const from = iso(addDays(today, -60));
+        return items.filter((it, i) => {
+          const inf = infos[i]; if (!inf?.last) return false;
+          const start = inf.seasons.find((s) => s.n === inf.last.s)?.air;
+          if (!start || start < from || start > TODAY) return false;
+          it.localDate = start; it.season = inf.last.s; return true;
+        });
+      },
       sort: (a, b) => b.popularity - a.popularity,
+      card: (it) => ({ badge: seasonLabel(it), meta: ['ab ' + short(showDate(it)), ...g1(it)] }),
     },
     soonTv: {
-      type: 'tv', title: 'Demnächst', grouped: true,
-      fetch: (page) => api('/discover/tv', {
-        page, sort_by: 'popularity.desc', without_genres: TV_SKIP_GENRES,
-        'first_air_date.gte': iso(addDays(today, 1)), 'first_air_date.lte': iso(addDays(today, 365)),
-      }),
-      sort: (a, b) => a.date.localeCompare(b.date) || b.popularity - a.popularity,
+      type: 'tv', title: 'Demnächst', grouped: true, pages: 2,
+      fetch: async (page) => {
+        const from = iso(addDays(today, 1)), to = iso(addDays(today, 365));
+        const [a, b] = await Promise.all([
+          api('/discover/tv', { ...tvBase(page), ...tvMarket(), 'air_date.gte': from, 'air_date.lte': to }),
+          // brandneue Serien haben oft noch keinen Anbieter eingetragen: deutsch- und englischsprachige dazunehmen
+          state.prov ? null : api('/discover/tv', { ...tvBase(page), 'first_air_date.gte': from, 'first_air_date.lte': to,
+            ...(state.world ? {} : { with_original_language: 'de|en' }) }),
+        ]);
+        return { results: [...(a.results || []), ...(b?.results || [])], total_pages: Math.max(a.total_pages || 1, b?.total_pages || 1) };
+      },
+      // neue Staffel (nächste Folge ist Folge 1) oder ganz neue Serie
+      post: async (items) => {
+        const infos = await pool(items, 6, (x) => tvInfo(x.id));
+        return items.filter((it, i) => {
+          const nx = infos[i]?.next;
+          if (nx && nx.e === 1 && nx.air > TODAY) { it.localDate = nx.air; it.season = nx.s; return true; }
+          if (it.date > TODAY) { it.localDate = it.date; it.season = 1; return true; }
+          return false;
+        });
+      },
+      sort: (a, b) => showDate(a).localeCompare(showDate(b)) || b.popularity - a.popularity,
+      card: (it) => ({ badge: relLabel(showDate(it)), soon: true, meta: [seasonLabel(it), ...g1(it)] }),
     },
   };
 
@@ -557,10 +801,11 @@
         fresh.push(...(r.results || []).map((x) => norm(x, def.type)));
       }
       L.page = want[want.length - 1];
-      const seen = new Set(L.items.map((x) => x.id));
+      const seenIds = new Set(L.items.map((x) => x.id));
       // ohne Cover oder ohne Titel in lateinischer Schrift (meist dann nicht hierzulande erschienen) weglassen
-      fresh = fresh.filter((x) => x.poster && LATIN.test(x.title) && !seen.has(x.id) && seen.add(x.id));
+      fresh = fresh.filter((x) => x.poster && (state.world || LATIN.test(x.title)) && !seenIds.has(x.id) && seenIds.add(x.id));
       if (def.post) fresh = await def.post(fresh);
+      if (state.lists[id] !== L) return;   // Filter wurde inzwischen geändert
       L.items = L.items.concat(fresh).sort(def.sort);
     } catch (e) {
       L.error = e;
@@ -571,45 +816,45 @@
 
   // ---------- Darstellung ----------
   const view = $('#view');
-  const genreNames = (it, n = 2) => it.genreIds.map((g) => state.genres[it.type][g]).filter(Boolean).slice(0, n);
-  const showDate = (it) => it.localDate || it.date;
-  const isSaved = (it) => state.saved.some((s) => s.type === it.type && s.id === it.id);
+  const genreNames = (it, n = 2) => (it.genreIds || []).map((g) => state.genres[it.type][g]).filter(Boolean).slice(0, n);
+  const showDate = (it) => it.localDate || it.date || '';
+  const year = (it) => (showDate(it) ? showDate(it).slice(0, 4) : '');
 
-  function cardHTML(it, opts = {}) {
-    const d = showDate(it);
-    let badge = '';
-    if (opts.soon && d) badge = `<span class="badge soon">${esc(relLabel(d))}</span>`;
-    else if (opts.badge) badge = `<span class="badge">${esc(opts.badge)}</span>`;
-    const meta = [];
-    if (d) meta.push(opts.soon ? fmtShort.format(parse(d)) : (it.type === 'movie' ? 'seit ' : 'ab ') + fmtShort.format(parse(d)));
-    meta.push(...genreNames(it, 1));
+  // o: { badge, soon, meta[], progress (0..1), quick {s,e} }
+  function cardHTML(it, o = {}) {
+    const badge = o.badge ? `<span class="badge${o.soon ? ' soon' : ''}">${esc(o.badge)}</span>` : '';
+    const L = libGet(it);
+    const done = L && (it.type === 'movie' ? L.w > 0 : false);
+    const mark = L ? `<span class="mark${done ? ' done' : ''}" aria-label="${done ? 'Gesehen' : 'Auf meiner Liste'}">${done ? icons.check : icons.bookmark}</span>` : '';
     const img = it.poster
       ? `<img loading="lazy" decoding="async" alt="" src="${IMG}w342${esc(it.poster)}" srcset="${IMG}w185${esc(it.poster)} 185w, ${IMG}w342${esc(it.poster)} 342w, ${IMG}w500${esc(it.poster)} 500w" sizes="(max-width:600px) 33vw, 180px" onload="this.classList.add('loaded')" onerror="this.remove()">`
       : '';
-    return `<button class="card" data-type="${it.type}" data-id="${it.id}" aria-label="${esc(it.title)}">
-      <div class="poster"><div class="ph">${esc(it.title)}</div>${img}${badge}
-        ${isSaved(it) ? `<span class="mark" aria-label="Gemerkt">${icons.bookmark}</span>` : ''}</div>
+    const quick = o.quick ? `<button class="quick" data-quick="${it.id}:${o.quick.s}:${o.quick.e}" aria-label="Staffel ${o.quick.s}, Folge ${o.quick.e} abhaken" title="Folge abhaken">${icons.check}</button>` : '';
+    return `<div class="card" role="button" tabindex="0" data-type="${it.type}" data-id="${it.id}" aria-label="${esc(it.title)}">
+      <div class="poster"><div class="ph">${esc(it.title)}</div>${img}${badge}${o.quick ? '' : mark}${quick}</div>
+      ${o.progress != null ? `<div class="bar"><i style="width:${Math.round(o.progress * 100)}%"></i></div>` : ''}
       <div class="card-title">${esc(it.title)}</div>
-      <div class="card-meta">${esc(meta.join(' · ')) || '&nbsp;'}</div>
-    </button>`;
+      <div class="card-meta">${esc((o.meta || []).filter(Boolean).join(' · ')) || '&nbsp;'}</div>
+    </div>`;
   }
 
   const skeleton = (n = 12) => `<div class="grid">${Array.from({ length: n }, () =>
     '<div class="card skel"><div class="poster"></div><div class="line"></div><div class="line short"></div></div>').join('')}</div>`;
+  const head = (title, n) => `<div class="sec-head"><h2>${esc(title)}</h2>${n != null ? `<span class="count">${n} Titel</span>` : ''}</div>`;
 
   function matches(it) {
-    const q = state.query.trim().toLowerCase();
-    if (!q) return true;
-    return (it.title + ' ' + (it.original || '') + ' ' + genreNames(it, 9).join(' ')).toLowerCase().includes(q);
+    const g = state.genre[state.tab];
+    return !g || (it.genreIds || []).includes(+g);
   }
 
   function sectionHTML(id) {
     const def = LISTS[id], L = state.lists[id];
-    const head = (n) => `<div class="sec-head"><h2>${esc(def.title)}</h2>${n != null ? `<span class="count">${n} Titel</span>` : ''}</div>`;
-    if (!L || (L.loading && !L.items.length)) return `<section>${head()}${skeleton(def.grouped ? 6 : 12)}</section>`;
-    if (L.error && !L.items.length) return `<section>${head()}${errorHTML(L.error, id)}</section>`;
+    if (!L || (L.loading && !L.items.length)) return `<section>${head(def.title)}${skeleton(def.grouped ? 6 : 12)}</section>`;
+    if (L.error && !L.items.length) return `<section>${head(def.title)}${errorHTML(L.error, id)}</section>`;
     const items = L.items.filter(matches);
-    if (!items.length) return state.query ? '' : `<section>${head(0)}<div class="empty">Gerade nichts gefunden.</div></section>`;
+    const more = L.page < L.total
+      ? `<div class="more"><button class="btn btn-tinted" data-more="${id}" ${L.loading ? 'disabled' : ''}>${L.loading ? 'Lädt …' : 'Mehr laden'}</button></div>` : '';
+    if (!items.length) return `<section id="sec-${id}">${head(def.title, 0)}<div class="empty small">Mit diesem Filter gerade nichts dabei.</div>${more}</section>`;
 
     let body;
     if (def.grouped) {
@@ -620,14 +865,11 @@
         groups.get(k).push(it);
       }
       body = [...groups].map(([k, arr]) =>
-        `<div class="month">${esc(fmtMonth.format(parse(k + '-01')))}</div><div class="grid">${arr.map((it) => cardHTML(it, { soon: true })).join('')}</div>`
-      ).join('');
+        `<div class="month">${esc(fmtMonth.format(parse(k + '-01')))}</div><div class="grid">${arr.map((it) => cardHTML(it, def.card(it))).join('')}</div>`).join('');
     } else {
-      body = `<div class="grid">${items.map((it) => cardHTML(it)).join('')}</div>`;
+      body = `<div class="grid">${items.map((it) => cardHTML(it, def.card(it))).join('')}</div>`;
     }
-    const more = !state.query && L.page < L.total
-      ? `<div class="more"><button class="btn btn-tinted" data-more="${id}" ${L.loading ? 'disabled' : ''}>${L.loading ? 'Lädt …' : 'Mehr laden'}</button></div>` : '';
-    return `<section id="sec-${id}">${head(items.length)}${body}${more}</section>`;
+    return `<section id="sec-${id}">${head(def.title, items.length)}${body}${more}</section>`;
   }
 
   function errorHTML(e, id) {
@@ -639,9 +881,9 @@
   }
 
   function heroHTML(listId) {
-    const L = state.lists[listId];
-    const it = L?.items.find((x) => x.backdrop && matches(x));
-    if (!it || state.query) return '';
+    const items = (state.lists[listId]?.items || []).filter((x) => x.backdrop && matches(x));
+    const it = items.find((x) => x.type !== 'tv' || x.season === 1) || items[0];   // bei Serien lieber eine ganz neue zeigen
+    if (!it || state.genre[state.tab]) return '';
     return `<div class="hero" data-type="${it.type}" data-id="${it.id}" role="button" tabindex="0" aria-label="${esc(it.title)} – Details">
       <img alt="" src="${IMG}w1280${esc(it.backdrop)}" srcset="${IMG}w780${esc(it.backdrop)} 780w, ${IMG}w1280${esc(it.backdrop)} 1280w" sizes="(max-width:1240px) 100vw, 1200px">
       <div class="hero-text">
@@ -651,36 +893,101 @@
       </div></div>`;
   }
 
-  function savedHTML() {
-    const items = state.saved.filter((s) => !state.query || s.title.toLowerCase().includes(state.query.trim().toLowerCase()));
-    if (!state.saved.length) return `<div class="empty">${icons.bookmarkO.replace('<svg', '<svg style="width:48px;height:48px"')}
-      <h3>Noch nichts gemerkt</h3><p>Öffne einen Film oder eine Serie und tippe auf „Merken“.</p></div>`;
-    if (!items.length) return noHits();
-    const sorted = [...items].sort((a, b) => (a.date || '9').localeCompare(b.date || '9'));
-    const coming = sorted.filter((s) => s.date > TODAY);
-    const out = sorted.filter((s) => !(s.date > TODAY));
-    const toIt = (s) => ({ ...s, genreIds: s.genreIds || [], localDate: s.date });
-    let html = '';
-    if (coming.length) html += `<section><div class="sec-head"><h2>Kommt bald</h2><span class="count">${coming.length} Titel</span></div><div class="grid">${coming.map((s) => cardHTML(toIt(s), { soon: true })).join('')}</div></section>`;
-    if (out.length) html += `<section><div class="sec-head"><h2>Schon da</h2><span class="count">${out.length} Titel</span></div><div class="grid">${out.map((s) => cardHTML(toIt(s), { badge: s.type === 'movie' ? 'Film' : 'Serie' })).join('')}</div></section>`;
-    return html;
+  function pill(id, value, options, allLabel) {
+    return `<label class="pill${value ? ' on' : ''}"><select id="${id}" aria-label="${esc(allLabel)}">
+      <option value="">${esc(allLabel)}</option>${options.map(([v, n]) => `<option value="${v}" ${String(v) === String(value) ? 'selected' : ''}>${esc(n)}</option>`).join('')}
+    </select>${icons.down}</label>`;
+  }
+  function filtersHTML() {
+    const type = state.tab === 'movies' ? 'movie' : 'tv';
+    const genres = Object.entries(state.genres[type]).filter(([id]) => !TV_SKIP_GENRES.split('|').includes(id)).sort((a, b) => a[1].localeCompare(b[1], 'de'));
+    return `<div class="filters">${state.tab === 'tv' ? pill('fProv', state.prov, PROVIDERS, 'Alle Anbieter') : ''}${pill('fGenre', state.genre[state.tab], genres, 'Alle Genres')}</div>`;
   }
 
-  const noHits = () => `<div class="empty">${icons.search}<h3>Keine Treffer</h3><p>Für „${esc(state.query)}“ wurde nichts gefunden.</p></div>`;
+  // ---------- Suche (ganz TMDB) ----------
+  let searchT;
+  async function runSearch(q) {
+    const S = state.search; S.q = q; S.loading = true; S.error = null; render();
+    try {
+      const r = await api('/search/multi', { query: q, include_adult: 'false', region: state.region }, 0);
+      if (state.query.trim() !== q) return;
+      S.items = (r.results || []).filter((x) => x.media_type === 'movie' || x.media_type === 'tv').map((x) => norm(x, x.media_type));
+    } catch (e) { if (state.query.trim() === q) S.error = e; }
+    if (state.query.trim() === q) { S.loading = false; render(); }
+  }
+  function searchHTML() {
+    const S = state.search, q = state.query.trim();
+    if (S.error) return errorHTML(S.error);
+    if (S.loading || S.q !== q) return `<section>${head('Suche')}${skeleton(6)}</section>`;
+    if (!S.items.length) return `<div class="empty">${icons.search}<h3>Keine Treffer</h3><p>Für „${esc(q)}“ wurde nichts gefunden.</p></div>`;
+    return `<section>${head('Suchergebnisse', S.items.length)}<div class="grid">${S.items.map((it) =>
+      cardHTML(it, { badge: it.type === 'movie' ? 'Film' : 'Serie', meta: [year(it), ...g1(it)] })).join('')}</div></section>`;
+  }
 
-  const TAB_LISTS = { movies: ['nowMovies', 'soonMovies'], tv: ['newTv', 'soonTv'] };
+  // ---------- Meine Liste ----------
+  function mineGroups() {
+    const g = { next: [], soon: [], want: [], done: [] };
+    for (const it of Object.values(lib.items)) {
+      if (it.type === 'movie') { (it.w > 0 ? g.done : g.want).push(it); continue; }
+      const n = seenCount(it);
+      if (!n) { g.want.push(it); continue; }
+      const nu = nextUnseen(it);
+      if (nu) g.next.push({ it, nu });
+      else if (it.meta?.next?.air >= TODAY) g.soon.push(it);
+      else g.done.push(it);
+    }
+    g.next.sort((a, b) => (b.it.upd || 0) - (a.it.upd || 0));
+    g.soon.sort((a, b) => a.meta.next.air.localeCompare(b.meta.next.air));
+    g.want.sort((a, b) => (b.added || 0) - (a.added || 0));
+    g.done.sort((a, b) => (b.upd || 0) - (a.upd || 0));
+    return g;
+  }
+  function mineHTML() {
+    if (!Object.keys(lib.items).length) return `<div class="empty">${icons.list}
+      <h3>Deine Liste ist noch leer</h3><p>Suche oben nach einem Film oder einer Serie, oder öffne einen Titel und tippe auf „Merken“.<br>Bei Serien hakst du Staffeln und Folgen einzeln ab.</p></div>`;
+    const g = mineGroups();
+    const sec = (title, arr, fn) => (arr.length ? `<section>${head(title, arr.length)}<div class="grid">${arr.map(fn).join('')}</div></section>` : '');
+    return sec('Als Nächstes', g.next, ({ it, nu }) => {
+      const total = airedCount(it), n = seenCount(it);
+      return cardHTML(it, { badge: `S${nu.s} E${nu.e}`, soon: true, quick: nu, progress: total ? Math.min(1, n / total) : 0, meta: [`${n} von ${total} Folgen`] });
+    }) + sec('Bald neue Folgen', g.soon, (it) => {
+      const nx = it.meta.next;
+      return cardHTML(it, { badge: relLabel(nx.air), soon: true, meta: [`S${nx.s} E${nx.e}`, short(nx.air)] });
+    }) + sec('Merkliste', g.want, (it) => {
+      const d = showDate(it), future = d > TODAY;
+      return cardHTML(it, { badge: future ? relLabel(d) : it.type === 'movie' ? 'Film' : 'Serie', soon: future, meta: [future ? short(d) : year(it), ...g1(it)] });
+    }) + sec('Gesehen', g.done, (it) =>
+      cardHTML(it, { badge: it.type === 'movie' ? '' : 'Serie', meta: it.type === 'movie' ? [year(it), ...g1(it)] : [`${seenCount(it)} Folgen`] }));
+  }
+  function mineStats() {
+    const items = Object.values(lib.items);
+    const films = items.filter((x) => x.type === 'movie' && x.w > 0).length;
+    const eps = items.reduce((n, x) => n + (x.type === 'tv' ? seenCount(x) : 0), 0);
+    return films || eps ? `${films} ${films === 1 ? 'Film' : 'Filme'} und ${eps} ${eps === 1 ? 'Folge' : 'Folgen'} gesehen.` : 'Deine Filme und Serien zum Abhaken.';
+  }
+  // Staffel-Stände der eigenen Serien auffrischen (höchstens alle 12 Stunden)
+  async function refreshMine() {
+    const stale = Object.values(lib.items).filter((x) => x.type === 'tv' && !(x.meta?.at > Date.now() - 12 * 3600e3));
+    if (!stale.length) return;
+    const infos = await pool(stale, 4, (x) => tvInfo(x.id));
+    let changed = false;
+    stale.forEach((it, i) => { if (infos[i]) { it.meta = { ...infos[i], at: Date.now() }; changed = true; } });
+    if (changed) { store.set(LS.lib, lib); if (state.tab === 'mine') render(); }
+  }
+
+  const TAB_LISTS = { movies: ['nowMovies', 'soonMovies'], tv: ['nowTv', 'soonTv'] };
   const SUBTITLES = {
     movies: () => `Was jetzt in den Kinos in ${REGIONS[state.region]} läuft und was bald startet.`,
-    tv: () => 'Serien, die gerade neu gestartet sind, und solche, die bald kommen.',
-    saved: () => 'Deine gemerkten Filme und Serien.',
+    tv: () => `Neue Serien und neue Staffeln, die du in ${REGIONS[state.region]} streamen kannst.`,
+    mine: mineStats,
   };
 
   function render() {
+    if (state.query.trim().length >= 2) { $('#subtitle').textContent = 'Suche in allen Filmen und Serien.'; view.innerHTML = searchHTML(); return; }
     $('#subtitle').textContent = SUBTITLES[state.tab]();
-    if (state.tab === 'saved') { view.innerHTML = savedHTML(); return; }
+    if (state.tab === 'mine') { view.innerHTML = mineHTML(); return; }
     const ids = TAB_LISTS[state.tab];
-    const sections = ids.map(sectionHTML).join('');
-    view.innerHTML = heroHTML(ids[0]) + (sections.trim() || (state.query ? noHits() : ''));
+    view.innerHTML = filtersHTML() + heroHTML(ids[0]) + ids.map(sectionHTML).join('');
   }
 
   async function showTab(tab) {
@@ -691,21 +998,19 @@
       if (on) $('#thumb').style.transform = `translateX(${i * 100}%)`;
     });
     render();
-    const ids = TAB_LISTS[tab];
-    if (!ids) return;
-    await Promise.all(ids.map(async (id) => {
-      if (!state.lists[id]?.items.length) { await loadList(id, PAGES_START); if (state.tab === tab) render(); }
+    if (tab === 'mine') { refreshMine(); return; }
+    await Promise.all(TAB_LISTS[tab].map(async (id) => {
+      if (!state.lists[id]) { await loadList(id, LISTS[id].pages); if (state.tab === tab) render(); }
     }));
   }
 
   function sizeThumb() {
     document.documentElement.style.setProperty('--ctl-h', $('#controlsWrap').offsetHeight + 'px');
-    const btns = document.querySelectorAll('#tabs button');
-    $('#thumb').style.width = btns[0].offsetWidth + 'px';
+    $('#thumb').style.width = document.querySelector('#tabs button').offsetWidth + 'px';
   }
 
-  // ---------- Detailansicht ----------
-  let sheetEl = null, scrimEl = null, lastFocus = null;
+  // ---------- Sheet ----------
+  let sheetEl = null, scrimEl = null, lastFocus = null, cur = null;
   function openSheet(html, small = false) {
     closeSheet(true);
     lastFocus = document.activeElement;
@@ -717,13 +1022,13 @@
     document.body.classList.add('locked');
     scrimEl.addEventListener('click', () => closeSheet());
     sheetEl.querySelector('.close').addEventListener('click', () => closeSheet());
-    requestAnimationFrame(() => { scrimEl.classList.add('open'); sheetEl.classList.add('open'); sheetEl.querySelector('.close').focus({ preventScroll: true }); });
+    requestAnimationFrame(() => { scrimEl?.classList.add('open'); sheetEl?.classList.add('open'); sheetEl?.querySelector('.close').focus({ preventScroll: true }); });
     enableSwipe(sheetEl);
     return sheetEl;
   }
   function closeSheet(instant = false) {
     if (!sheetEl) return;
-    const s = sheetEl, c = scrimEl; sheetEl = scrimEl = null;
+    const s = sheetEl, c = scrimEl; sheetEl = scrimEl = cur = null;
     document.body.classList.remove('locked');
     if (instant) { s.remove(); c.remove(); return; }
     s.classList.remove('open'); c.classList.remove('open');
@@ -748,42 +1053,45 @@
     });
   }
 
+  // ---------- Detailansicht ----------
   function findItem(type, id) {
-    for (const L of Object.values(state.lists)) {
-      const it = L.items.find((x) => x.type === type && x.id === id);
-      if (it) return it;
-    }
-    const s = state.saved.find((x) => x.type === type && x.id === id);
-    return s ? { ...s, genreIds: s.genreIds || [], localDate: s.date } : null;
+    const k = keyOf(type, id);
+    return known.get(k) || (lib.items[k] ? { ...lib.items[k] } : null);
   }
 
   async function openDetail(type, id) {
-    const base = findItem(type, id) || { type, id, title: '', poster: null, backdrop: null, genreIds: [] };
-    const el = openSheet(detailHTML(base, null));
+    const base = { ...(findItem(type, id) || { type, id, title: '', poster: null, backdrop: null, genreIds: [] }) };
+    const el = openSheet(`<div class="backdrop">${base.backdrop ? `<img alt="" src="${IMG}w1280${esc(base.backdrop)}">` : ''}</div>
+      <div class="sheet-pad"><div class="d-head">
+        <div class="d-poster">${base.poster ? `<img alt="Cover von ${esc(base.title)}" src="${IMG}w342${esc(base.poster)}">` : ''}</div>
+        <div><h2 class="d-title">${esc(base.title)}</h2></div>
+      </div><div class="d-body"><div class="skel" style="margin-top:20px"><div class="line"></div><div class="line"></div><div class="line short"></div></div></div></div>`);
+    cur = { base, d: null, open: new Set(), eps: new Map() };
+    const mine = cur;
+    el.addEventListener('click', onDetailClick);
     try {
       const d = await api(`/${type}/${id}`, {
         append_to_response: type === 'movie' ? 'videos,release_dates,credits,watch/providers' : 'videos,credits,watch/providers,content_ratings',
         include_video_language: 'de,en,null',
-      }, 12 * 3600e3);
-      if (sheetEl !== el) return;
+      }, 0);
+      if (cur !== mine) return;
+      cur.d = d;
+      base.title = (type === 'movie' ? d.title : d.name) || base.title;
+      base.poster = d.poster_path || base.poster; base.backdrop = d.backdrop_path || base.backdrop;
       el.querySelector('.d-body').outerHTML = detailBody(base, d);
-      el.querySelector('.d-title').textContent = type === 'movie' ? d.title : d.name;
-      if (!base.poster && d.poster_path) el.querySelector('.d-poster').innerHTML = `<img alt="" src="${IMG}w342${esc(d.poster_path)}">`;
-      if (!base.backdrop && d.backdrop_path) el.querySelector('.backdrop').innerHTML = `<img alt="" src="${IMG}w1280${esc(d.backdrop_path)}">`;
-      bindDetail(el, base, d);
+      el.querySelector('.d-title').textContent = base.title;
+      if (base.poster) el.querySelector('.d-poster').innerHTML = `<img alt="Cover von ${esc(base.title)}" src="${IMG}w342${esc(base.poster)}">`;
+      if (base.backdrop && !el.querySelector('.backdrop img')) el.querySelector('.backdrop').innerHTML = `<img alt="" src="${IMG}w1280${esc(base.backdrop)}">`;
+      // gespeicherte Angaben der eigenen Liste auf den neuesten Stand bringen
+      const L = libGet(base);
+      if (L) { Object.assign(L, { title: base.title, poster: base.poster, backdrop: base.backdrop, date: base.date || L.date }); if (type === 'tv') L.meta = slimTv(d); store.set(LS.lib, lib); }
+      // bei eigenen Serien gleich die Staffel mit der nächsten Folge aufklappen
+      const nu = L && type === 'tv' && seenCount(L) ? nextUnseen(L) : null;
+      if (nu) toggleSeasonOpen(nu.s);
     } catch (e) {
-      if (sheetEl === el) el.querySelector('.d-body').innerHTML = `<p style="color:var(--label-2)">Details konnten nicht geladen werden.</p>`;
+      if (cur === mine) el.querySelector('.d-body').innerHTML = '<p style="color:var(--label-2)">Details konnten nicht geladen werden.</p>';
     }
   }
-
-  function detailHTML(it) {
-    return `<div class="backdrop">${it.backdrop ? `<img alt="" src="${IMG}w1280${esc(it.backdrop)}">` : ''}</div>
-      <div class="sheet-pad"><div class="d-head">
-        <div class="d-poster">${it.poster ? `<img alt="Cover von ${esc(it.title)}" src="${IMG}w342${esc(it.poster)}">` : ''}</div>
-        <div><h2 class="d-title">${esc(it.title)}</h2></div>
-      </div><div class="d-body">${skeletonLines()}</div></div>`;
-  }
-  const skeletonLines = () => '<div class="skel" style="margin-top:20px"><div class="line"></div><div class="line"></div><div class="line short"></div></div>';
 
   function pickTrailer(videos) {
     const v = (videos?.results || []).filter((x) => x.site === 'YouTube');
@@ -791,9 +1099,117 @@
     return v.sort((a, b) => score(b) - score(a))[0];
   }
 
+  function actionsHTML() {
+    const { base, d } = cur, L = libGet(base), trailer = pickTrailer(d.videos);
+    const watched = base.type === 'movie' && L?.w > 0;
+    return `${trailer ? `<a class="btn btn-filled" href="https://www.youtube.com/watch?v=${encodeURIComponent(trailer.key)}" target="_blank" rel="noopener">${icons.play} Trailer</a>` : ''}
+      <button class="btn ${L ? 'btn-tinted' : 'btn-gray'}" data-act="list">${L ? icons.check + ' Auf meiner Liste' : icons.plus + ' Merken'}</button>
+      ${base.type === 'movie' ? `<button class="btn ${watched ? 'btn-green' : 'btn-gray'}" data-act="watched">${icons.check} Gesehen</button>` : ''}`;
+  }
+
+  function seasonsHTML() {
+    const { base, d, open, eps } = cur, L = libGet(base);
+    const seasons = (d.seasons || []).filter((s) => s.season_number > 0);
+    if (!seasons.length) return '';
+    const total = seasons.reduce((n, s) => n + s.episode_count, 0), have = seenCount(L);
+    return `<div class="sec-head"><h3>Staffeln</h3><span class="count">${have} von ${total} Folgen gesehen</span></div>
+      <div class="group seasons">${seasons.map((s) => {
+        const n = s.season_number, got = seenInSeason(L, n), list = eps.get(n);
+        const aired = list ? list.filter(isAired).length : s.episode_count;
+        const cls = got && got >= aired ? ' on' : got ? ' part' : '';
+        const sub = [`${s.episode_count} ${s.episode_count === 1 ? 'Folge' : 'Folgen'}`, s.air_date ? (s.air_date > TODAY ? 'ab ' + short(s.air_date) : s.air_date.slice(0, 4)) : ''].filter(Boolean).join(' · ');
+        return `<div class="season${open.has(n) ? ' open' : ''}">
+          <div class="srow">
+            <button class="chk${cls}" data-season-check="${n}" aria-label="${esc(s.name)} ${cls === ' on' ? 'als ungesehen markieren' : 'als gesehen markieren'}">${cls === ' part' ? icons.minus : icons.check}</button>
+            <button class="stoggle" data-season="${n}" aria-expanded="${open.has(n)}">
+              <span class="st"><b>${esc(s.name || 'Staffel ' + n)}</b><small>${esc(sub)}</small></span>
+              <span class="prog">${got}/${s.episode_count}</span>${icons.chevron}
+            </button>
+          </div>
+          ${open.has(n) ? `<div class="eps">${list ? list.map((e) => {
+            const on = seen(L, n, e.episode_number), ok = isAired(e);
+            const info = [e.air_date ? (ok ? fmtDate.format(parse(e.air_date)) : 'ab ' + fmtDate.format(parse(e.air_date))) : 'Termin offen', e.runtime ? e.runtime + ' Min.' : ''].filter(Boolean).join(' · ');
+            return `<button class="erow${ok ? '' : ' unaired'}" data-ep="${n}:${e.episode_number}" ${ok ? '' : 'disabled'} aria-pressed="${on}">
+              <span class="chk${on ? ' on' : ''}">${icons.check}</span>
+              <span class="st"><b>${e.episode_number}. ${esc(e.name || 'Folge ' + e.episode_number)}</b><small>${esc(info)}</small></span></button>`;
+          }).join('') : '<div class="erow loading">Lädt …</div>'}</div>` : ''}
+        </div>`;
+      }).join('')}</div>`;
+  }
+  const isAired = (e) => !!e.air_date && e.air_date <= TODAY;
+
+  async function loadSeason(n) {
+    const c = cur;
+    if (c.eps.has(n)) return c.eps.get(n);
+    const r = await api(`/tv/${c.base.id}/season/${n}`, {}, 0);
+    const list = (r.episodes || []).map((e) => ({ episode_number: e.episode_number, name: e.name, air_date: e.air_date || '', runtime: e.runtime }));
+    c.eps.set(n, list);
+    return list;
+  }
+  function redrawDetail() {
+    if (!cur?.d || !sheetEl) return;
+    const a = sheetEl.querySelector('.d-actions'); if (a) a.innerHTML = actionsHTML();
+    const s = sheetEl.querySelector('#seasons'); if (s) s.innerHTML = seasonsHTML();
+  }
+  async function toggleSeasonOpen(n) {
+    const c = cur;
+    if (c.open.has(n)) { c.open.delete(n); redrawDetail(); return; }
+    c.open.add(n); redrawDetail();
+    try { await loadSeason(n); } catch { c.open.delete(n); toast('Folgen konnten nicht geladen werden'); }
+    if (cur === c) redrawDetail();
+  }
+  // nach jeder Änderung an der eigenen Liste
+  function commit() {
+    const L = cur && libGet(cur.base);
+    if (L && cur.d && L.type === 'tv') L.meta = slimTv(cur.d);
+    saveLib(); redrawDetail(); render();
+  }
+
+  async function onDetailClick(e) {
+    if (!cur?.d) return;
+    const c = cur, { base } = c;
+    const act = e.target.closest('[data-act]')?.dataset.act;
+    if (act === 'list') {
+      const L = libGet(base);
+      if (!L) { ensure(base); toast('Zur Liste hinzugefügt'); }
+      else {
+        const n = seenCount(L);
+        if (n && !confirm(`„${base.title}“ von deiner Liste entfernen? Die ${n} abgehakten Folgen gehen dabei verloren.`)) return;
+        dropItem(base); toast('Von der Liste entfernt');
+      }
+      commit(); return;
+    }
+    if (act === 'watched') {
+      const L = ensure(base), on = !(L.w > 0);
+      L.w = on ? Date.now() : -Date.now(); L.upd = Date.now();
+      toast(on ? 'Als gesehen markiert' : 'Haken entfernt');
+      commit(); return;
+    }
+    const tog = e.target.closest('[data-season]');
+    if (tog) { toggleSeasonOpen(+tog.dataset.season); return; }
+    const sc = e.target.closest('[data-season-check]');
+    if (sc) {
+      const n = +sc.dataset.seasonCheck;
+      let list;
+      try { list = await loadSeason(n); } catch { toast('Folgen konnten nicht geladen werden'); return; }
+      if (cur !== c) return;
+      const aired = list.filter(isAired);
+      if (!aired.length) { toast('Noch keine Folge erschienen'); return; }
+      const L = ensure(base), all = aired.every((x) => seen(L, n, x.episode_number));
+      aired.forEach((x) => setEp(L, n, x.episode_number, !all));
+      commit(); return;
+    }
+    const ep = e.target.closest('[data-ep]');
+    if (ep) {
+      const [s, n] = ep.dataset.ep.split(':').map(Number);
+      const L = ensure(base);
+      setEp(L, s, n, !seen(L, s, n));
+      commit();
+    }
+  }
+
   function detailBody(base, d) {
     const type = base.type;
-    const title = type === 'movie' ? d.title : d.name;
     const original = type === 'movie' ? d.original_title : d.original_name;
     let date = type === 'movie' ? d.release_date : d.first_air_date;
     let cert = '';
@@ -805,8 +1221,7 @@
     } else {
       cert = d.content_ratings?.results?.find((x) => x.iso_3166_1 === state.region)?.rating || '';
     }
-    base.date = date || base.date; base.localDate = base.date;
-    const genres = (d.genres || []).map((g) => g.name);
+    base.date = date || base.date || ''; base.localDate = base.date;
     base.genreIds = (d.genres || []).map((g) => g.id);
 
     const chips = [];
@@ -814,19 +1229,19 @@
     if (cert) chips.push(`<span class="chip fsk">${state.region === 'DE' ? 'FSK ' : ''}${esc(cert)}</span>`);
     if (type === 'movie' && d.runtime) chips.push(`<span class="chip">${Math.floor(d.runtime / 60) ? Math.floor(d.runtime / 60) + ' Std. ' : ''}${d.runtime % 60} Min.</span>`);
     if (type === 'tv' && d.number_of_seasons) chips.push(`<span class="chip">${d.number_of_seasons} ${d.number_of_seasons === 1 ? 'Staffel' : 'Staffeln'}</span>`);
-    genres.forEach((g) => chips.push(`<span class="chip">${esc(g)}</span>`));
+    (d.genres || []).forEach((g) => chips.push(`<span class="chip">${esc(g.name)}</span>`));
 
-    const trailer = pickTrailer(d.videos);
     const facts = [];
     if (date) {
       const n = daysUntil(date);
       const label = type === 'movie' ? (n > 0 ? 'Kinostart' : 'Im Kino seit') : (n > 0 ? 'Startet am' : 'Gestartet am');
       facts.push([label, fmtDate.format(parse(date)) + (n > 0 && n < 60 ? ` (${relLabel(date)})` : '')]);
     }
-    if (original && original !== title) facts.push(['Originaltitel', original]);
+    if (original && original !== base.title) facts.push(['Originaltitel', original]);
     if (type === 'tv') {
       if (d.networks?.length) facts.push(['Sender', d.networks.map((n) => n.name).join(', ')]);
-      if (d.next_episode_to_air?.air_date) facts.push(['Nächste Folge', fmtDate.format(parse(d.next_episode_to_air.air_date)) + (d.next_episode_to_air.season_number ? ` · S${d.next_episode_to_air.season_number} E${d.next_episode_to_air.episode_number}` : '')]);
+      const nx = d.next_episode_to_air;
+      if (nx?.air_date) facts.push(['Nächste Folge', fmtDate.format(parse(nx.air_date)) + ` · S${nx.season_number} E${nx.episode_number}`]);
       if (d.number_of_episodes) facts.push(['Folgen', String(d.number_of_episodes)]);
       if (d.created_by?.length) facts.push(['Idee', d.created_by.map((p) => p.name).join(', ')]);
     } else {
@@ -843,11 +1258,9 @@
     return `<div class="d-body">
       ${d.tagline ? `<p class="d-tagline">${esc(d.tagline)}</p>` : ''}
       <div class="chips">${chips.join('')}</div>
-      <div class="d-actions">
-        ${trailer ? `<a class="btn btn-filled" href="https://www.youtube.com/watch?v=${encodeURIComponent(trailer.key)}" target="_blank" rel="noopener">${icons.play} Trailer ansehen</a>` : ''}
-        <button class="btn btn-gray" data-save>${isSaved(base) ? icons.bookmark + ' Gemerkt' : icons.bookmarkO + ' Merken'}</button>
-      </div>
+      <div class="d-actions">${actionsHTML()}</div>
       <div class="d-sec"><h3>Handlung</h3><p>${esc(d.overview || base.overview) || '<span style="color:var(--label-2)">Noch keine Beschreibung auf Deutsch vorhanden.</span>'}</p></div>
+      ${type === 'tv' ? `<div class="d-sec" id="seasons">${seasonsHTML()}</div>` : ''}
       ${provList.length ? `<div class="d-sec"><h3>Streamen</h3><div class="providers">${provList.map((p) =>
         `<span class="prov"><img alt="" src="${IMG}w92${esc(p.logo_path)}">${esc(p.provider_name)}</span>`).join('')}</div></div>` : ''}
       ${cast.length ? `<div class="d-sec"><h3>Besetzung</h3><div class="cast">${cast.map((c) => `<div class="person">
@@ -858,23 +1271,6 @@
     </div>`;
   }
 
-  function bindDetail(el, base, d) {
-    const title = base.type === 'movie' ? d.title : d.name;
-    const btn = el.querySelector('[data-save]');
-    btn?.addEventListener('click', () => {
-      const i = state.saved.findIndex((s) => s.type === base.type && s.id === base.id);
-      if (i >= 0) { state.saved.splice(i, 1); toast('Von der Merkliste entfernt'); }
-      else {
-        state.saved.push({ type: base.type, id: base.id, title: title || base.title, poster: d.poster_path || base.poster,
-          backdrop: d.backdrop_path || base.backdrop, date: base.date || '', genreIds: base.genreIds, overview: d.overview || '' });
-        toast('Zur Merkliste hinzugefügt');
-      }
-      store.set(LS.saved, state.saved);
-      btn.innerHTML = isSaved(base) ? icons.bookmark + ' Gemerkt' : icons.bookmarkO + ' Merken';
-      render();
-    });
-  }
-
   let toastT;
   function toast(msg) {
     const t = $('#toast'); t.textContent = msg; t.classList.add('show');
@@ -882,9 +1278,7 @@
   }
 
   // ---------- Einrichtung & Einstellungen ----------
-  function regionOptions() {
-    return Object.entries(REGIONS).map(([k, v]) => `<option value="${k}" ${k === state.region ? 'selected' : ''}>${v}</option>`).join('');
-  }
+  const regionOptions = () => Object.entries(REGIONS).map(([k, v]) => `<option value="${k}" ${k === state.region ? 'selected' : ''}>${v}</option>`).join('');
 
   function showSetup(msg = '') {
     $('#controlsWrap').hidden = true;
@@ -930,59 +1324,128 @@
     });
   }
 
+  function accountHTML() {
+    if (!sync.available) return `<div class="group-label">Konto</div><div class="group"><div class="row muted">Nicht verfügbar</div></div>
+      <p class="group-foot">Den Abgleich zwischen Geräten gibt es in der veröffentlichten Version der Seite. Hier bleibt deine Liste in diesem Browser.</p>`;
+    if (sync.user) return `<div class="group-label">Konto</div><div class="group">
+        <div class="row"><span>Angemeldet als</span><span class="val">${esc(sync.user)}</span></div>
+        <div class="row"><button class="row-btn" id="syncNow">Jetzt abgleichen</button></div>
+        <div class="row"><button class="row-btn destructive" id="logoutAcc">Abmelden</button></div>
+      </div><p class="group-foot" id="syncInfo">${sync.error ? 'Abgleich fehlgeschlagen. Wird beim nächsten Öffnen erneut versucht.' : sync.last ? 'Deine Liste ist auf all deinen Geräten gleich. Zuletzt abgeglichen um ' + new Date(sync.last).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr.' : 'Deine Liste wird zwischen deinen Geräten abgeglichen.'}</p>`;
+    return `<div class="group-label">Konto</div><form id="accForm"><div class="group">
+        <div class="row"><label for="accUser">Benutzername</label><input id="accUser" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
+        <div class="row"><label for="accPw">Passwort</label><input id="accPw" type="password" autocomplete="current-password" required></div>
+      </div>
+      <p class="group-foot">Mit einem Konto ist deine Liste auf Handy und Rechner gleich. Was du hier schon abgehakt hast, wird übernommen.</p>
+      <p class="error" id="accErr"></p>
+      <div class="actions" style="margin-top:8px"><button class="btn btn-filled" type="submit" value="login">Anmelden</button><button class="btn btn-gray" type="submit" value="register">Konto anlegen</button></div></form>`;
+  }
+
   function openSettings() {
     const el = openSheet(`<div class="sheet-pad">
       <div class="sheet-h">Einstellungen</div>
-      <div class="group-label">Land</div>
-      <div class="group"><div class="row"><label for="setReg">Kinostarts für</label><select id="setReg">${regionOptions()}</select></div></div>
-      <p class="group-foot">Bestimmt Starttermine, Altersfreigaben und Streaming-Anbieter.</p>
-      ${state.useProxy && !state.key ? '<div class="group-label">Zugang</div><div class="group"><div class="row">Über den Server verbunden</div></div>' : `
-      <div class="group-label">Zugang</div>
+      <div id="account">${accountHTML()}</div>
+      <div class="group-label">Auswahl</div>
+      <div class="group">
+        <div class="row"><label for="setReg">Land</label><select id="setReg">${regionOptions()}</select></div>
+        <div class="row"><label for="setWorld" class="grow">Auch internationale Titel</label><input type="checkbox" class="switch" id="setWorld" ${state.world ? 'checked' : ''}></div>
+      </div>
+      <p class="group-foot">Normalerweise siehst du nur Filme mit Kinostart im gewählten Land und Serien, die dort streambar sind. Mit dem Schalter kommen auch Titel aus aller Welt dazu.</p>
+      ${state.useProxy && !state.key ? '' : `
+      <div class="group-label">TMDB-Zugang</div>
       <div class="group">
         <div class="row"><label for="setKey">Schlüssel</label><input id="setKey" type="password" autocomplete="off" spellcheck="false" value="${esc(state.key)}"></div>
         <div class="row"><button class="row-btn destructive" id="logout">Schlüssel entfernen</button></div>
       </div>`}
       <div class="group-label">Daten</div>
       <div class="group">
-        <div class="row"><button class="row-btn" id="clearCache">Neu laden</button></div>
-        ${state.saved.length ? '<div class="row"><button class="row-btn destructive" id="clearSaved">Merkliste leeren</button></div>' : ''}
+        <div class="row"><button class="row-btn" id="clearCache">Listen neu laden</button></div>
       </div>
       <p class="group-foot">Listen werden für drei Stunden zwischengespeichert, damit die Seite schnell lädt.</p>
     </div>`, true);
-    el.querySelector('#setReg').addEventListener('change', (e) => { state.region = e.target.value; store.set(LS.region, state.region); state.lists = {}; closeSheet(); start(); });
+    const reload = () => { state.lists = {}; closeSheet(); start(); };
+    el.querySelector('#setReg').addEventListener('change', (e) => { state.region = e.target.value; store.set(LS.region, state.region); reload(); });
+    el.querySelector('#setWorld').addEventListener('change', (e) => { state.world = e.target.checked; store.set(LS.world, state.world); state.lists = {}; showTab(state.tab); });
     el.querySelector('#setKey')?.addEventListener('change', (e) => {
       const v = e.target.value.trim(); if (!v || v === state.key) return;
-      state.key = v; store.set(LS.key, v); clearCache(); state.lists = {}; closeSheet(); start();
+      state.key = v; store.set(LS.key, v); clearCache(); reload();
     });
-    el.querySelector('#logout')?.addEventListener('click', () => { store.del(LS.key); state.key = ''; clearCache(); state.lists = {}; closeSheet(); start(); });
-    el.querySelector('#clearCache').addEventListener('click', () => { clearCache(); state.lists = {}; closeSheet(); start(); toast('Wird neu geladen'); });
-    el.querySelector('#clearSaved')?.addEventListener('click', () => {
-      if (!confirm('Merkliste wirklich leeren?')) return;
-      state.saved = []; store.set(LS.saved, []); closeSheet(); render(); toast('Merkliste geleert');
-    });
+    el.querySelector('#logout')?.addEventListener('click', () => { store.del(LS.key); state.key = ''; clearCache(); reload(); });
+    el.querySelector('#clearCache').addEventListener('click', () => { clearCache(); reload(); toast('Wird neu geladen'); });
+    bindAccount(el);
   }
-  function clearCache() {
-    try { Object.keys(localStorage).filter((x) => x.startsWith(LS.cache)).forEach((x) => localStorage.removeItem(x)); } catch {}
+
+  function bindAccount(el) {
+    const box = el.querySelector('#account');
+    const redraw = () => { if (sheetEl === el) { box.innerHTML = accountHTML(); bindAccount(el); } };
+    box.querySelector('#accForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const mode = e.submitter?.value || 'login', err = box.querySelector('#accErr');
+      const btns = box.querySelectorAll('button'); btns.forEach((b) => (b.disabled = true)); err.textContent = '';
+      try {
+        const r = await fetch('/api/' + mode, { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ user: box.querySelector('#accUser').value, password: box.querySelector('#accPw').value }) });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || 'Das hat nicht geklappt.');
+        sync.user = data.user; sync.rev = 0;
+        await sync.pull();
+        if (!sync.last) await sync.push();
+        toast(mode === 'register' ? 'Konto angelegt' : 'Angemeldet');
+        redraw(); render();
+      } catch (ex) {
+        err.textContent = ex.message; btns.forEach((b) => (b.disabled = false));
+      }
+    });
+    box.querySelector('#syncNow')?.addEventListener('click', async () => { await sync.pull(); await sync.push(); redraw(); toast(sync.error ? 'Abgleich fehlgeschlagen' : 'Abgeglichen'); });
+    box.querySelector('#logoutAcc')?.addEventListener('click', async () => {
+      await sync.push();
+      if (sync.error && !confirm('Der letzte Stand konnte nicht hochgeladen werden. Trotzdem abmelden?')) return;
+      await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
+      // die Liste gehört zum Konto: auf diesem Gerät entfernen
+      sync.user = null; sync.rev = 0; sync.last = 0; store.del(LS.rev);
+      lib = { v: 1, items: {}, removed: {} }; store.set(LS.lib, lib);
+      redraw(); render(); toast('Abgemeldet');
+    });
   }
 
   // ---------- Ereignisse ----------
+  function resetTv() { delete state.lists.nowTv; delete state.lists.soonTv; }
   document.addEventListener('click', (e) => {
+    const quick = e.target.closest('[data-quick]');
+    if (quick) {
+      const [id, s, n] = quick.dataset.quick.split(':').map(Number), L = lib.items[keyOf('tv', id)];
+      if (L) { setEp(L, s, n, true); saveLib(); render(); toast(`S${s} E${n} abgehakt`); }
+      return;
+    }
     const card = e.target.closest('.card[data-id], .hero[data-id]');
     if (card) { openDetail(card.dataset.type, Number(card.dataset.id)); return; }
     const more = e.target.closest('[data-more]');
     if (more) { const id = more.dataset.more; more.disabled = true; more.textContent = 'Lädt …'; loadList(id, 1).then(render); return; }
     if (e.target.closest('[data-retry]')) { state.lists = {}; start(); return; }
     const tab = e.target.closest('#tabs button');
-    if (tab) { showTab(tab.dataset.tab); const y = $('#controlsWrap').offsetTop - $('#nav').offsetHeight; if (scrollY > y) scrollTo({ top: y }); }
+    if (tab) {
+      if (state.query) { state.query = ''; $('#search').value = ''; }
+      showTab(tab.dataset.tab);
+      const y = $('#controlsWrap').offsetTop - $('#nav').offsetHeight; if (scrollY > y) scrollTo({ top: y });
+    }
+  });
+  document.addEventListener('change', (e) => {
+    if (e.target.id === 'fGenre') { state.genre[state.tab] = e.target.value; render(); }
+    if (e.target.id === 'fProv') { state.prov = e.target.value; resetTv(); showTab('tv'); }
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeSheet();
-    if (e.key === 'Enter' && e.target.matches('.hero[data-id]')) openDetail(e.target.dataset.type, Number(e.target.dataset.id));
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.hero[data-id], .card[data-id]')) { e.preventDefault(); openDetail(e.target.dataset.type, Number(e.target.dataset.id)); }
     if (e.key === '/' && !e.target.matches('input, select') && !sheetEl) { e.preventDefault(); $('#search')?.focus(); }
   });
-  $('#settingsBtn').addEventListener('click', () => (state.key || state.useProxy) ? openSettings() : null);
-  let qT;
-  $('#search').addEventListener('input', (e) => { clearTimeout(qT); qT = setTimeout(() => { state.query = e.target.value; render(); }, 120); });
+  $('#settingsBtn').addEventListener('click', openSettings);
+  $('#search').addEventListener('input', (e) => {
+    state.query = e.target.value; clearTimeout(searchT);
+    const q = state.query.trim();
+    if (q.length < 2) { render(); return; }
+    render();
+    searchT = setTimeout(() => runSearch(q), 350);
+  });
   const onScroll = () => {
     $('#nav').classList.toggle('scrolled', scrollY > 30);
     const bar = $('#controlsWrap');
@@ -990,11 +1453,17 @@
   };
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', sizeThumb);
+  let lastPull = 0;
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && sync.user && Date.now() - lastPull > 30000) { lastPull = Date.now(); sync.pull(); }
+  });
 
   // ---------- Start ----------
+  let syncStarted = false;
   async function start() {
     $('#largeTitle').textContent = 'Kino & Serien';
     view.innerHTML = skeleton(12);
+    if (!syncStarted) { syncStarted = true; sync.init(); }
     let ok = false, err = null;
     try { ok = await checkAccess(); } catch (e) { err = e; }
     if (!ok) {
@@ -1011,7 +1480,7 @@
     $('#settingsBtn').hidden = false;
     requestAnimationFrame(sizeThumb);
     try { await loadGenres(); } catch {}
-    showTab(TAB_LISTS[state.tab] || state.tab === 'saved' ? state.tab : 'movies');
+    showTab(state.tab);
   }
   start();
 })();

@@ -4,7 +4,7 @@
 // dann fragt die Seite selbst nach einem Schlüssel.
 import type { Config } from "@netlify/edge-functions";
 
-const ALLOWED = /^\/(configuration|genre\/(movie|tv)\/list|movie\/(now_playing|\d+(\/release_dates)?)|discover\/(movie|tv)|tv\/\d+)$/;
+const ALLOWED = /^\/(configuration|genre\/(movie|tv)\/list|movie\/(now_playing|\d+(\/release_dates)?)|discover\/(movie|tv)|search\/multi|tv\/\d+(\/season\/\d+)?)$/;
 
 export default async (req: Request) => {
   const key = Netlify.env.get("TMDB_KEY");
@@ -30,4 +30,8 @@ export default async (req: Request) => {
   });
 };
 
-export const config: Config = { path: "/api/tmdb/*" };
+export const config: Config = {
+  path: "/api/tmdb/*",
+  // schützt den Schlüssel vor Missbrauch: höchstens 600 Anfragen pro Minute und IP
+  rateLimit: { windowLimit: 600, windowSize: 60, aggregateBy: ["ip", "domain"] },
+};

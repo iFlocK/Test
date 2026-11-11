@@ -1,6 +1,9 @@
 [build]
   publish = "public"
 
+[build.environment]
+  NODE_VERSION = "22"
+
 [[headers]]
   for = "/index.html"
   [headers.values]
