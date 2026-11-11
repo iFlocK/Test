@@ -1298,7 +1298,6 @@
         <div class="ava">${c.profile_path ? `<img loading="lazy" alt="" src="${IMG}w185${esc(c.profile_path)}">` : esc((c.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join(''))}</div>
         <div class="n">${esc(c.name)}</div><div class="r">${esc(c.character || '')}</div></div>`).join('')}</div></div>` : ''}
       ${facts.length ? `<div class="d-sec"><h3>Infos</h3><div class="facts">${facts.map(([k, v]) => `<div class="fact"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('')}</div></div>` : ''}
-      <div class="d-sec"><a class="btn btn-gray" style="width:100%" href="https://www.themoviedb.org/${type}/${base.id}" target="_blank" rel="noopener">Auf TMDB ansehen</a></div>
     </div>`;
   }
 
