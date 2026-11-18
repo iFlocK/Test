@@ -366,6 +366,42 @@
     .intro h2 { font-size: 26px; margin: 12px 0 4px; } .intro-sub { margin-bottom: 18px; } .intro-list { gap: 15px; margin-bottom: 12px; }
   }
 
+  /* Lieblinge */
+  .mark.fav { background: #ff2d55; }
+  .btn-heart { flex: 0 0 44px !important; min-width: 44px !important; width: 44px; padding: 0 !important; border-radius: 50%; background: var(--fill); color: var(--label-2); }
+  .btn-heart.on { background: color-mix(in srgb, #ff2d55 16%, transparent); color: #ff2d55; }
+  .btn-heart svg { width: 22px; height: 22px; }
+
+  /* Einklappbare Bereiche */
+  .fold-head { width: 100%; text-align: left; color: inherit; cursor: pointer; align-items: center; }
+  .fold-head h2 { flex: 1; }
+  .fold-head > svg { width: 16px; height: 16px; color: var(--label-3); transform: rotate(90deg); transition: transform .2s; flex: none; }
+  .fold.closed .fold-head > svg { transform: none; }
+  .fold.closed { margin-bottom: 8px; }
+  .fold.closed .fold-head { padding-bottom: 12px; box-shadow: inset 0 -.5px 0 var(--sep); }
+  .sub-head { font-size: 15px; font-weight: 600; color: var(--label-2); margin: 6px 0 10px; display: flex; gap: 6px; }
+  .sub-head span { font-weight: 400; color: var(--label-3); }
+  .grid + .sub-head { margin-top: 24px; }
+
+  /* Filmreihe */
+  .parts { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 8px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .parts::-webkit-scrollbar { display: none; }
+  .part { width: 104px; flex: none; text-align: left; scroll-snap-align: start; color: inherit; }
+  .part .pp { position: relative; display: block; aspect-ratio: 2/3; border-radius: 10px; overflow: hidden; background: var(--bg-2); box-shadow: var(--shadow); }
+  .part .pp img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .part .mark { width: 22px; height: 22px; right: 5px; top: 5px; }
+  .part .mark svg { width: 11px; height: 11px; }
+  .part b { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13px; font-weight: 600; margin-top: 6px; line-height: 1.25; }
+  .part small { font-size: 12px; color: var(--label-2); }
+  .part.me .pp { box-shadow: 0 0 0 3px var(--blue); }
+  .part.me small { color: var(--blue); font-weight: 600; }
+
+  /* Suchfeld leeren */
+  .search input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }
+  .search-clear { flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--label-3); color: var(--bg); }
+  .search-clear svg { width: 10px; height: 10px; }
+  .search-clear[hidden] { display: none; }
+
   /* Schalter und Zeilen */
   .row .grow, .row > span:first-child { flex: 1; }
   .row .val, .row.muted { color: var(--label-2); }
@@ -422,6 +458,7 @@
       <label class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input type="search" id="search" placeholder="Filme und Serien suchen" autocomplete="off" aria-label="Filme und Serien suchen">
+        <button type="button" class="search-clear" id="searchClear" aria-label="Suche löschen" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg></button>
       </label>
     </div>
   </div>
@@ -443,7 +480,12 @@
   // ---------- Grundlagen ----------
   const TMDB = 'https://api.themoviedb.org/3';
   const IMG = 'https://image.tmdb.org/t/p/';
-  const LS = { key: 'ks.key', region: 'ks.region', saved: 'ks.saved', tab: 'ks.tab', cache: 'ks.c:', lib: 'ks.lib', world: 'ks.world', rev: 'ks.rev', intro: 'ks.intro' };
+  // In der Claude-Vorschau kommen Cover und Daten eingebettet mit (window.KS_PREVIEW), sonst direkt von TMDB
+  const PREVIEW = window.KS_PREVIEW || null;
+  const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+  const img = (size, path) => (PREVIEW ? PREVIEW.images?.[path] || BLANK : esc(IMG + size + path));
+  const srcset = (path, sizes) => (PREVIEW ? '' : ` srcset="${sizes.map(([s, w]) => esc(IMG + s + path) + ' ' + w + 'w').join(', ')}"`);
+  const LS = { key: 'ks.key', region: 'ks.region', saved: 'ks.saved', tab: 'ks.tab', cache: 'ks.c:', lib: 'ks.lib', world: 'ks.world', rev: 'ks.rev', intro: 'ks.intro', fold: 'ks.fold' };
   const REGIONS = { DE: 'Deutschland', AT: 'Österreich', CH: 'Schweiz' };
   // Nachrichten, Reality-TV, Talkshows und Seifenopern ausblenden
   const TV_SKIP_GENRES = '10763|10764|10767|10766';
@@ -475,6 +517,8 @@
     tv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 18v3"/></svg>',
     person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20.500a8 8 0 0 1 16 0"/></svg>',
     checkCircle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.500"/><path d="m8 12.500 3 3 5-6"/></svg>',
+    heart: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.7s-7.6-4.6-9.4-9.4C1.300 7.800 3.500 4.300 7.100 4.300c2 0 3.500 1.100 4.900 2.900 1.400-1.800 2.900-2.900 4.900-2.900 3.600 0 5.800 3.500 4.500 7-1.800 4.800-9.400 9.400-9.400 9.400z"/></svg>',
+    heartO: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20.700s-7.600-4.600-9.400-9.400C1.300 7.800 3.500 4.300 7.100 4.300c2 0 3.500 1.100 4.900 2.900 1.400-1.800 2.900-2.900 4.900-2.900 3.600 0 5.800 3.500 4.500 7-1.800 4.800-9.400 9.400-9.400 9.400z"/></svg>',
     list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6.5 1.5 1.5L8 5M4 12.5 5.5 14 8 11M4 18.5 5.5 20 8 17M12 7h8M12 13h8M12 19h8"/></svg>',
   };
 
@@ -500,7 +544,7 @@
 
   // ---------- Zustand ----------
   const state = {
-    key: store.get(LS.key, ''),
+    key: store.get(LS.key, '') || PREVIEW?.key || '',
     region: store.get(LS.region, 'DE'),
     world: store.get(LS.world, false),
     useProxy: false,
@@ -511,6 +555,7 @@
     prov: '',
     genres: { movie: {}, tv: {} },
     lists: {},
+    fold: store.get(LS.fold, {}),   // eingeklappte Bereiche in „Meine Liste“
   };
   if (!['movies', 'tv', 'mine'].includes(state.tab)) state.tab = state.tab === 'saved' ? 'mine' : 'movies';
   const lang = () => 'de-' + state.region;
@@ -518,7 +563,7 @@
   // ---------- Meine Liste (Speicher) ----------
   // items: { "movie:1": {type,id,title,poster,backdrop,date,genreIds,added,upd,w}, "tv:2": {…, eps:{"1:3":Zeit}, meta} }
   // Zeiten sind positiv für „gesehen“ und negativ für „Haken entfernt“; so lassen sich zwei Geräte sauber zusammenführen.
-  let lib = store.get(LS.lib, null);
+  let lib = store.get(LS.lib, null) || (PREVIEW?.lib ? JSON.parse(JSON.stringify(PREVIEW.lib)) : null);
   if (!lib || typeof lib.items !== 'object') lib = { v: 1, items: {}, removed: {} };
   lib.removed ||= {};
   const keyOf = (type, id) => type + ':' + id;
@@ -581,6 +626,7 @@
         m = { ...((A.upd || 0) >= (B.upd || 0) ? A : B) };
         m.added = Math.min(A.added || Infinity, B.added || Infinity); m.upd = Math.max(A.upd || 0, B.upd || 0);
         if (A.w || B.w) m.w = newer(A.w, B.w);
+        if (A.fav || B.fav) m.fav = newer(A.fav, B.fav);
         if (m.type === 'tv') {
           m.eps = {};
           for (const e of new Set([...Object.keys(A.eps || {}), ...Object.keys(B.eps || {})])) m.eps[e] = newer(A.eps?.[e], B.eps?.[e]);
@@ -857,14 +903,16 @@
   function cardHTML(it, o = {}) {
     const badge = o.badge ? `<span class="badge${o.soon ? ' soon' : ''}">${esc(o.badge)}</span>` : '';
     const L = libGet(it);
-    const done = L && (it.type === 'movie' ? L.w > 0 : false);
-    const mark = L ? `<span class="mark${done ? ' done' : ''}" aria-label="${done ? 'Gesehen' : 'Auf meiner Liste'}">${done ? icons.check : icons.bookmark}</span>` : '';
-    const img = it.poster
-      ? `<img loading="lazy" decoding="async" alt="" src="${IMG}w342${esc(it.poster)}" srcset="${IMG}w185${esc(it.poster)} 185w, ${IMG}w342${esc(it.poster)} 342w, ${IMG}w500${esc(it.poster)} 500w" sizes="(max-width:600px) 33vw, 180px" onload="this.classList.add('loaded')" onerror="this.remove()">`
+    const done = L && (it.type === 'movie' ? L.w > 0 : seenCount(L) > 0 && !nextUnseen(L) && !(L.meta?.next?.air >= TODAY));
+    const fav = L?.fav > 0;
+    const mark = !L ? '' : fav ? `<span class="mark fav" aria-label="Liebling">${icons.heart}</span>`
+      : `<span class="mark${done ? ' done' : ''}" aria-label="${done ? 'Gesehen' : 'Auf meiner Liste'}">${done ? icons.check : icons.bookmark}</span>`;
+    const pic = it.poster
+      ? `<img loading="lazy" decoding="async" alt="" src="${img('w342', it.poster)}"${srcset(it.poster, [['w185', 185], ['w342', 342], ['w500', 500]])} sizes="(max-width:600px) 33vw, 180px" onload="this.classList.add('loaded')" onerror="this.remove()">`
       : '';
     const quick = o.quick ? `<button class="quick" data-quick="${it.id}:${o.quick.s}:${o.quick.e}" aria-label="Staffel ${o.quick.s}, Folge ${o.quick.e} abhaken" title="Folge abhaken">${icons.check}</button>` : '';
     return `<div class="card" role="button" tabindex="0" data-type="${it.type}" data-id="${it.id}" aria-label="${esc(it.title)}">
-      <div class="poster"><div class="ph">${esc(it.title)}</div>${img}${badge}${o.quick ? '' : mark}${quick}</div>
+      <div class="poster"><div class="ph">${esc(it.title)}</div>${pic}${badge}${o.quick ? '' : mark}${quick}</div>
       ${o.progress != null ? `<div class="bar"><i style="width:${Math.round(o.progress * 100)}%"></i></div>` : ''}
       <div class="card-title">${esc(it.title)}</div>
       <div class="card-meta">${esc((o.meta || []).filter(Boolean).join(' · ')) || '&nbsp;'}</div>
@@ -918,7 +966,7 @@
     const it = items.find((x) => x.type !== 'tv' || x.season === 1) || items[0];   // bei Serien lieber eine ganz neue zeigen
     if (!it || state.genre[state.tab]) return '';
     return `<div class="hero" data-type="${it.type}" data-id="${it.id}" role="button" tabindex="0" aria-label="${esc(it.title)} – Details">
-      <img alt="" src="${IMG}w1280${esc(it.backdrop)}" srcset="${IMG}w780${esc(it.backdrop)} 780w, ${IMG}w1280${esc(it.backdrop)} 1280w" sizes="(max-width:1240px) 100vw, 1200px">
+      <img alt="" src="${img('w1280', it.backdrop)}"${srcset(it.backdrop, [['w780', 780], ['w1280', 1280]])} sizes="(max-width:1240px) 100vw, 1200px">
       <div class="hero-text">
         <div class="hero-eyebrow">${esc(LISTS[listId].eyebrow)}</div>
         <div class="hero-title">${esc(it.title)}</div>
@@ -959,38 +1007,55 @@
 
   // ---------- Meine Liste ----------
   function mineGroups() {
-    const g = { next: [], soon: [], want: [], done: [] };
+    const g = { next: [], soon: [], fav: [], want: [], done: [] };
     for (const it of Object.values(lib.items)) {
-      if (it.type === 'movie') { (it.w > 0 ? g.done : g.want).push(it); continue; }
+      const isFav = it.fav > 0;
+      if (isFav) g.fav.push(it);   // Lieblinge stehen in einem eigenen Bereich statt in Merkliste oder Gesehen
+      if (it.type === 'movie') { if (!isFav) (it.w > 0 ? g.done : g.want).push(it); continue; }
       const n = seenCount(it);
-      if (!n) { g.want.push(it); continue; }
+      if (!n) { if (!isFav) g.want.push(it); continue; }
       const nu = nextUnseen(it);
       if (nu) g.next.push({ it, nu });
       else if (it.meta?.next?.air >= TODAY) g.soon.push(it);
-      else g.done.push(it);
+      else if (!isFav) g.done.push(it);
     }
     g.next.sort((a, b) => (b.it.upd || 0) - (a.it.upd || 0));
     g.soon.sort((a, b) => a.meta.next.air.localeCompare(b.meta.next.air));
+    g.fav.sort((a, b) => (b.fav || 0) - (a.fav || 0));
     g.want.sort((a, b) => (b.added || 0) - (a.added || 0));
     g.done.sort((a, b) => (b.upd || 0) - (a.upd || 0));
     return g;
+  }
+  // Bereich mit Kopfzeile zum Ein- und Ausklappen, darin Filme und Serien getrennt
+  function foldSection(id, title, arr, labels, fn) {
+    if (!arr.length) return '';
+    const closed = !!state.fold[id];
+    const movies = arr.filter((x) => x.type === 'movie'), shows = arr.filter((x) => x.type === 'tv');
+    const sub = (label, a) => (a.length ? `<div class="sub-head">${esc(label)}<span>${a.length}</span></div><div class="grid">${a.map(fn).join('')}</div>` : '');
+    return `<section class="fold${closed ? ' closed' : ''}">
+      <button class="sec-head fold-head" data-fold="${id}" aria-expanded="${!closed}"><h2>${esc(title)}</h2><span class="count">${arr.length} Titel</span>${icons.chevron}</button>
+      ${closed ? '' : `<div class="fold-body">${sub(labels[0], movies)}${sub(labels[1], shows)}</div>`}</section>`;
   }
   function mineHTML() {
     if (!Object.keys(lib.items).length) return `<div class="empty">${icons.list}
       <h3>Deine Liste ist noch leer</h3><p>Suche oben nach einem Film oder einer Serie, oder öffne einen Titel und tippe auf „Merken“.<br>Bei Serien hakst du Staffeln und Folgen einzeln ab.</p></div>`;
     const g = mineGroups();
     const sec = (title, arr, fn) => (arr.length ? `<section>${head(title, arr.length)}<div class="grid">${arr.map(fn).join('')}</div></section>` : '');
+    const plain = (it) => {
+      const d = showDate(it), future = d > TODAY;
+      return cardHTML(it, { badge: future ? relLabel(d) : '', soon: future, meta: [future ? short(d) : year(it), ...g1(it)] });
+    };
     return sec('Als Nächstes', g.next, ({ it, nu }) => {
       const total = airedCount(it), n = seenCount(it);
       return cardHTML(it, { badge: `S${nu.s} E${nu.e}`, soon: true, quick: nu, progress: total ? Math.min(1, n / total) : 0, meta: [`${n} von ${total} Folgen`] });
     }) + sec('Bald neue Folgen', g.soon, (it) => {
       const nx = it.meta.next;
       return cardHTML(it, { badge: relLabel(nx.air), soon: true, meta: [`S${nx.s} E${nx.e}`, short(nx.air)] });
-    }) + sec('Merkliste', g.want, (it) => {
-      const d = showDate(it), future = d > TODAY;
-      return cardHTML(it, { badge: future ? relLabel(d) : it.type === 'movie' ? 'Film' : 'Serie', soon: future, meta: [future ? short(d) : year(it), ...g1(it)] });
-    }) + sec('Gesehen', g.done, (it) =>
-      cardHTML(it, { badge: it.type === 'movie' ? '' : 'Serie', meta: it.type === 'movie' ? [year(it), ...g1(it)] : [`${seenCount(it)} Folgen`] }));
+    }) + foldSection('fav', 'Favoriten', g.fav, ['Lieblingsfilme', 'Lieblingsserien'], (it) =>
+      it.type === 'tv' && seenCount(it) ? cardHTML(it, { meta: [`${seenCount(it)} Folgen gesehen`] }) : plain(it))
+      + foldSection('want', 'Merkliste', g.want, ['Filme', 'Serien'], plain)
+      + foldSection('done', 'Gesehen', g.done, ['Filme', 'Serien'], (it) =>
+        cardHTML(it, { meta: it.type === 'movie' ? [year(it), ...g1(it)] : [`${seenCount(it)} Folgen`] }));
   }
   function mineStats() {
     const items = Object.values(lib.items);
@@ -1094,9 +1159,9 @@
 
   async function openDetail(type, id) {
     const base = { ...(findItem(type, id) || { type, id, title: '', poster: null, backdrop: null, genreIds: [] }) };
-    const el = openSheet(`<div class="backdrop">${base.backdrop ? `<img alt="" src="${IMG}w1280${esc(base.backdrop)}">` : ''}</div>
+    const el = openSheet(`<div class="backdrop">${base.backdrop ? `<img alt="" src="${img('w1280', base.backdrop)}">` : ''}</div>
       <div class="sheet-pad"><div class="d-head">
-        <div class="d-poster">${base.poster ? `<img alt="Cover von ${esc(base.title)}" src="${IMG}w342${esc(base.poster)}">` : ''}</div>
+        <div class="d-poster">${base.poster ? `<img alt="Cover von ${esc(base.title)}" src="${img('w342', base.poster)}">` : ''}</div>
         <div><h2 class="d-title">${esc(base.title)}</h2></div>
       </div><div class="d-body"><div class="skel" style="margin-top:20px"><div class="line"></div><div class="line"></div><div class="line short"></div></div></div></div>`);
     cur = { base, d: null, open: new Set(), eps: new Map() };
@@ -1113,8 +1178,9 @@
       base.poster = d.poster_path || base.poster; base.backdrop = d.backdrop_path || base.backdrop;
       el.querySelector('.d-body').outerHTML = detailBody(base, d);
       el.querySelector('.d-title').textContent = base.title;
-      if (base.poster) el.querySelector('.d-poster').innerHTML = `<img alt="Cover von ${esc(base.title)}" src="${IMG}w342${esc(base.poster)}">`;
-      if (base.backdrop && !el.querySelector('.backdrop img')) el.querySelector('.backdrop').innerHTML = `<img alt="" src="${IMG}w1280${esc(base.backdrop)}">`;
+      if (base.poster) el.querySelector('.d-poster').innerHTML = `<img alt="Cover von ${esc(base.title)}" src="${img('w342', base.poster)}">`;
+      if (type === 'movie' && d.belongs_to_collection) loadParts(mine, d.belongs_to_collection.id);
+      if (base.backdrop && !el.querySelector('.backdrop img')) el.querySelector('.backdrop').innerHTML = `<img alt="" src="${img('w1280', base.backdrop)}">`;
       // gespeicherte Angaben der eigenen Liste auf den neuesten Stand bringen
       const L = libGet(base);
       if (L) { Object.assign(L, { title: base.title, poster: base.poster, backdrop: base.backdrop, date: base.date || L.date }); if (type === 'tv') L.meta = slimTv(d); store.set(LS.lib, lib); }
@@ -1124,6 +1190,28 @@
     } catch (e) {
       if (cur === mine) el.querySelector('.d-body').innerHTML = '<p style="color:var(--label-2)">Details konnten nicht geladen werden.</p>';
     }
+  }
+
+  // Alle Teile einer Filmreihe (z. B. Harry Potter) unter dem Film zeigen
+  async function loadParts(c, colId) {
+    try { c.col = await api(`/collection/${colId}`, {}, 24 * 3600e3); } catch { c.col = null; }
+    if (cur === c) redrawParts();
+  }
+  function redrawParts() {
+    const box = sheetEl?.querySelector('#parts');
+    if (!box || !cur) return;
+    const parts = (cur.col?.parts || []).filter((p) => p.poster_path || p.release_date)
+      .sort((a, b) => (a.release_date || '9').localeCompare(b.release_date || '9'));
+    if (parts.length < 2) { box.remove(); return; }
+    box.querySelector('h3').textContent = cur.col.name || box.querySelector('h3').textContent;
+    box.querySelector('.parts').innerHTML = parts.map((p, i) => {
+      norm(p, 'movie');   // damit beim Antippen gleich Titel und Cover da sind
+      const me = p.id === cur.base.id, L = lib.items[keyOf('movie', p.id)];
+      const when = me ? 'Dieser Film' : !p.release_date ? 'Termin offen' : p.release_date > TODAY ? 'ab ' + short(p.release_date) : p.release_date.slice(0, 4);
+      return `<button class="part${me ? ' me' : ''}" data-part="${p.id}"${me ? ' aria-current="true"' : ''}>
+        <span class="pp">${p.poster_path ? `<img loading="lazy" alt="" src="${img('w185', p.poster_path)}">` : ''}${L?.fav > 0 ? `<span class="mark fav">${icons.heart}</span>` : L?.w > 0 ? `<span class="mark done">${icons.check}</span>` : ''}</span>
+        <b>${i + 1}. ${esc(p.title)}</b><small>${esc(when)}</small></button>`;
+    }).join('');
   }
 
   function pickTrailer(videos) {
@@ -1137,7 +1225,8 @@
     const watched = base.type === 'movie' && L?.w > 0;
     return `${trailer ? `<a class="btn btn-filled" href="https://www.youtube.com/watch?v=${encodeURIComponent(trailer.key)}" target="_blank" rel="noopener">${icons.play} Trailer</a>` : ''}
       <button class="btn ${L ? 'btn-tinted' : 'btn-gray'}" data-act="list">${L ? icons.check + ' Auf meiner Liste' : icons.plus + ' Merken'}</button>
-      ${base.type === 'movie' ? `<button class="btn ${watched ? 'btn-green' : 'btn-gray'}" data-act="watched">${icons.check} Gesehen</button>` : ''}`;
+      ${base.type === 'movie' ? `<button class="btn ${watched ? 'btn-green' : 'btn-gray'}" data-act="watched">${icons.check} Gesehen</button>` : ''}
+      <button class="btn btn-heart${L?.fav > 0 ? ' on' : ''}" data-act="fav" aria-pressed="${L?.fav > 0}" aria-label="${base.type === 'movie' ? 'Lieblingsfilm' : 'Lieblingsserie'}" title="${base.type === 'movie' ? 'Lieblingsfilm' : 'Lieblingsserie'}">${L?.fav > 0 ? icons.heart : icons.heartO}</button>`;
   }
 
   function seasonsHTML() {
@@ -1183,6 +1272,7 @@
     if (!cur?.d || !sheetEl) return;
     const a = sheetEl.querySelector('.d-actions'); if (a) a.innerHTML = actionsHTML();
     const s = sheetEl.querySelector('#seasons'); if (s) s.innerHTML = seasonsHTML();
+    if (cur.col) redrawParts();
   }
   async function toggleSeasonOpen(n) {
     const c = cur;
@@ -1212,6 +1302,15 @@
       }
       commit(); return;
     }
+    if (act === 'fav') {
+      const L = ensure(base), on = !(L.fav > 0);
+      L.fav = on ? Date.now() : -Date.now(); L.upd = Date.now();
+      const what = base.type === 'movie' ? 'Lieblingsfilmen' : 'Lieblingsserien';
+      toast(on ? `Zu deinen ${what} hinzugefügt` : `Aus deinen ${what} entfernt`);
+      commit(); return;
+    }
+    const part = e.target.closest('[data-part]');
+    if (part) { if (+part.dataset.part !== base.id) openDetail('movie', +part.dataset.part); return; }
     if (act === 'watched') {
       const L = ensure(base), on = !(L.w > 0);
       L.w = on ? Date.now() : -Date.now(); L.upd = Date.now();
@@ -1294,10 +1393,11 @@
       <div class="d-actions">${actionsHTML()}</div>
       <div class="d-sec"><h3>Handlung</h3><p>${esc(d.overview || base.overview) || '<span style="color:var(--label-2)">Noch keine Beschreibung auf Deutsch vorhanden.</span>'}</p></div>
       ${type === 'tv' ? `<div class="d-sec" id="seasons">${seasonsHTML()}</div>` : ''}
+      ${type === 'movie' && d.belongs_to_collection ? `<div class="d-sec" id="parts"><h3>${esc(d.belongs_to_collection.name)}</h3><div class="parts"><div class="skel" style="width:100%"><div class="line"></div><div class="line short"></div></div></div></div>` : ''}
       ${provList.length ? `<div class="d-sec"><h3>Streamen</h3><div class="providers">${provList.map((p) =>
-        `<span class="prov"><img alt="" src="${IMG}w92${esc(p.logo_path)}">${esc(p.provider_name)}</span>`).join('')}</div></div>` : ''}
+        `<span class="prov"><img alt="" src="${img('w92', p.logo_path)}">${esc(p.provider_name)}</span>`).join('')}</div></div>` : ''}
       ${cast.length ? `<div class="d-sec"><h3>Besetzung</h3><div class="cast">${cast.map((c) => `<div class="person">
-        <div class="ava">${c.profile_path ? `<img loading="lazy" alt="" src="${IMG}w185${esc(c.profile_path)}">` : esc((c.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join(''))}</div>
+        <div class="ava">${c.profile_path ? `<img loading="lazy" alt="" src="${img('w185', c.profile_path)}">` : esc((c.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join(''))}</div>
         <div class="n">${esc(c.name)}</div><div class="r">${esc(c.character || '')}</div></div>`).join('')}</div></div>` : ''}
       ${facts.length ? `<div class="d-sec"><h3>Infos</h3><div class="facts">${facts.map(([k, v]) => `<div class="fact"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('')}</div></div>` : ''}
     </div>`;
@@ -1363,7 +1463,8 @@
     ['tv', 'Serien', 'Neue Serien und neue Staffeln, die du hier streamen kannst. Oben filterst du nach Anbieter und Genre.'],
     ['search', 'Suche', 'Finde jeden Film und jede Serie, auch ältere. Ein Tipp aufs Cover zeigt Handlung, Trailer und Besetzung.'],
     ['checkCircle', 'Abhaken', 'Markiere Filme als gesehen. Bei Serien hakst du ganze Staffeln oder einzelne Folgen ab.'],
-    ['list', 'Meine Liste', 'Zeigt deine nächste Folge, wann neue Folgen kommen und was du dir gemerkt hast.'],
+    ['heartO', 'Favoriten', 'Markiere Lieblingsfilme und -serien mit dem Herz. Sie bekommen in „Meine Liste“ einen eigenen Bereich.'],
+    ['list', 'Meine Liste', 'Zeigt deine nächste Folge, wann neue Folgen kommen, was du dir gemerkt und was du gesehen hast. Bereiche lassen sich einklappen.'],
     ['person', 'Konto', 'Lege unter dem Zahnrad oben rechts ein Konto an, dann ist deine Liste auf all deinen Geräten gleich.'],
   ];
   function openIntro() {
@@ -1477,12 +1578,14 @@
     }
     const card = e.target.closest('.card[data-id], .hero[data-id]');
     if (card) { openDetail(card.dataset.type, Number(card.dataset.id)); return; }
+    const fold = e.target.closest('[data-fold]');
+    if (fold) { const id = fold.dataset.fold; state.fold[id] = !state.fold[id]; store.set(LS.fold, state.fold); render(); return; }
     const more = e.target.closest('[data-more]');
     if (more) { const id = more.dataset.more; more.disabled = true; more.textContent = 'Lädt …'; loadList(id, 1).then(render); return; }
     if (e.target.closest('[data-retry]')) { state.lists = {}; start(); return; }
     const tab = e.target.closest('#tabs button');
     if (tab) {
-      if (state.query) { state.query = ''; $('#search').value = ''; }
+      if (state.query) { state.query = ''; $('#search').value = ''; $('#searchClear').hidden = true; }
       showTab(tab.dataset.tab);
       const y = $('#controlsWrap').offsetTop - $('#nav').offsetHeight; if (scrollY > y) scrollTo({ top: y });
     }
@@ -1497,7 +1600,13 @@
     if (e.key === '/' && !e.target.matches('input, select') && !sheetEl) { e.preventDefault(); $('#search')?.focus(); }
   });
   $('#settingsBtn').addEventListener('click', openSettings);
+  $('#searchClear').addEventListener('click', (e) => {
+    e.preventDefault();
+    const inp = $('#search'); inp.value = ''; state.query = ''; clearTimeout(searchT);
+    e.currentTarget.hidden = true; render(); inp.focus();
+  });
   $('#search').addEventListener('input', (e) => {
+    $('#searchClear').hidden = !e.target.value;
     state.query = e.target.value; clearTimeout(searchT);
     const q = state.query.trim();
     if (q.length < 2) { render(); return; }

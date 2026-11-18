@@ -4,7 +4,7 @@
 // dann fragt die Seite selbst nach einem Schlüssel.
 import type { Config } from "@netlify/edge-functions";
 
-const ALLOWED = /^\/(configuration|genre\/(movie|tv)\/list|movie\/(now_playing|\d+(\/release_dates)?)|discover\/(movie|tv)|search\/multi|tv\/\d+(\/season\/\d+)?)$/;
+const ALLOWED = /^\/(configuration|genre\/(movie|tv)\/list|movie\/(now_playing|\d+(\/release_dates)?)|discover\/(movie|tv)|search\/multi|collection\/\d+|tv\/\d+(\/season\/\d+)?)$/;
 
 export default async (req: Request) => {
   const key = Netlify.env.get("TMDB_KEY");

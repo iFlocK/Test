@@ -91,6 +91,12 @@ Live unter https://nextup-filme-serien.netlify.app (Netlify-Projekt `nextup-film
 - **Suche** über ganz TMDB, um auch ältere Titel in die eigene Liste zu holen.
 - **Meine Liste:** Filme merken und als gesehen markieren; Serien Staffel für Staffel und Folge für Folge abhaken.
   Bereiche „Als Nächstes“ (nächste Folge ohne Haken, mit Schnell-Haken auf dem Cover), „Bald neue Folgen“, „Merkliste“ und „Gesehen“.
+- **Favoriten:** Filme und Serien per Herz als Liebling markieren; sie stehen in „Meine Liste“ im Bereich „Favoriten“ (Lieblingsfilme und Lieblingsserien).
+- **Filmreihen:** Gehört ein Film zu einer Reihe, zeigt die Detailansicht alle Teile zum Antippen.
+- **Einklappen:** Favoriten, Merkliste und Gesehen lassen sich einklappen und sind nach Filmen und Serien getrennt (Zustand im Browser, `ks.fold`).
+- **Suchfeld** mit X zum Leeren.
+- **Vorschau ohne Netlify:** Die Seite liest `window.KS_PREVIEW` (Schlüssel, eingebettete Bilder, Beispiel-Liste). Eine Claude-Vorschau mit echten TMDB-Daten
+  baut man, indem man Antworten und Cover aufnimmt und vor dem Seiten-Skript einen `fetch`-Ersatz einbettet, der sie ausliefert.
 - **Details** per Tipp aufs Cover: Handlung, Trailer, Staffeln und Folgen, Besetzung, Sender, nächste Folge, Streaming-Anbieter.
 
 ## Daten (TMDB)
