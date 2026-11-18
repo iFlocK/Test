@@ -402,6 +402,18 @@
   .search-clear svg { width: 10px; height: 10px; }
   .search-clear[hidden] { display: none; }
 
+  /* Patch Notes */
+  .fx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 50; pointer-events: none; }
+  .news-badge { width: 72px; height: 72px; margin: 0 auto; border-radius: 18px; display: grid; place-items: center; font-size: 40px;
+    background: linear-gradient(145deg, #ff375f, #ff9f0a); box-shadow: var(--shadow); }
+  .news-ver { margin: 14px 0 0; font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #ff375f; }
+  .news h2 { margin-top: 4px; }
+  .news-ic { width: 34px; flex: none; font-size: 26px; line-height: 34px; text-align: center; }
+  .news-old { text-align: left; max-width: 400px; margin: 0 auto 8px; }
+  .news-old summary { cursor: pointer; color: var(--blue); font-size: 15px; padding: 8px 0; }
+  .news-old h3 { font-size: 15px; color: var(--label-2); margin: 14px 0 12px; }
+  .row-btn + .val { flex: none; }
+
   /* Schalter und Zeilen */
   .row .grow, .row > span:first-child { flex: 1; }
   .row .val, .row.muted { color: var(--label-2); }
@@ -485,7 +497,7 @@
   const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
   const img = (size, path) => (PREVIEW ? PREVIEW.images?.[path] || BLANK : esc(IMG + size + path));
   const srcset = (path, sizes) => (PREVIEW ? '' : ` srcset="${sizes.map(([s, w]) => esc(IMG + s + path) + ' ' + w + 'w').join(', ')}"`);
-  const LS = { key: 'ks.key', region: 'ks.region', saved: 'ks.saved', tab: 'ks.tab', cache: 'ks.c:', lib: 'ks.lib', world: 'ks.world', rev: 'ks.rev', intro: 'ks.intro', fold: 'ks.fold' };
+  const LS = { key: 'ks.key', region: 'ks.region', saved: 'ks.saved', tab: 'ks.tab', cache: 'ks.c:', lib: 'ks.lib', world: 'ks.world', rev: 'ks.rev', intro: 'ks.intro', fold: 'ks.fold', version: 'ks.version' };
   const REGIONS = { DE: 'Deutschland', AT: 'Österreich', CH: 'Schweiz' };
   // Nachrichten, Reality-TV, Talkshows und Seifenopern ausblenden
   const TV_SKIP_GENRES = '10763|10764|10767|10766';
@@ -1457,6 +1469,71 @@
     });
   }
 
+  // ---------- Patch Notes nach einem Update ----------
+  // Neue Version: oben einen Eintrag ergänzen. Wer die Seite schon kennt, sieht ihn beim nächsten Öffnen einmal.
+  const CHANGELOG = [
+    { v: '1.1.0', title: 'Das Lieblings-Update', tag: 'Frisch aus dem Feedback-Kino, mit extra Butter.', notes: [
+      ['❤️', 'Lieblingsfilme und Lieblingsserien', 'Tipp bei einem Film oder einer Serie aufs Herz. Deine Lieblinge bekommen in „Meine Liste“ ihren eigenen roten Teppich.'],
+      ['🎞️', 'Ganze Filmreihen', 'Harry Potter 1 bis 8 auf einen Blick: Unter jedem Film einer Reihe stehen alle Teile zum Antippen. Nie wieder raten, welcher Teil als Nächstes dran ist.'],
+      ['🗂️', 'Einklappen und sortieren', 'Favoriten, Merkliste und Gesehen klappen per Tipp auf die Überschrift zu. Darin sind Filme und Serien jetzt sauber getrennt.'],
+      ['✖️', 'Suche mit einem Tipp leeren', 'Das kleine X im Suchfeld löscht alles auf einmal. Dein Daumen hat ab jetzt Feierabend.'],
+      ['🙌', 'Danke fürs Feedback', 'Alle Ideen in diesem Update kamen von euch. Weiter so!'],
+    ] },
+    { v: '1.0.0', title: 'Die Premiere', tag: 'Vorhang auf für NextUp.', notes: [
+      ['🎬', 'Kino und Streaming', 'Was gerade läuft und was bald kommt, mit Countdown bis zum Start.'],
+      ['✅', 'Abhaken', 'Filme als gesehen markieren, Serien Staffel für Staffel und Folge für Folge abhaken.'],
+      ['☁️', 'Dein Konto', 'Mit Konto ist deine Liste auf Handy und Rechner gleich.'],
+    ] },
+  ];
+  const APP_VERSION = CHANGELOG[0].v;
+  function openNews() {
+    store.set(LS.version, APP_VERSION);
+    const notes = (e) => `<div class="intro-list">${e.notes.map(([ic, t, d]) => `<div class="intro-row"><span class="news-ic" aria-hidden="true">${ic}</span><div><b>${esc(t)}</b><p>${esc(d)}</p></div></div>`).join('')}</div>`;
+    const [now, ...older] = CHANGELOG;
+    const el = openSheet(`<div class="sheet-pad intro news">
+      <div class="news-badge">🍿</div>
+      <p class="news-ver">Version ${now.v}</p>
+      <h2>${esc(now.title)}</h2>
+      <p class="intro-sub">${esc(now.tag)}</p>
+      ${notes(now)}
+      ${older.length ? `<details class="news-old"><summary>Frühere Versionen</summary>${older.map((e) => `<h3>Version ${e.v} · ${esc(e.title)}</h3>${notes(e)}`).join('')}</details>` : ''}
+      <div class="intro-foot"><button class="btn btn-filled intro-go">Popcorn holen und los</button>
+        <p class="made intro-made">Created with <span aria-label="love">♥</span> by FH</p></div>
+    </div>`, true);
+    el.querySelector('.intro-go').addEventListener('click', () => closeSheet());
+    popcorn();
+  }
+  // Popcorn-Regen hinter den Patch Notes
+  function popcorn() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const cv = document.createElement('canvas'); cv.className = 'fx'; document.body.append(cv);
+    const g = cv.getContext('2d'), dpr = Math.min(2, devicePixelRatio || 1);
+    const size = () => { cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; };
+    size();
+    const kinds = ['🍿', '🍿', '🍿', '🎬', '⭐', '❤️', '🎞️'];
+    const bits = Array.from({ length: innerWidth < 600 ? 36 : 60 }, () => ({
+      x: Math.random() * innerWidth, y: -20 - Math.random() * innerHeight * 0.9, v: 140 + Math.random() * 160,
+      r: Math.random() * 6.3, vr: (Math.random() - 0.5) * 4, s: 18 + Math.random() * 16, k: kinds[Math.floor(Math.random() * kinds.length)],
+      sway: Math.random() * 6.3, wob: 20 + Math.random() * 30 }));
+    let last = 0, t0 = 0;
+    function frame(t) {
+      t0 ||= t; const dt = Math.min(0.05, (t - (last || t)) / 1000); last = t;
+      if (cv.width !== innerWidth * dpr) size();
+      g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, innerWidth, innerHeight);
+      const fade = Math.max(0, Math.min(1, (4.5 - (t - t0) / 1000) / 1));
+      let alive = false;
+      for (const b of bits) {
+        b.y += b.v * dt; b.r += b.vr * dt; b.sway += dt * 2;
+        if (b.y < innerHeight + 40) alive = true;
+        g.save(); g.globalAlpha = fade; g.translate(b.x + Math.sin(b.sway) * b.wob, b.y); g.rotate(b.r);
+        g.font = `${b.s}px system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(b.k, 0, 0); g.restore();
+      }
+      if (alive && fade > 0) requestAnimationFrame(frame); else cv.remove();
+    }
+    requestAnimationFrame(frame);
+  }
+
   // ---------- Einführung beim ersten Öffnen ----------
   const INTRO = [
     ['ticket', 'Filme', 'Was jetzt im Kino läuft und was in den nächsten Monaten startet, mit Countdown bis zum Kinostart.'],
@@ -1468,7 +1545,7 @@
     ['person', 'Konto', 'Lege unter dem Zahnrad oben rechts ein Konto an, dann ist deine Liste auf all deinen Geräten gleich.'],
   ];
   function openIntro() {
-    store.set(LS.intro, 1);
+    store.set(LS.intro, 1); store.set(LS.version, APP_VERSION);   // neue Leute brauchen keine Patch Notes
     const el = openSheet(`<div class="sheet-pad intro">
       <img class="intro-icon" src="icon.svg" alt="">
       <h2>Willkommen bei<br>NextUp</h2>
@@ -1517,6 +1594,7 @@
       <div class="group">
         <div class="row"><button class="row-btn" id="clearCache">Listen neu laden</button></div>
         <div class="row"><button class="row-btn" id="showIntro">Einführung zeigen</button></div>
+        <div class="row"><button class="row-btn" id="showNews">Was ist neu?</button><span class="val">Version ${APP_VERSION}</span></div>
       </div>
       <p class="group-foot">Listen werden für drei Stunden zwischengespeichert, damit die Seite schnell lädt.</p>
       <p class="made" style="text-align:center;color:var(--label-2);margin-top:24px">Created with <span aria-label="love">♥</span> by FH</p>
@@ -1531,6 +1609,7 @@
     el.querySelector('#logout')?.addEventListener('click', () => { store.del(LS.key); state.key = ''; clearCache(); reload(); });
     el.querySelector('#clearCache').addEventListener('click', () => { clearCache(); reload(); toast('Wird neu geladen'); });
     el.querySelector('#showIntro').addEventListener('click', openIntro);
+    el.querySelector('#showNews').addEventListener('click', openNews);
     bindAccount(el);
   }
 
@@ -1648,7 +1727,9 @@
     requestAnimationFrame(sizeThumb);
     try { await loadGenres(); } catch {}
     showTab(state.tab);
-    if (!store.get(LS.intro)) openIntro();
+    if (PREVIEW?.news) openNews();                                   // Claude-Vorschau: gleich die Patch Notes zeigen
+    else if (!store.get(LS.intro)) openIntro();                      // ganz neu hier: Einführung
+    else if (store.get(LS.version) !== APP_VERSION) setTimeout(openNews, 600);   // schon dabei: einmal zeigen, was neu ist
   }
   start();
 })();

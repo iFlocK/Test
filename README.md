@@ -126,3 +126,5 @@ unter ⚙️ ein Konto anlegen, dann ist die Liste auf allen Geräten gleich. Au
 - App-Icon mit Filmklappe: `public/icon.svg` ist die Vorlage, daraus sind `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`
   und `favicon.png` erzeugt. Mit `manifest.webmanifest` lässt sich die Seite auf den Home-Bildschirm legen.
 - Beim ersten Öffnen erklärt eine Einführung die Funktionen (Merker `ks.intro` im Browser); unter ⚙️ → „Einführung zeigen“ lässt sie sich wieder aufrufen.
+- **Patch Notes:** `CHANGELOG` oben im Skript von `public/index.html`. Vor jedem Upload mit neuen Funktionen einen Eintrag mit höherer Version ergänzen.
+  Wer die Seite schon kennt, sieht ihn beim nächsten Öffnen einmal (mit Popcorn-Regen); Neue sehen stattdessen die Einführung. Gemerkt in `ks.version`.
