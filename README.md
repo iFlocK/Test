@@ -94,6 +94,9 @@ Live unter https://nextup-filme-serien.netlify.app (Netlify-Projekt `nextup-film
 - **Favoriten:** Filme und Serien per Herz als Liebling markieren; sie stehen in „Meine Liste“ im Bereich „Favoriten“ (Lieblingsfilme und Lieblingsserien).
 - **Filmreihen:** Gehört ein Film zu einer Reihe, zeigt die Detailansicht alle Teile zum Antippen.
 - **Einklappen:** Favoriten, Merkliste und Gesehen lassen sich einklappen, darin auch Filme und Serien einzeln (Zustand im Browser, `ks.fold`).
+- **Serie komplett:** Grüner Haken, wenn alle Folgen gesehen sind und TMDB die Serie als beendet oder abgesetzt führt (`status`, gespeichert als `meta.end`).
+  Grauer Haken, wenn alles Erschienene gesehen ist, aber weitere Folgen kommen können.
+- **Popcorn-Regen** beim Markieren eines Films als gesehen und wenn eine Serie komplett wird (nicht bei jeder einzelnen Folge).
 - **Suchfeld** mit X zum Leeren.
 - **Vorschau ohne Netlify:** Die Seite liest `window.KS_PREVIEW` (Schlüssel, eingebettete Bilder, Beispiel-Liste). Eine Claude-Vorschau mit echten TMDB-Daten
   baut man, indem man Antworten und Cover aufnimmt und vor dem Seiten-Skript einen `fetch`-Ersatz einbettet, der sie ausliefert.

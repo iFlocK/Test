@@ -368,6 +368,9 @@
 
   /* Lieblinge */
   .mark.fav { background: #ff2d55; }
+  .mark.uptodate { background: rgba(0,0,0,.45); }
+  .count.all-done { color: var(--green); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+  .count.all-done svg { width: 15px; height: 15px; }
   .btn-heart { flex: 0 0 44px !important; min-width: 44px !important; width: 44px; padding: 0 !important; border-radius: 50%; background: var(--fill); color: var(--label-2); }
   .btn-heart.on { background: color-mix(in srgb, #ff2d55 16%, transparent); color: #ff2d55; }
   .btn-heart svg { width: 22px; height: 22px; }
@@ -627,6 +630,13 @@
     }
     return null;
   }
+  // Serie: alles Erschienene gesehen; komplett = zusätzlich beendet, es kommt nichts mehr
+  const caughtUp = (it) => it?.type === 'tv' && seenCount(it) > 0 && !nextUnseen(it) && !(it.meta?.next?.air >= TODAY);
+  const complete = (it) => caughtUp(it) && !!it.meta?.end && !it.meta?.next;
+  // nach einem Haken: Serie gerade komplett geworden? Dann feiern
+  function celebrate(L, was) {
+    if (!was && complete(L)) { toast(`„${L.title}“ komplett gesehen! 🎉`); popcorn(); }
+  }
   function saveLib() { store.set(LS.lib, lib); sync.schedule(); }
 
   // Zwei Stände zusammenführen (dieses Gerät und der Server)
@@ -784,9 +794,10 @@
   const slimTv = (d) => ({
     seasons: (d.seasons || []).filter((s) => s.season_number > 0).map((s) => ({ n: s.season_number, c: s.episode_count, air: s.air_date || '' })),
     last: epRef(d.last_episode_to_air), next: epRef(d.next_episode_to_air), at: Date.now(),
+    end: d.status === 'Ended' || d.status === 'Canceled',   // keine weiteren Staffeln zu erwarten
   });
   async function tvInfo(id) {
-    const ck = LS.cache + 'tv:' + id;
+    const ck = LS.cache + 'tv2:' + id;
     const hit = readCache(ck); if (hit) return hit;
     const info = slimTv(await api(`/tv/${id}`, {}, 0));
     writeCache(ck, info, 12 * 3600e3);
@@ -918,10 +929,11 @@
   function cardHTML(it, o = {}) {
     const badge = o.badge ? `<span class="badge${o.soon ? ' soon' : ''}">${esc(o.badge)}</span>` : '';
     const L = libGet(it);
-    const done = L && (it.type === 'movie' ? L.w > 0 : seenCount(L) > 0 && !nextUnseen(L) && !(L.meta?.next?.air >= TODAY));
+    const done = L && (it.type === 'movie' ? L.w > 0 : complete(L));
+    const upToDate = L && !done && caughtUp(L);
     const fav = L?.fav > 0;
     const mark = !L ? '' : fav ? `<span class="mark fav" aria-label="Liebling">${icons.heart}</span>`
-      : `<span class="mark${done ? ' done' : ''}" aria-label="${done ? 'Gesehen' : 'Auf meiner Liste'}">${done ? icons.check : icons.bookmark}</span>`;
+      : `<span class="mark${done ? ' done' : upToDate ? ' uptodate' : ''}" aria-label="${done ? (it.type === 'tv' ? 'Komplett gesehen' : 'Gesehen') : upToDate ? 'Auf dem neuesten Stand' : 'Auf meiner Liste'}">${done || upToDate ? icons.check : icons.bookmark}</span>`;
     const pic = it.poster
       ? `<img loading="lazy" decoding="async" alt="" src="${img('w342', it.poster)}"${srcset(it.poster, [['w185', 185], ['w342', 342], ['w500', 500]])} sizes="(max-width:600px) 33vw, 180px" onload="this.classList.add('loaded')" onerror="this.remove()">`
       : '';
@@ -1086,7 +1098,7 @@
   }
   // Staffel-Stände der eigenen Serien auffrischen (höchstens alle 12 Stunden)
   async function refreshMine() {
-    const stale = Object.values(lib.items).filter((x) => x.type === 'tv' && !(x.meta?.at > Date.now() - 12 * 3600e3));
+    const stale = Object.values(lib.items).filter((x) => x.type === 'tv' && (!(x.meta?.at > Date.now() - 12 * 3600e3) || x.meta.end === undefined));
     if (!stale.length) return;
     const infos = await pool(stale, 4, (x) => tvInfo(x.id));
     let changed = false;
@@ -1255,7 +1267,9 @@
     const seasons = (d.seasons || []).filter((s) => s.season_number > 0);
     if (!seasons.length) return '';
     const total = seasons.reduce((n, s) => n + s.episode_count, 0), have = seenCount(L);
-    return `<div class="sec-head"><h3>Staffeln</h3><span class="count">${have} von ${total} Folgen gesehen</span></div>
+    const state2 = L && complete(L) ? `<span class="count all-done">${icons.check} Komplett gesehen</span>`
+      : L && caughtUp(L) ? '<span class="count">Auf dem neuesten Stand</span>' : `<span class="count">${have} von ${total} Folgen gesehen</span>`;
+    return `<div class="sec-head"><h3>Staffeln</h3>${state2}</div>
       <div class="group seasons">${seasons.map((s) => {
         const n = s.season_number, got = seenInSeason(L, n), list = eps.get(n);
         const aired = list ? list.filter(isAired).length : s.episode_count;
@@ -1303,11 +1317,14 @@
     if (cur === c) redrawDetail();
   }
   // nach jeder Änderung an der eigenen Liste
-  function commit() {
+  function commit(was) {
     const L = cur && libGet(cur.base);
     if (L && cur.d && L.type === 'tv') L.meta = slimTv(cur.d);
     saveLib(); redrawDetail(); render();
+    if (L && was !== undefined) celebrate(L, was);
   }
+  // Stand vor einem Haken (mit frischen Staffel-Angaben)
+  function before(L) { if (cur?.d && L.type === 'tv') L.meta = slimTv(cur.d); return complete(L); }
 
   async function onDetailClick(e) {
     if (!cur?.d) return;
@@ -1335,7 +1352,8 @@
     if (act === 'watched') {
       const L = ensure(base), on = !(L.w > 0);
       L.w = on ? Date.now() : -Date.now(); L.upd = Date.now();
-      toast(on ? 'Als gesehen markiert' : 'Haken entfernt');
+      toast(on ? 'Als gesehen markiert 🍿' : 'Haken entfernt');
+      if (on) popcorn();
       commit(); return;
     }
     const tog = e.target.closest('[data-season]');
@@ -1348,16 +1366,16 @@
       if (cur !== c) return;
       const aired = list.filter(isAired);
       if (!aired.length) { toast('Noch keine Folge erschienen'); return; }
-      const L = ensure(base), all = aired.every((x) => seen(L, n, x.episode_number));
+      const L = ensure(base), was = before(L), all = aired.every((x) => seen(L, n, x.episode_number));
       aired.forEach((x) => setEp(L, n, x.episode_number, !all));
-      commit(); return;
+      commit(was); return;
     }
     const ep = e.target.closest('[data-ep]');
     if (ep) {
       const [s, n] = ep.dataset.ep.split(':').map(Number);
-      const L = ensure(base);
+      const L = ensure(base), was = before(L);
       setEp(L, s, n, !seen(L, s, n));
-      commit();
+      commit(was);
     }
   }
 
@@ -1485,6 +1503,8 @@
       ['❤️', 'Lieblingsfilme und Lieblingsserien', 'Tipp bei einem Film oder einer Serie aufs Herz. Deine Lieblinge bekommen in „Meine Liste“ ihren eigenen roten Teppich.'],
       ['🎞️', 'Ganze Filmreihen', 'Harry Potter 1 bis 8 auf einen Blick: Unter jedem Film einer Reihe stehen alle Teile zum Antippen. Nie wieder raten, welcher Teil als Nächstes dran ist.'],
       ['🗂️', 'Einklappen und sortieren', 'Favoriten, Merkliste und Gesehen klappen per Tipp auf die Überschrift zu. Darin sind Filme und Serien getrennt und lassen sich einzeln ein- und ausklappen.'],
+      ['✅', 'Serie durch? Grüner Haken!', 'Hast du alle Folgen einer beendeten Serie gesehen, bekommt sie einen grünen Haken. Läuft sie noch weiter, zeigt ein grauer Haken, dass du auf dem neuesten Stand bist.'],
+      ['🍿', 'Popcorn-Regen', 'Film als gesehen markiert oder eine Serie komplett durch? Dann regnet es Popcorn, Sterne und Herzen.'],
       ['✖️', 'Suche mit einem Tipp leeren', 'Das kleine X im Suchfeld löscht alles auf einmal. Dein Daumen hat ab jetzt Feierabend.'],
       ['🙌', 'Danke fürs Feedback', 'Alle Ideen in diesem Update kamen von euch. Weiter so!'],
     ] },
@@ -1661,7 +1681,7 @@
     const quick = e.target.closest('[data-quick]');
     if (quick) {
       const [id, s, n] = quick.dataset.quick.split(':').map(Number), L = lib.items[keyOf('tv', id)];
-      if (L) { setEp(L, s, n, true); saveLib(); render(); toast(`S${s} E${n} abgehakt`); }
+      if (L) { const was = complete(L); setEp(L, s, n, true); saveLib(); render(); toast(`S${s} E${n} abgehakt`); celebrate(L, was); }
       return;
     }
     const card = e.target.closest('.card[data-id], .hero[data-id]');
