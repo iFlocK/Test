@@ -379,9 +379,12 @@
   .fold.closed .fold-head > svg { transform: none; }
   .fold.closed { margin-bottom: 8px; }
   .fold.closed .fold-head { padding-bottom: 12px; box-shadow: inset 0 -.5px 0 var(--sep); }
-  .sub-head { font-size: 15px; font-weight: 600; color: var(--label-2); margin: 6px 0 10px; display: flex; gap: 6px; }
-  .sub-head span { font-weight: 400; color: var(--label-3); }
-  .grid + .sub-head { margin-top: 24px; }
+  .sub-head { font-size: 15px; font-weight: 600; color: var(--label-2); margin: 6px 0 10px; display: flex; align-items: center; gap: 6px; width: 100%; text-align: left; cursor: pointer; padding: 4px 0; }
+  .sub-head span { font-weight: 400; color: var(--label-3); flex: 1; }
+  .sub-head > svg { width: 13px; height: 13px; color: var(--label-3); transform: rotate(90deg); transition: transform .2s; flex: none; }
+  .sub-head.shut > svg { transform: none; }
+  .grid + .sub-head, .sub-head.shut + .sub-head { margin-top: 20px; }
+  .sub-head.shut { margin-bottom: 0; }
 
   /* Filmreihe */
   .parts { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 8px; scroll-snap-type: x mandatory; scrollbar-width: none; }
@@ -1043,10 +1046,16 @@
     if (!arr.length) return '';
     const closed = !!state.fold[id];
     const movies = arr.filter((x) => x.type === 'movie'), shows = arr.filter((x) => x.type === 'tv');
-    const sub = (label, a) => (a.length ? `<div class="sub-head">${esc(label)}<span>${a.length}</span></div><div class="grid">${a.map(fn).join('')}</div>` : '');
+    // Filme und Serien lassen sich darin noch einmal einzeln einklappen
+    const sub = (key, label, a) => {
+      if (!a.length) return '';
+      const shut = !!state.fold[id + ':' + key];
+      return `<button class="sub-head${shut ? ' shut' : ''}" data-fold="${id}:${key}" aria-expanded="${!shut}">${esc(label)}<span>${a.length}</span>${icons.chevron}</button>
+        ${shut ? '' : `<div class="grid">${a.map(fn).join('')}</div>`}`;
+    };
     return `<section class="fold${closed ? ' closed' : ''}">
       <button class="sec-head fold-head" data-fold="${id}" aria-expanded="${!closed}"><h2>${esc(title)}</h2><span class="count">${arr.length} Titel</span>${icons.chevron}</button>
-      ${closed ? '' : `<div class="fold-body">${sub(labels[0], movies)}${sub(labels[1], shows)}</div>`}</section>`;
+      ${closed ? '' : `<div class="fold-body">${sub('movie', labels[0], movies)}${sub('tv', labels[1], shows)}</div>`}</section>`;
   }
   function mineHTML() {
     if (!Object.keys(lib.items).length) return `<div class="empty">${icons.list}
@@ -1475,7 +1484,7 @@
     { v: '1.1.0', title: 'Das Lieblings-Update', tag: 'Frisch aus dem Feedback-Kino, mit extra Butter.', notes: [
       ['❤️', 'Lieblingsfilme und Lieblingsserien', 'Tipp bei einem Film oder einer Serie aufs Herz. Deine Lieblinge bekommen in „Meine Liste“ ihren eigenen roten Teppich.'],
       ['🎞️', 'Ganze Filmreihen', 'Harry Potter 1 bis 8 auf einen Blick: Unter jedem Film einer Reihe stehen alle Teile zum Antippen. Nie wieder raten, welcher Teil als Nächstes dran ist.'],
-      ['🗂️', 'Einklappen und sortieren', 'Favoriten, Merkliste und Gesehen klappen per Tipp auf die Überschrift zu. Darin sind Filme und Serien jetzt sauber getrennt.'],
+      ['🗂️', 'Einklappen und sortieren', 'Favoriten, Merkliste und Gesehen klappen per Tipp auf die Überschrift zu. Darin sind Filme und Serien getrennt und lassen sich einzeln ein- und ausklappen.'],
       ['✖️', 'Suche mit einem Tipp leeren', 'Das kleine X im Suchfeld löscht alles auf einmal. Dein Daumen hat ab jetzt Feierabend.'],
       ['🙌', 'Danke fürs Feedback', 'Alle Ideen in diesem Update kamen von euch. Weiter so!'],
     ] },
